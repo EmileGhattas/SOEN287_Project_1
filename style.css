@@ -1,4 +1,4 @@
-ul {
+.menu{
     list-style-type: none;
     margin: 0;
     padding: 0;
@@ -6,7 +6,7 @@ ul {
     background-color: darkred;
 }
 
-ul li{
+.menu a{
     float: left;
     display: block;
     color: white;

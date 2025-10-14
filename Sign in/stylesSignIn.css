@@ -1,0 +1,62 @@
+body {
+    margin: 0;
+    padding: 0;
+
+}
+
+#Main {
+    display: flex;
+    flex-direction: column; /* stack children vertically */
+    justify-content: flex-start; /* align to top */
+    align-items: center; /* center horizontally */
+   /* background-color: #36393F; */
+    background-image: url(https://www.shutterstock.com/shutterstock/photos/2497073191/display_1500/stock-vector-beautiful-cow-cartoon-character-seamless-pattern-cute-kawaii-farm-animal-hand-drawn-style-2497073191.jpg);
+    background-position: center;
+    height: 100vh; 
+    width: 100%;
+}
+
+#S-I {
+    display: block;
+    background-color: #2F3136;
+    width: 350px; /* slightly bigger if you want */;;
+    padding: 20px;;
+    border-radius: 4px;;
+    text-align: left;
+
+    box-shadow: 0 10px 12px rgba(0, 0, 0, 0.4);
+}
+
+.Whitetxt{
+    color: white;
+}
+#WelcomeB {
+    display: block;
+    text-align: center;
+    margin-bottom: 50px; /* smaller spacing between welcome and form */
+    font-size: 40px; /* bigger for emphasis */
+    text-shadow: 1px 1px 2px black;
+}
+.bar{
+    width: 340px;
+    border-radius: 6px;
+    height: 20px
+}
+#greeting{
+    text-align: center ;
+    
+}
+.barcolor{
+    background-color: #40444B;
+    color:white 
+}
+
+.hyperlinks{
+    color:lightblue;
+    text-decoration: none;
+}
+.loginbar{
+    background-color: #5865F2;
+    /*color:white */
+    height: 35px;
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="stylesSignUp.css">
+</head>
+<body>
+    <div id = "Main">
+    <div id = "Welcome">
+            <h1 class = "Whitetxt"> Welcome!</h1>
+    </div>
+        <div id = "S-U">
+            <h3  id = "cac" class = "Whitetxt">Create an account</h3>
+            <form id="signupForm" action="signup" method="post">
+
+                <label for="email" class = "Whitetxt">Email*</label><br>
+                <input class = "bar barcolor"  type="email" id="email" name="email" required><br><br>
+
+                <label for="username" class = "Whitetxt">Username*</label><br>
+                <input class = "bar barcolor" type="text" id="username" name="username" required><br><br>
+                
+                <label for="password" class = "Whitetxt">Password*</label><br>
+                <input class = "bar barcolor"  type="password" id="password" name="password" required><br><br>
+
+                <label for ="date of birth" class = "Whitetxt">Date of Birth*</label><br>
+                <div id="dob-container">
+                    <select class = "barcolor dob_bar" id="day" name="day" required>
+                        <option value="" disabled selected hidden>Day</option>
+                    </select>
+
+                    <select class = "barcolor dob_bar" id="month" name="month" required>
+                        <option value="" disabled selected hidden>Month</option>
+                    </select>
+
+                    <select class = "barcolor dob_bar" id="year" name="year" required>
+                        <option value="" disabled selected hidden>Year</option>
+                    </select>
+                    <p id="dob-error" style="color: red; display: none; font-size: 14px; margin-top: 5px;">Invalid date of birth. Please select a valid date.</p>
+                    </div><br>
+                    <input for = "checkbox" type="checkbox" id="terms" name="terms" required>
+                    <label for = "terms" class = "Whitetxt">By clicking 'Create Account' you agree to Our <a href="" class = "hyperlinks">Terms of service</a> and read the <a href = ""  class = "hyperlinks">Privacy Policy</a></label><br><br>
+
+                <input class = " barcolor bar CAbar"type="submit" value="Create Account" id = "submitbtn"><br><br>
+                <a href = "../Sign in /indexsignin.html" class = "hyperlinks">Already have an account? Log in</a>
+            </form>
+        </div>
+
+    </div>
+       
+    <script src="scriptSU.js"></script>
+    </body>
+</html>

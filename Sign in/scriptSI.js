@@ -20,7 +20,7 @@ loginForm.addEventListener('submit', function(e) {
         // Save logged-in user to localStorage
         localStorage.setItem('user', JSON.stringify(user));
         // Redirect to main page
-        window.location.href = '../index.html'; 
+        window.location.href = '../MainPage/index.html'; 
     } else {
         alert('Invalid email or password');
     }

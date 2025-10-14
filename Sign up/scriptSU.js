@@ -71,12 +71,15 @@ document.getElementById('signupForm').addEventListener('submit', function(e) {
 
     // Save to LocalStorage
     const users = JSON.parse(localStorage.getItem('users')) || [];
-    users.push({ email, username, password });
+    const newUser = { email, username, password };
+    users.push(newUser);
     localStorage.setItem('users', JSON.stringify(users));
+
+    // Automatically log in the new user
+    localStorage.setItem('user', JSON.stringify(newUser));
 
     alert('Account created successfully!');
 
     // Redirect to main page
-    window.location.href = '../mainpage.html'; // <-- adjust path to your main page
+    window.location.href = '../index.html'; 
 });
-

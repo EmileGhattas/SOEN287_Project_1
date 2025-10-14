@@ -4,7 +4,7 @@ const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 
 loginForm.addEventListener('submit', function(e) {
-    e.preventDefault(); // stop form from submitting normally
+    e.preventDefault(); 
 
     const email = emailInput.value;
     const password = passwordInput.value;
@@ -17,8 +17,10 @@ loginForm.addEventListener('submit', function(e) {
 
     if (user) {
         alert(`Welcome back, ${user.username || 'user'}!`);
+        // Save logged-in user to localStorage
+        localStorage.setItem('user', JSON.stringify(user));
         // Redirect to main page
-        window.location.href = '../mainpage.html'; // adjust path
+        window.location.href = '../index.html'; 
     } else {
         alert('Invalid email or password');
     }

@@ -2,9 +2,93 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Room Booking</title>
+    <link rel="stylesheet" href="../MainPage/Style/style.css">
+    <link rel="stylesheet" href="../Dropdown/styles/rooms.css">
+
+
 </head>
 <body>
+<header>
+
+    <nav class="navbar">
+
+        <h1 class="logo">
+            <img src="../Images/image-removebg-preview.png" alt="Website Logo">
+        </h1>
+
+        <ul class="navLinks">
+
+            <li><a href="../MainPage/index.html" class="active">Home</a></li>
+            <li><a href="about.html">About</a></li>
+
+
+            <li class="dropdown">
+                <a href="../Dropdown/bookings.html">Bookings</a>
+                <ul class="dropdown-menu">
+                    <li><a href="../Dropdown/rooms.html">Rooms</a></li>
+                    <li><a href="../Dropdown/labs.html">Labs</a></li>
+                    <li><a href="../Dropdown/equipment.html">Equipment</a></li>
+                </ul>
+            </li>
+
+            <li><a href="../Dropdown/contact.html">Contact</a></li>
+
+            <li class="dropdown" id="profileDropdown">
+                <a href="#" id="profileLink">Log In</a>
+                <ul class="dropdown-menu" id="profileMenu">
+                    <!-- Menu items will be added dynamically through js -->
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<br><br><br>
+<h1> LearnSpace Group Study Rooms </h1>
+
+<div class="info">
+    <br><br>
+    <p> LearnSpace offers 1000 study rooms </p><br>
+    <ul>
+        <li> Room Bookings are limited to registered students, staff and faculty members with approved access.</li>
+        <li> Rooms can last up to 4 hours per day. </li>
+        <li> There is a maximum of one reservation per day, 2 reservations per week, Monday to Sunday. </li>
+        <li> Bookings can be made up to 10 days in advance.</li>
+        <li> </li>
+    </ul>
+</div>
+
+<br><br>
+<p id="currentDate" class="currentDate"></p>
+
+<script>
+    const date= new Date();
+    const format = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}
+    document.getElementById('currentDate').textContent = date.toLocaleDateString('en-US', format);
+</script>
+
+<br><br><h2>Select a Room</h2><br>
+<div class="room-blocks">
+    <div class="room">Room 1</div>
+    <div class="room">Room 2</div>
+    <div class="room">Room 3</div>
+    <div class="room">Room 4</div>
+    <div class="room">Room 5</div>
+    <div class="room">Room 6</div>
+    <div class="room">Room 7</div>
+    <div class="room">Room 8</div>
+    <div class="room">Room 9</div>
+    <div class="room">Room 10</div>
+    <div class="room">Conference Room A</div>
+    <div class="room">Conference Room B</div>
+
+
+</div>
+<label for="booking">(Make into big ass calendar)</label>
+
+<input type="date" id="booking">
+
 
 </body>
 </html>

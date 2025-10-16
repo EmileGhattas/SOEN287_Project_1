@@ -13,6 +13,7 @@ ul{
 
 .room-blocks{
     display: grid;
+    position: relative;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap:15px;
     margin-bottom: 20px;
@@ -21,10 +22,30 @@ ul{
 
 .room{
     background:#3d5d60;
+    position: relative;
     border-radius: 12px;
     padding:10px;
     cursor: pointer;
     font-weight: 300;
     text-align: center;
     color: white;
+    overflow: visible;
+}
+
+.room-info{
+    display: none;
+    position: absolute;
+    bottom: 120%;
+    background: white;
+    color: black;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 1em;
+    z-index: 10;
+}
+
+.room:hover .room-info{
+    opacity:1;
+    bottom: 125%;
+    display: block;
 }

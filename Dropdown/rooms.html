@@ -49,24 +49,15 @@
 
 <div class="info">
     <br><br>
-    <p> LearnSpace offers 1000 study rooms </p><br>
+    <p> LearnSpace offers 10 study rooms and 2 conference rooms available at Learnspace. </p><br>
     <ul>
-        <li> Room Bookings are limited to registered students, staff and faculty members with approved access.</li>
+        <li> Only registered students, staff and faculty members with approved access may book study or conference rooms.</li>
         <li> Rooms can last up to 4 hours per day. </li>
         <li> There is a maximum of one reservation per day, 2 reservations per week, Monday to Sunday. </li>
         <li> Bookings can be made up to 10 days in advance.</li>
         <li> </li>
     </ul>
 </div>
-
-<br><br>
-<p id="currentDate" class="currentDate"></p>
-
-<script>
-    const date= new Date();
-    const format = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}
-    document.getElementById('currentDate').textContent = date.toLocaleDateString('en-US', format);
-</script>
 
 <br><br><br>
 
@@ -179,7 +170,17 @@
 
 <div class="date-selection">
     <h2> Select a Date </h2>
+    <br><br>
+    <p id="currentDate" class="currentDate"></p>
+
+    <script>
+        const date= new Date();
+        const format = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}
+        document.getElementById('currentDate').textContent = date.toLocaleDateString('en-US', format);
+    </script>
+
     <input id="today-date" name="today-date" type="date"> <!--alter to only allow present day forward -->
+
 
 </div>
 

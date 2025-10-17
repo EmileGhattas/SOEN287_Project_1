@@ -2,9 +2,87 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Room Booking</title>
+    <link rel="stylesheet" href="../MainPage/Style/style.css">
+    <link rel="stylesheet" href="../Dropdown/styles/labs.css">
+
 </head>
 <body>
+<header>
+
+    <nav class="navbar">
+
+        <h1 class="logo">
+            <img src="../Images/image-removebg-preview.png" alt="Website Logo">
+        </h1>
+
+        <ul class="navLinks">
+
+            <li><a href="../MainPage/index.html" class="active">Home</a></li>
+            <li><a href="about.html">About</a></li>
+
+
+            <li class="dropdown">
+                <a href="../Dropdown/bookings.html">Bookings</a>
+                <ul class="dropdown-menu">
+                    <li><a href="../Dropdown/rooms.html">Rooms</a></li>
+                    <li><a href="../Dropdown/labs.html">Labs</a></li>
+                    <li><a href="../Dropdown/equipment.html">Equipment</a></li>
+                </ul>
+            </li>
+
+            <li><a href="../Dropdown/contact.html">Contact</a></li>
+
+            <li class="dropdown" id="profileDropdown">
+                <a href="#" id="profileLink">Log In</a>
+                <ul class="dropdown-menu" id="profileMenu">
+                    <!-- Menu items will be added dynamically through js -->
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<br><br><br>
+<h1> LearnSpace Lab Facilities </h1>
+
+<div class="info">
+    <br><br>
+    <p> There are 2 laboratories available for each of the following departments: Chemistry, Physics, Computer and Robotics
+    </p><br>
+    <p><b> Please follow our booking and safety procedures. </b></p></br>
+    <ul>
+        <li> Only registered students, staff and faculty members with approved access may book laboratories. </li>
+        <li> Undergraduate Students must have a supervising professor or lab technician present during the entirety of the booking.</li>
+        <li> Lab Bookings can last up to 2 hours </li>
+        <li> There is a maximum of one reservation per day and 1 reservations per week, Monday to Sunday. </li>
+        <li> Labs operate from 8:00 am to 6:00 pm</li>
+        <li> You must submit your booking at least 48 hours in advance.</li>
+        <li><a href="safety.html" target="_blank">You must read the Laboratory Safety Code and complete the Laboratory Safety Quiz before submitting a booking</a> </li>
+
+    </ul>
+</div>
+
+<br><br><br>
+
+<div class="lab-selection">
+    <h2>Select a Lab</h2><br>
+    <div class="lab-blocks">
+        <div class="lab">Chemistry</div><br>
+        <div class="lab">Physics</div><br>
+        <div class="lab">Computer</div><br>
+        <div class="lab">Robotics</div><br>
+
+    </div>
+    <button id="toDate" disabled> Next </button>
+</div>
+
+<br><br><br>
+
+
+
+
+
 
 </body>
 </html>

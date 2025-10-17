@@ -1,0 +1,26 @@
+ul{
+    padding-left:60px;
+}
+
+.info, h1, p, h2{
+    padding-left:30px;
+}
+
+.logo img {
+    width: 110px;
+    height: auto;
+}
+
+.lab {
+    background:#3d5d60;
+    position: relative;
+    border-radius: 2px;
+    padding-left:10px;
+    padding-top: 10px;
+    cursor: pointer;
+    font-weight: 300;
+    text-align: center;
+    color: white;
+    overflow: visible;
+}
+

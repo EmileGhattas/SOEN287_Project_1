@@ -172,14 +172,14 @@
     <h2> Select a Date </h2>
     <br><br>
     <p id="currentDate" class="currentDate"></p>
-
     <script>
         const date= new Date();
         const format = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}
         document.getElementById('currentDate').textContent = date.toLocaleDateString('en-US', format);
     </script>
 
-    <input id="today-date" name="today-date" type="date"> <!--alter to only allow present day forward -->
+    <label for="date"></label>
+    <input type="date" id="date" required><br>
 
 
 </div>

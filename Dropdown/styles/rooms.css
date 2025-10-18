@@ -4,12 +4,13 @@
 
 
 .info, h1, p, h2{
-   padding-left:30px;
+   padding-left:50px;
 }
 
 ul{
-    padding-left:60px;
+    padding-left:80px;
 }
+
 
 .room-blocks{
     display: grid;
@@ -24,7 +25,7 @@ ul{
     background:#3d5d60;
     position: relative;
     border-radius: 12px;
-    padding:10px;
+    padding:30px;
     cursor: pointer;
     font-weight: 300;
     text-align: center;
@@ -38,7 +39,7 @@ ul{
     bottom: 120%;
     background: white;
     color: black;
-    padding: 10px 15px;
+    padding: 5px 10px;
     border-radius: 5px;
     font-size: 1em;
     z-index: 10;

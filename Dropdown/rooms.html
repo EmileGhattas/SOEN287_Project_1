@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Room Booking</title>
+    <link rel="stylesheet" href="../MainPage/Style/style.css">
+    <link rel="stylesheet" href="../Dropdown/styles/rooms.css">
+    <script src="../Dropdown/scripts/rooms.js"></script>
+
+
+</head>
+<body>
+<header>
+
+    <nav class="navbar">
+
+        <h1 class="logo">
+            <img src="../Images/image-removebg-preview.png" alt="Website Logo">
+        </h1>
+
+        <ul class="navLinks">
+
+            <li><a href="../MainPage/index.html" class="active">Home</a></li>
+            <li><a href="about.html">About</a></li>
+
+
+            <li class="dropdown">
+                <a href="../Dropdown/bookings.html">Bookings</a>
+                <ul class="dropdown-menu">
+                    <li><a href="../Dropdown/rooms.html">Rooms</a></li>
+                    <li><a href="../Dropdown/labs.html">Labs</a></li>
+                    <li><a href="../Dropdown/equipment.html">Equipment</a></li>
+                </ul>
+            </li>
+
+            <li><a href="../Dropdown/contact.html">Contact</a></li>
+
+            <li class="dropdown" id="profileDropdown">
+                <a href="#" id="profileLink">Log In</a>
+                <ul class="dropdown-menu" id="profileMenu">
+                    <!-- Menu items will be added dynamically through js -->
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<br><br><br>
+<h1> LearnSpace Group Study Rooms </h1>
+
+<div class="info">
+    <br><br>
+    <p> LearnSpace offers 10 study rooms and 2 conference rooms available at Learnspace. </p><br>
+    <ul>
+        <li> Only registered students, staff and faculty members with approved access may book study or conference rooms.</li>
+        <li> Rooms can last up to 4 hours per day. </li>
+        <li> There is a maximum of one reservation per day, 2 reservations per week, Monday to Sunday. </li>
+        <li> Bookings can be made up to 10 days in advance.</li>
+        <li> </li>
+    </ul>
+</div>
+
+<br><br><br>
+
+<div class="room-selection">
+    <h2>Select a Room</h2>
+    <div class="room-blocks">
+        <div class="room">Room 1
+            <div class="room-info">
+                (add an image)
+                Capacity: 4 people<br>
+                Has: WhiteBoard<br>
+                Location: 1st floor, NI building
+            </div>
+        </div>
+        <div class="room">Room 2
+            <div class="room-info">
+                (add an image)
+                Capacity: 4 people<br>
+                Has: WhiteBoard, Smart TVs<br>
+                Location: 1st floor, NI building
+            </div>
+        </div>
+        <div class="room">Room 3
+            <div class="room-info">
+                (add an image)
+                Capacity: 6 people<br>
+                Has: WhiteBoard, Smart Tv, Projector<br>
+                Location: 2nd floor, NI building
+            </div>
+        </div>
+        <div class="room">Room 4
+            <div class="room-info">
+                (add an image)
+                Capacity: 4 people<br>
+                Has: WhiteBoard, Projector <br>
+                Location: 1st floor, EG building
+            </div>
+        </div>
+        <div class="room">Room 5
+            <div class="room-info">
+                (add an image)
+                Capacity: 4 people<br>
+                Has: WhiteBoard, Smart Tv <br>
+                Location: 2nd floor, EG building
+            </div>
+        </div>
+        <div class="room">Room 6
+            <div class="room-info">
+                (add an image)
+                Capacity: 6 people<br>
+                (Presentation room - No table)<br>
+                Has: WhiteBoard, Smart TV, Projector<br>
+                Location: 3rd floor, EG building
+            </div>
+        </div>
+        <div class="room">Room 7
+            <div class="room-info">
+                (add an image)
+                Capacity: 6 people<br>
+                Has: WhiteBoard<br>
+                Location: 1st floor, S building
+            </div>
+        </div>
+        <div class="room">Room 8
+            <div class="room-info">
+                (add an image)
+                Capacity: 6 people<br>
+                Has: WhiteBoard<br>
+                Location: 3rd floor, S building
+            </div>
+        </div>
+        <div class="room">Room 9
+            <div class="room-info">
+                (add an image)
+                Capacity: 6 people<br>
+                Has: WhiteBoard<br>
+                Location: 4th floor, S building
+            </div>
+        </div>
+        <div class="room">Room 10
+            <div class="room-info">
+                (add an image)
+                Capacity: 6 people<br>
+                (Presentation room - No table)<br>
+                Has: Whiteboard, Smart TV, Projector<br>
+                Location: 1st floor, AB building
+            </div>
+        </div>
+        <div class="room">Conference Room A
+            <div class="room-info">
+                (add an image)
+                Capacity: 15 people<br>
+                Has: Smart TV, Projector<br>
+                Location: 6th floor, AB building
+            </div>
+        </div>
+        <div class="room">Conference Room B
+            <div class="room-info">
+                (add an image)
+                Capacity: 20 people<br>
+                Has: Smart TV, Projector<br>
+                Location: 5th floor, AB building
+            </div>
+        </div>
+    </div>
+    <button id="toDate" disabled> Next </button>
+</div>
+
+<br><br><br>
+
+<div class="date-selection">
+    <h2> Select a Date </h2>
+    <br><br>
+    <p id="currentDate" class="currentDate"></p>
+    <script>
+        const date= new Date();
+        const format = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}
+        document.getElementById('currentDate').textContent = date.toLocaleDateString('en-US', format);
+    </script>
+
+    <label for="date"></label>
+    <input type="date" id="date" required><br>
+
+
+</div>
+
+
+
+
+</body>
+</html>

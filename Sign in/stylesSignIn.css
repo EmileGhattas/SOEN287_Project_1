@@ -9,8 +9,8 @@ body {
     flex-direction: column; /* stack children vertically */
     justify-content: flex-start; /* align to top */
     align-items: center; /* center horizontally */
-   /* background-color: #36393F; */
-    background-image: url(https://www.shutterstock.com/shutterstock/photos/2497073191/display_1500/stock-vector-beautiful-cow-cartoon-character-seamless-pattern-cute-kawaii-farm-animal-hand-drawn-style-2497073191.jpg);
+    background-color: #36393F; 
+   /* background-image: url(https://www.shutterstock.com/shutterstock/photos/2497073191/display_1500/stock-vector-beautiful-cow-cartoon-character-seamless-pattern-cute-kawaii-farm-animal-hand-drawn-style-2497073191.jpg); */
     background-position: center;
     height: 100vh; 
     width: 100%;

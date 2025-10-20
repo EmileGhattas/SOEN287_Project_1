@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Equipment Booking</title>
+    <link rel="stylesheet" href="../MainPage/Style/style.css">
+    <link rel="stylesheet" href="../Dropdown/styles/equipment.css">
+
+</head>
+<body>
+<header>
+
+    <nav class="navbar">
+
+        <h1 class="logo">
+            <img src="../Images/image-removebg-preview.png" alt="Website Logo">
+        </h1>
+
+        <ul class="navLinks">
+
+            <li><a href="../MainPage/index.html" class="active">Home</a></li>
+            <li><a href="about.html">About</a></li>
+
+
+            <li class="dropdown">
+                <a href="../Dropdown/bookings.html">Bookings</a>
+                <ul class="dropdown-menu">
+                    <li><a href="../Dropdown/rooms.html">Rooms</a></li>
+                    <li><a href="../Dropdown/labs.html">Labs</a></li>
+                    <li><a href="../Dropdown/equipment.html">Equipment</a></li>
+                </ul>
+            </li>
+
+            <li><a href="../Dropdown/contact.html">Contact</a></li>
+
+            <li class="dropdown" id="profileDropdown">
+                <a href="#" id="profileLink">Log In</a>
+                <ul class="dropdown-menu" id="profileMenu">
+                    <!-- Menu items will be added dynamically through js -->
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<br><br><br>
+<h1> LearnSpace Equipment rentals </h1>
+
+<div class="info">
+    <br><br>
+    <p> We offer a variety of equipment rentals </p><br>
+    <ul>
+        <li> Only registered students, staff and faculty members with approved access may rent equipments. </li>
+        <li> Rentals can be made for same-day or future use (subject to availability).</li>
+        <li> All equipment must be returned in the same condition it was rented. </li>
+        <li> Recurring late returns may result in rental restrictions. </li>
+    </ul>
+</div>
+
+<br><br><br>
+
+<div class="equip-selection">
+    <h2>Select the equipment you would like to rent</h2><br>
+    <div class="equip-blocks">
+        <div class="equip">Projector</div><br>
+        <div class="equip">Microphone</div><br>
+        <div class="equip">Camera</div><br>
+        <div class="equip">VR Headset</div><br>
+
+    </div>
+    <button id="toDate" disabled> Next </button>
+</div>
+
+<br><br><br>
+
+
+
+
+
+
+</body>
+</html>

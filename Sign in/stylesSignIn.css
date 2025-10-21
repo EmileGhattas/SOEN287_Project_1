@@ -9,7 +9,8 @@ body {
     flex-direction: column; /* stack children vertically */
     justify-content: flex-start; /* align to top */
     align-items: center; /* center horizontally */
-    background-color: #FFE4C4; 
+   /* background-color: #FFE4C4; */
+    background-color: #36393F;
    /* background-image: url(https://www.shutterstock.com/shutterstock/photos/2497073191/display_1500/stock-vector-beautiful-cow-cartoon-character-seamless-pattern-cute-kawaii-farm-animal-hand-drawn-style-2497073191.jpg); */
     background-position: center;
     height: 100vh; 
@@ -35,7 +36,7 @@ body {
     text-align: center;
     margin-bottom: 50px; /* smaller spacing between welcome and form */
     font-size: 40px; /* bigger for emphasis */
-    text-shadow: 1px 1px 2px black;
+    text-shadow: 1px 2px 3px black;
 }
 .bar{
     width: 340px;
@@ -47,8 +48,8 @@ body {
     
 }
 .barcolor{
-    background-color: #40444B;
-    color:white 
+    background-color: white;
+    color: black 
 }
 
 .hyperlinks{
@@ -57,6 +58,7 @@ body {
 }
 .loginbar{
     background-color: #5865F2;
+    color: white;
     /*color:white */
     height: 35px;
 }

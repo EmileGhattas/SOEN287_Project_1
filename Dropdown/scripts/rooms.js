@@ -1,6 +1,12 @@
 //getting all info from room.html
 const rooms = document.querySelectorAll('.room')
 const dateInput = document.getElementById('date');
+const toDate = document.getElementById('toDate');
+const datetime = document.getElementById('datetime');
+const confirm = document.getElementById('confirm');
+const startTime = document.getElementById('startTime');
+const endTime = document.getElementById('endTime');
+
 
 let selectedRoom = "";
 rooms.forEach(room =>{
@@ -11,16 +17,53 @@ rooms.forEach(room =>{
 
         selectedRoom = room.textContent.trim();
 
+        toDate.disabled = false;
+
     });
 });
-// Display today's date
-const date= new Date();
-const format = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}
-document.getElementById('currentDate').textContent = date.toLocaleDateString('en-US', format);
+
+toDate.addEventListener('click', () => {
+    if(selectedRoom === ""){
+        alert("Please select a room first.");
+        return;
+    }
+    datetime.style.display = 'block';
+
+    // Display today's date
+    const date= new Date();
+    const format = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}
+    document.getElementById('currentDate').textContent = date.toLocaleDateString('en-US', format);
 
 //Restrict the date to present date
-const today = new Date();
-const maxdate = new Date();
-maxdate.setDate(today.getDate() + 14);
-dateInput.min = today.toISOString().split('T')[0];
-dateInput.max = maxdate.toISOString().split('T')[0];
+    const today = new Date();
+    const maxdate = new Date();
+    maxdate.setDate(today.getDate() + 14);
+    dateInput.min = today.toISOString().split('T')[0];
+    dateInput.max = maxdate.toISOString().split('T')[0];
+
+});
+
+confirm.addEventListener('click', () => {
+    const inDate = dateInput.value;
+    const inStartTime = startTime.value;
+    const inEndTime = endTime.value;
+
+    if (!inDate || !inStartTime || !inEndTime){
+        alert("Please fill in all the required fields.");
+    }
+
+    //need to change to send alert when booking > 4 hours
+    if((inEndTime - inStartTime) > 4){
+        alert("Bookings are limited to 4 hours per.");
+    }
+
+    const booking = {
+        room: selectedRoom,
+        date: inDate,
+        startTime : inStartTime,
+        endTime : inEndTime
+    };
+
+    localStorage.setItem('Booking', JSON.stringify(booking));
+
+})

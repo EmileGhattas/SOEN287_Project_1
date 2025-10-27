@@ -22,8 +22,8 @@ ul{
 }
 
 .info-image{
-    width: 150px;
-    height: 100px;
+    width: 200px;
+    height: 150px;
 }
 
 .room{
@@ -62,18 +62,12 @@ ul{
 }
 
 button {
-    padding: 10px 20px;
-    background-color: #F0F0F0;
-    color: black;
-    border: none;
-    border-radius: 8px;
     cursor: pointer;
-    font-size: 16px;
     position: absolute;
     right: 10px;
 }
 
 .date-selection{
     position: absolute;
-    left: 10px;
+    left: 30px;
 }

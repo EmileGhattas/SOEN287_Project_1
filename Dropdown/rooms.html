@@ -5,8 +5,7 @@
     <title>Room Booking</title>
     <link rel="stylesheet" href="../MainPage/Style/style.css">
     <link rel="stylesheet" href="../Dropdown/styles/rooms.css">
-    <script src="../Dropdown/scripts/rooms.js"></script>
-
+    <script defer src="../Dropdown/scripts/rooms.js"></script>
 
 </head>
 <body>
@@ -67,23 +66,21 @@
     <div class="room-blocks">
         <div class="room">Room 1
             <div class="room-info">
-                (add an image)
+                <img src="../Images/room1.jpg" alt="Room 1" class="info-image" >
                 Capacity: 4 people<br>
-                Has: WhiteBoard<br>
                 Location: 1st floor, NI building
             </div>
         </div>
         <div class="room">Room 2
             <div class="room-info">
-                (add an image)
+                <img src="../Images/room3.jpg" alt="Room 2" class="info-image" >
                 Capacity: 4 people<br>
-                Has: WhiteBoard, Smart TVs<br>
                 Location: 1st floor, NI building
             </div>
         </div>
         <div class="room">Room 3
             <div class="room-info">
-                (add an image)
+                <img src="../Images/room2.jpg" alt="Room 3" class="info-image" >
                 Capacity: 6 people<br>
                 Has: WhiteBoard, Smart Tv, Projector<br>
                 Location: 2nd floor, NI building
@@ -99,7 +96,6 @@
         </div>
         <div class="room">Room 5
             <div class="room-info">
-                (add an image)
                 Capacity: 4 people<br>
                 Has: WhiteBoard, Smart Tv <br>
                 Location: 2nd floor, EG building
@@ -124,9 +120,9 @@
         </div>
         <div class="room">Room 8
             <div class="room-info">
-                (add an image)
+                <img src="../Images/room4.jpg" alt="Room 8" class="info-image" >
                 Capacity: 6 people<br>
-                Has: WhiteBoard<br>
+                Has: WhiteBoard, Smart Tv, Projector<br>
                 Location: 3rd floor, S building
             </div>
         </div>
@@ -170,21 +166,25 @@
 <br><br><br>
 
 <div class="date-selection">
-    <h2> Select a Date </h2>
+    <h2> Select a Date and a Time</h2>
     <br><br>
     <p id="currentDate" class="currentDate"></p>
-    <script>
-        const date= new Date();
-        const format = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}
-        document.getElementById('currentDate').textContent = date.toLocaleDateString('en-US', format);
-    </script>
+    <br><br>
 
     <label for="date"></label>
     <input type="date" id="date" required><br>
+    <br><br>
 
+    <label for="startTime"> Start Time </label>
+    <input type="time" id="startTime" required>
+    <br><br>
 
+    <label for="endTime"> End Time </label>
+    <input type="time" id="endTime" required>
+    <br><br>
+
+    <button id="confirm"> Confirm Booking</button>
 </div>
-
 
 
 

@@ -1,0 +1,122 @@
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: white;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* ---------- HEADER ---------- */
+header {
+    background-color: #3d5d60;
+    color: white;
+    text-align: center;
+    padding: 50px 20px 30px 20px;
+    border-bottom: 4px solid #8f9498;
+}
+
+header .logo img {
+    width: 120px;
+    height: auto;
+    margin-bottom: 15px;
+}
+
+header h1 {
+    font-size: 32px;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+header p {
+    font-size: 17px;
+    color: #e0e0e0;
+}
+
+/* ---------- MAIN CONTENT ---------- */
+main {
+    max-width: 950px;
+    margin: 50px auto;
+    padding: 40px 50px;
+    background-color: #f8f8f8;
+    border-radius: 10px;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.intro, .conclusion {
+    margin-bottom: 40px;
+}
+
+.intro h2,
+.rules h2,
+.conclusion h2 {
+    color: #3d5d60;
+    margin-bottom: 12px;
+    border-left: 6px solid #8f9498;
+    padding-left: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+}
+
+.intro p,
+.conclusion p {
+    font-size: 17px;
+    color: #444;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+.rules ul {
+    margin-left: 30px;
+    padding-left: 10px;
+    margin-bottom: 30px;
+}
+
+.rules li {
+    margin-bottom: 8px;
+    font-size: 16px;
+    color: #333;
+}
+
+strong {
+    color: #3d5d60;
+}
+
+/* ---------- CONCLUSION SECTION ---------- */
+.conclusion {
+    background-color: #e6ecec;
+    padding: 25px 30px;
+    border-radius: 10px;
+    border: 1px solid #cfd6d6;
+}
+
+/* ---------- FOOTER ---------- */
+footer {
+    background-color: #3d5d60;
+    color: white;
+    text-align: center;
+    padding: 40px 20px;
+    margin-top: 60px;
+    font-size: 15px;
+    border-top: 4px solid #8f9498;
+}
+
+footer p {
+    color: #e0e0e0;
+}
+
+/* ---------- RESPONSIVE DESIGN ---------- */
+@media (max-width: 768px) {
+    main {
+        padding: 25px 20px;
+        margin: 25px;
+    }
+
+    header h1 {
+        font-size: 26px;
+    }
+
+    .rules ul {
+        margin-left: 20px;
+    }
+}

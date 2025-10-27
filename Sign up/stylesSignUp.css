@@ -18,7 +18,7 @@ body {
 
 #S-U {
     display: block;
-    background-color: #2F3136;
+    background-color: #3d5d60;
     width: 350px; /* slightly bigger if you want */;;
     padding: 20px;;
     border-radius: 4px;;
@@ -47,8 +47,8 @@ body {
     
 }
 .barcolor{
-    background-color: #40444B;
-    color:white 
+    background-color: white;
+    color: black
 }
 .dob_bar{
     width:113px;
@@ -59,6 +59,7 @@ body {
 }
 .CAbar{
     background-color: #5865F2;
+    color: white;
     /*color:white */
     height: 35px;
 }

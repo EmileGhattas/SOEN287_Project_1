@@ -11,21 +11,66 @@ ul{
     height: auto;
 }
 
-.labs {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-bottom: 30px;
+.currentDate {
+    font-size: 1.5em;
+    margin-bottom: 10px;
 }
 
-.lab-btn {
+.lab-selection {
+    padding: 30px;
+}
+
+.lab-blocks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+}
+
+.lab {
     background-color: #3d5d60;
     color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 15px 25px;
-    font-size: 16px;
+    text-align: center;
+    padding: 25px;
+    border-radius: 10px;
     cursor: pointer;
+    position: relative;
     transition: background-color 0.3s;
 }
+
+.lab.disabled {
+    background-color: gray;
+    cursor: not-allowed;
+}
+
+.lab:hover .lab-info {
+    display: block;
+}
+
+.lab-info {
+    display: none;
+    background: grey;
+    opacity: 95%;
+    width: 120px;
+    height: 100px;
+    color: black;
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    z-index: 10;
+}
+
+.lab.selected{
+    border-color: #04282B;
+    background-color: #04282B;
+}
+
+button {
+    cursor: pointer;
+    position: absolute;
+    right: 30px;
+}
+

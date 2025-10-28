@@ -2,17 +2,123 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-    <link rel="stylesheet" href="Style/style.css">
+    <title>About LearnSpace</title>
+    <link rel="stylesheet" href="../MainPage/Style/style.css">
+    <link rel="stylesheet" href="../MainPage/Style/about.css">
 </head>
 <body>
-    <ul>
-        <li>Room Booking</li>
-        <li>Info</li>
-        <li>Etc...</li>
-        <li> About</li>
-    </ul>
+<header class="about-header">
+    <nav class="navbar">
 
+        <h1 class="logo">
+            <img src="../Images/image-removebg-preview.png" alt="Website Logo">
+        </h1>
+
+        <ul class="navLinks">
+
+            <li><a href="../MainPage/index.html" class="active">Home</a></li>
+            <li><a href="../MainPage/about.html">About</a></li>
+
+
+            <li class="dropdown">
+                <a href="../Dropdown/bookings.html">Bookings</a>
+                <ul class="dropdown-menu">
+                    <li><a href="../Dropdown/bookings.html">My Bookings</a></li>
+                    <li><a href="../Dropdown/rooms.html">Rooms</a></li>
+                    <li><a href="../Dropdown/labs.html">Labs</a></li>
+                    <li><a href="../Dropdown/equipment.html">Equipment</a></li>
+                </ul>
+            </li>
+
+            <li><a href="../Dropdown/contact.html">Contact</a></li>
+
+            <li class="dropdown" id="profileDropdown">
+                <a href="#" id="profileLink">Log In</a>
+                <ul class="dropdown-menu" id="profileMenu">
+                    <!-- Menu items will be added dynamically through js -->
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+</header>
+
+<main class="about-content">
+    <h1>About LearnSpace</h1>
+    <section class="intro">
+        <h2>Our Story</h2>
+        <p>
+            LearnSpace was founded in 2023 with a simple idea: to make learning environments more accessible, organized,
+            and collaborative. What began as a small campus project quickly grew into a platform connecting students,
+            educators, and researchers to fully equipped rooms, advanced laboratories, and specialized tools.
+        </p>
+        <p>
+            We realized that valuable time was being lost managing physical resources, booking lab space, reserving
+            equipment, or scheduling group study rooms. LearnSpace was built to change that. Today, our system helps
+            institutions streamline resource management while ensuring accessible, efficient, and safe access for everyone.
+        </p>
+    </section>
+
+    <section class="mission">
+        <h2>Our Mission</h2>
+        <p>
+            At LearnSpace, our mission is to empower education and innovation through accessibility.
+            We aim to eliminate scheduling conflicts, improve lab and equipment usage, and foster
+            collaboration in academic and research settings.
+        </p>
+        <p>
+            Whether you're booking a study room, reserving lab time, or checking out technical equipment,
+            LearnSpace ensures the process is smooth, transparent, and reliable.
+        </p>
+    </section>
+
+    <section class="vision">
+        <h2>Our Vision</h2>
+        <p>
+            We envision a future where every learner and educator has instant access to the resources they need —
+            where managing spaces and equipment is effortless and digital, allowing more focus on what truly matters:
+            discovery, creativity, and learning.
+        </p>
+    </section>
+
+    <section class="values">
+        <h2>Our Core Values</h2>
+        <ul>
+            <li><strong>Accessibility:</strong> Equal and fair access to learning environments for all users.</li>
+            <li><strong>Innovation:</strong> Using smart technology to modernize resource management.</li>
+            <li><strong>Reliability:</strong> Ensuring every booking and system interaction runs smoothly.</li>
+            <li><strong>Community:</strong> Supporting collaboration among students, staff, and researchers.</li>
+        </ul>
+    </section>
+
+    <section class="contact">
+        <h2>Get in Touch</h2>
+        <p>
+            Have questions or suggestions? We'd love to hear from you!
+            You can reach us at <strong>learnspace@gmail.com</strong>.
+        </p>
+        <p>
+            Together, let’s build smarter, safer, and more connected learning environments.
+        </p>
+    </section>
+</main>
+
+<footer class="contact">
+    <h2>Contact Us</h2>
+    <p>Reach out through any of the options below:</p>
+
+    <div class="contact-info">
+        <p><strong>Phone:</strong> (438) 345 9821</p>
+        <p><strong>Email:</strong> learnspace@gmail.com</p>
+    </div>
+
+    <div class="social-links">
+        <a href="https://www.instagram.com" target="_blank">Instagram</a>
+        <a href="https://www.facebook.com" target="_blank">Facebook</a>
+        <a href="https://www.twitter.com" target="_blank">Twitter</a>
+    </div>
+
+    <p class="footer-note"> 2025 Learn Space</p>
+</footer>
 </body>
 </html>
-

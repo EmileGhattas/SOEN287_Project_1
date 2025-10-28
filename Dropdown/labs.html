@@ -5,6 +5,8 @@
     <title>Lab Booking</title>
     <link rel="stylesheet" href="../MainPage/Style/style.css">
     <link rel="stylesheet" href="../Dropdown/styles/labs.css">
+    <script defer src="../Dropdown/scripts/labs.js"></script>
+
 
 </head>
 <body>
@@ -55,7 +57,7 @@
     <ul>
         <li> Only registered students, staff and faculty members with approved access may book laboratories. </li>
         <li> Undergraduate Students must have a supervising professor or lab technician present during the entirety of the booking.</li>
-        <li> Lab Bookings can last up to 2 hours </li>
+        <li> There are three lab booking slots per day: 8:00 am to 11:30 pm, 12:00pm to 3:30 pm and 4:00pm to 7:30pm.</li>
         <li> There is a maximum of one reservation per day and 1 reservations per week, Monday to Sunday. </li>
         <li> Labs operate from 8:00 am to 6:00 pm</li>
         <li> You must submit your booking at least 48 hours in advance.</li>
@@ -64,36 +66,49 @@
     </ul>
 </div>
 
-<br><br><br><h2>Select a Lab</h2><br>
-<section class="labs">
-
-        <button class="lab-btn" data-lab="Chemistry Lab">Chemistry Labs</button><br>
-        <button class="lab-btn" data-lab="Chemistry Lab">Physics Labs</button><br>
-        <button class="lab-btn" data-lab="Chemistry Lab">Computer Labs</button><br>
-        <button class="lab-btn" data-lab="Chemistry Lab">Robotics Labs</button><br>
-</section>
+<br><br><br>
+<div class="lab-selection">
+    <h2>Select a Lab</h2>
+    <div class="lab-blocks">
+        <div class="lab" data-lab="Chemistry Lab">Chemistry Lab
+            <div class="lab-info"></div>
+        </div>
+        <div class="lab" data-lab="Physics Lab">Physics Lab
+            <div class="lab-info"></div>
+        </div>
+        <div class="lab" data-lab="Computer Lab">Computer Lab
+            <div class="lab-info"></div>
+        </div>
+        <div class="lab" data-lab="Robotics Lab">Robotics Lab
+            <div class="lab-info"></div>
+        </div>
+    </div>
+    <button id="toDate" disabled>Next</button>
+</div>
 
 <div class="date-selection" id="datetime" style="display:none;">
-    <h2> Select a Date and a Time</h2>
-    <br><br>
-
+    <h2>Select a Date and Slot</h2>
     <p id="currentDate" class="currentDate"></p>
-    <br><br>
 
-    <label for="date"></label>
-    <input type="date" id="date" required><br>
-    <br><br>
+    <label for="date">Date:</label>
+    <input type="date" id="date" required><br><br>
 
-    <label for="startTime"> Start Time </label>
-    <input type="time" id="startTime" min="7:00" max="19:00" required>
-    <br><br>
+    <label for="slot">Available Slot:</label>
+    <select id="slot" required>
+        <option value="">Select</option>
+        <option value="8:00-11:30">8:00 – 11:30</option>
+        <option value="12:00-15:30">12:00 – 15:30</option>
+        <option value="16:00-19:30">16:00 – 19:30</option>
+    </select><br><br>
 
-    <label for="endTime"> End Time </label>
-    <input type="time" id="endTime" max="23:00" required>
-    <br><br>
-
-    <button id="confirm"> Confirm Booking</button>
+    <button id="confirm">Confirm Booking</button>
 </div>
+
+<div id="confirmation" style="display:none;">
+    <h2>Booking Confirmed!</h2>
+    <p id="summary"></p>
+</div>
+
 
 <br><br><br>
 

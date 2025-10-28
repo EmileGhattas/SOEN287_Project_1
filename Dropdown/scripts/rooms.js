@@ -73,11 +73,27 @@ confirmButton.addEventListener('click', () => {
 
     if (!inDate || !inStartTime || !inEndTime){
         alert("Please fill in all the required fields.");
+        return;
     }
 
-    //need to change to send alert when booking > 4 hours
-    if((inEndTime - inStartTime) > 4){
-        alert("Bookings cannot exceed 4 hours.");
+    const [startHour, startMin] = inStartTime.split(':').map(Number);
+    const [endHour, endMin] = inEndTime.split(':').map(Number);
+    const startTotal = startHour * 60 + startMin;
+    const endTotal = endHour * 60 + endMin;
+
+    if (startTotal < 7 * 60 || endTotal > 23 * 60) {
+        alert("Bookings must be between 07:00 and 23:00.");
+        return;
+    }
+
+    if (endTotal <= startTotal) {
+        alert("End time must be after start time.");
+        return;
+    }
+
+    if (endTotal - startTotal > 240) {
+        alert("Booking cannot exceed 4 hours.");
+        return;
     }
 
     const booking = {
@@ -100,7 +116,3 @@ confirmButton.addEventListener('click', () => {
     Room successfully booked!
   `;
 });
-
-function getBookings(){
-    return JSON.parse(localStorage.getItem("booking"));
-}

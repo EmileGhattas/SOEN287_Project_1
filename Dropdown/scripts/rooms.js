@@ -7,13 +7,14 @@ function getBookingsArray() {
   return Array.isArray(arr) ? arr : [];
 }
 function saveBooking(booking) {
-  if (!booking) return;
-  const arr = getBookingsArray();
-  arr.push(booking);
-  localStorage.setItem('bookings', JSON.stringify(arr));
-  // Backward compatibility: also set the last single booking (optional)
-  saveBooking(booking);
-  saveBooking(booking);
+    if (!booking || typeof booking !== 'object') return;
+
+    const arr = JSON.parse(localStorage.getItem('bookings') || '[]');
+    arr.push(booking);
+    localStorage.setItem('bookings', JSON.stringify(arr));
+
+    localStorage.setItem('booking', JSON.stringify(booking));
+    localStorage.setItem('Booking', JSON.stringify(booking));
 }
 
 const rooms = document.querySelectorAll('.room')

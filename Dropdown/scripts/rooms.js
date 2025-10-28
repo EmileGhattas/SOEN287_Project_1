@@ -1,4 +1,21 @@
-//getting all info from room.html
+
+function _readJSON(key) {
+  try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; }
+}
+function getBookingsArray() {
+  const arr = _readJSON('bookings');
+  return Array.isArray(arr) ? arr : [];
+}
+function saveBooking(booking) {
+  if (!booking) return;
+  const arr = getBookingsArray();
+  arr.push(booking);
+  localStorage.setItem('bookings', JSON.stringify(arr));
+  // Backward compatibility: also set the last single booking (optional)
+  saveBooking(booking);
+  saveBooking(booking);
+}
+
 const rooms = document.querySelectorAll('.room')
 const dateInput = document.getElementById('date');
 const toDate = document.getElementById('toDate');
@@ -69,10 +86,10 @@ confirmButton.addEventListener('click', () => {
         endTime : inEndTime
     };
 
-    localStorage.setItem('Booking', JSON.stringify(booking));
+    saveBooking(booking);
 
     //Confirm Booking
-    datetime.style.display = none;
+    datetime.style.display = 'none';
     document.querySelector('.room-selection').style.display = 'none';
     confirmation.style.display = 'block';
     summary.innerHTML = `

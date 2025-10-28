@@ -23,3 +23,8 @@
     margin-bottom: 20px;
     padding: 30px;
 }
+
+.equip.selected {
+    border: 2px solid #04282B;
+    background-color: #04282B;
+}

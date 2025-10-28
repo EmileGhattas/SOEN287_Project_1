@@ -1,4 +1,3 @@
-
 function _readJSON(key) {
   try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; }
 }
@@ -11,10 +10,12 @@ function saveBooking(booking) {
   const arr = getBookingsArray();
   arr.push(booking);
   localStorage.setItem('bookings', JSON.stringify(arr));
+  // Backward compatibility (optional)
   localStorage.setItem('booking', JSON.stringify(booking));
   localStorage.setItem('Booking', JSON.stringify(booking));
 }
 
+// Selection handling
 const items = document.querySelectorAll('.equip');
 let selectedName = null;
 items.forEach((el) => {
@@ -25,6 +26,7 @@ items.forEach((el) => {
   });
 });
 
+// Confirm booking
 const confirmBtn = document.getElementById('confirm');
 const dateInput = document.getElementById('date');
 const startInput = document.getElementById('startTime');
@@ -54,7 +56,33 @@ if (confirmBtn) {
       endTime,
       type: 'Equipment'
     });
-
     alert('Equipment successfully booked!\nIt is now visible on My Bookings.');
   });
+}
+
+
+const toDateBtn = document.getElementById('toDate');
+const dateSection = document.querySelector('.date-selection');
+
+if (toDateBtn && dateSection) {
+  try { dateSection.style.display = dateSection.style.display || 'none'; } catch(e){}
+  toDateBtn.addEventListener('click', () => {
+    if (!selectedName) {
+      alert('Please select equipment first.');
+      return;
+    }
+    dateSection.style.display = 'block';
+    dateSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+function flashConfirm(btn) {
+  if (!btn) return;
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Booked! ✓';
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.textContent = original;
+  }, 1200);
 }

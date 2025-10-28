@@ -64,17 +64,34 @@
 </div>
 
 <br><br><br>
-
-<div class="lab-selection">
+<section class="lab-blocks">
     <h2>Select a Lab</h2><br>
-    <div class="lab-blocks">
-        <div class="lab">Chemistry</div><br>
-        <div class="lab">Physics</div><br>
-        <div class="lab">Computer</div><br>
-        <div class="lab">Robotics</div><br>
+        <button class="lab-btn" data-lab="Chemistry Lab">Chemistry Labs</button><br>
+        <button class="lab-btn" data-lab="Chemistry Lab">Physics Labs</button><br>
+        <button class="lab-btn" data-lab="Chemistry Lab">Computer</button><br>
+        <button class="lab-btn" data-lab="Chemistry Lab">Robotics</button><br>
+</section>
 
-    </div>
-    <button id="toDate" disabled> Next </button>
+<div class="date-selection" id="datetime" style="display:none;">
+    <h2> Select a Date and a Time</h2>
+    <br><br>
+
+    <p id="currentDate" class="currentDate"></p>
+    <br><br>
+
+    <label for="date"></label>
+    <input type="date" id="date" required><br>
+    <br><br>
+
+    <label for="startTime"> Start Time </label>
+    <input type="time" id="startTime" min="7:00" max="19:00" required>
+    <br><br>
+
+    <label for="endTime"> End Time </label>
+    <input type="time" id="endTime" max="23:00" required>
+    <br><br>
+
+    <button id="confirm"> Confirm Booking</button>
 </div>
 
 <br><br><br>

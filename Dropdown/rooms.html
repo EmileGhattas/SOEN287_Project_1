@@ -177,17 +177,21 @@
     <br><br>
 
     <label for="startTime"> Start Time </label>
-    <input type="time" id="startTime" required>
+    <input type="time" id="startTime" min="7:00" max="19:00" required>
     <br><br>
 
     <label for="endTime"> End Time </label>
-    <input type="time" id="endTime" required>
+    <input type="time" id="endTime" max="23:00" required>
     <br><br>
 
     <button id="confirm"> Confirm Booking</button>
 </div>
 
-
+<!--confirmation of booking -->
+<div id="confirmation" style="display:none;">
+    <h2>Booking Confirmed!</h2>
+    <p id="summary"></p>
+</div>
 
 </body>
 </html>

@@ -3,9 +3,11 @@ const rooms = document.querySelectorAll('.room')
 const dateInput = document.getElementById('date');
 const toDate = document.getElementById('toDate');
 const datetime = document.getElementById('datetime');
-const confirm = document.getElementById('confirm');
+const confirmButton = document.getElementById('confirm');
 const startTime = document.getElementById('startTime');
 const endTime = document.getElementById('endTime');
+const confirmation = document.getElementById('confirmation');
+const summary = document.getElementById('summary');
 
 
 let selectedRoom = "";
@@ -41,12 +43,15 @@ toDate.addEventListener('click', () => {
     dateInput.min = today.toISOString().split('T')[0];
     dateInput.max = maxdate.toISOString().split('T')[0];
 
+
 });
 
-confirm.addEventListener('click', () => {
+
+confirmButton.addEventListener('click', () => {
     const inDate = dateInput.value;
     const inStartTime = startTime.value;
     const inEndTime = endTime.value;
+
 
     if (!inDate || !inStartTime || !inEndTime){
         alert("Please fill in all the required fields.");
@@ -54,7 +59,7 @@ confirm.addEventListener('click', () => {
 
     //need to change to send alert when booking > 4 hours
     if((inEndTime - inStartTime) > 4){
-        alert("Bookings are limited to 4 hours per.");
+        alert("Bookings cannot exceed 4 hours.");
     }
 
     const booking = {
@@ -66,4 +71,18 @@ confirm.addEventListener('click', () => {
 
     localStorage.setItem('Booking', JSON.stringify(booking));
 
-})
+    //Confirm Booking
+    datetime.style.display = none;
+    document.querySelector('.room-selection').style.display = 'none';
+    confirmation.style.display = 'block';
+    summary.innerHTML = `
+    <strong>Room:</strong> ${booking.room}<br>
+    <strong>Date:</strong> ${booking.date}<br>
+    <strong>Time:</strong> ${booking.startTime} – ${booking.endTime}<br><br>
+    Room successfully booked!
+  `;
+});
+
+function getBookings(){
+    return JSON.parse(localStorage.getItem("booking"));
+}

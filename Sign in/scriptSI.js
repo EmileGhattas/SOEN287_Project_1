@@ -4,16 +4,19 @@ const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 
 loginForm.addEventListener('submit', function(e) {
-    e.preventDefault(); 
+    e.preventDefault();
 
-    const email = emailInput.value;
-    const password = passwordInput.value;
+    const email = emailInput.value.trim().toLowerCase();
+    const password = passwordInput.value.trim();
 
     // Get users from LocalStorage
     const users = JSON.parse(localStorage.getItem('users')) || [];
 
     // Find user that matches email and password
-    const user = users.find(u => u.email === email && u.password === password);
+    const user = users.find(u =>
+        (u.email || '').toLowerCase() === email &&
+        (u.password || '').trim() === password
+    );
 
     if (user) {
         alert(`Welcome back, ${user.username || 'user'}!`);

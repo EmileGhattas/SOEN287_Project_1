@@ -27,102 +27,37 @@ items.forEach((el) => {
 });
 
 // Confirm booking
-const confirmBtn = document.getElementById('confirm');
+const equipments = document.querySelectorAll('.equipment');
 const dateInput = document.getElementById('date');
-const startInput = document.getElementById('startTime');
-const endInput = document.getElementById('endTime');
+const datetime = document.getElementById('datetime');
+const confirmButton = document.getElementById('confirm');
+const summary = document.getElementById('summary');
+const confirmation = document.getElementById('confirmation');
+const toDate = document.getElementById('Next');
 
-if (confirmBtn) {
-  confirmBtn.addEventListener('click', () => {
-    if (!selectedName && items.length) {
-      const first = items[0];
-      selectedName = first.getAttribute('data-name') || first.textContent.trim();
-      first.classList.add('selected');
-    }
+let selectedEquipment = "";
 
-    const date = dateInput ? dateInput.value : '';
-    const startTime = startInput ? startInput.value : '';
-    const endTime = endInput ? endInput.value : '';
+// Constants
+const MAX_PER_DAY = 5;
 
-    if (!selectedName || !date || !startTime || !endTime) {
-      alert('Please choose equipment and fill in date/time.');
-      return;
-    }
-
-    saveBooking({
-      room: selectedName,
-      date,
-      startTime,
-      endTime,
-      type: 'Equipment'
-    });
-    alert('Equipment successfully booked!\nIt is now visible on My Bookings.');
-  });
-}
-
-
-const toDateBtn = document.getElementById('toDate');
-const dateSection = document.querySelector('.date-selection');
-
-if (toDateBtn && dateSection) {
-  try { dateSection.style.display = dateSection.style.display || 'none'; } catch(e){}
-  toDateBtn.addEventListener('click', () => {
-    if (!selectedName) {
-      alert('Please select equipment first.');
-      return;
-    }
-    dateSection.style.display = 'block';
-    dateSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-}
-
-function flashConfirm(btn) {
-  if (!btn) return;
-  const original = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = 'Booked! ✓';
-  setTimeout(() => {
-    btn.disabled = false;
-    btn.textContent = original;
-  }, 1200);
-}
-
-const MAX_EQUIPMENT_PER_DAY = 5;
-
-// Reset daily equipment availability
-function resetEquipmentDaily() {
-    const today = new Date().toISOString().split('T')[0];
-    const lastReset = localStorage.getItem('equipmentLastReset');
-    if (lastReset !== today) {
-        localStorage.removeItem('equipmentBookings');
-        localStorage.setItem('equipmentLastReset', today);
-    }
-}
-
-// Count how many of one equipment are booked on a date
-function countEquipmentBookings(equipmentName, date) {
-    const bookings = JSON.parse(localStorage.getItem('equipmentBookings') || '[]');
-    return bookings.filter(b => b.equipment === equipmentName && b.date === date).length;
-}
-
-// Disable unavailable equipment
+// 🔹 Update equipment info tooltips + disable when full
 function updateEquipmentAvailability() {
-    const equipments = document.querySelectorAll('.equipment');
-    const today = new Date().toISOString().split('T')[0];
-    const bookings = JSON.parse(localStorage.getItem('equipmentBookings') || '[]');
+    const bookings = getBookingsArray();
+    const today = dateInput.value || new Date().toISOString().split('T')[0];
 
     equipments.forEach(eq => {
-        const name = eq.dataset.equipment;
-        const booked = countEquipmentBookings(name, today);
-        const remaining = Math.max(0, MAX_EQUIPMENT_PER_DAY - booked);
+        const eqName = eq.dataset.equipment;
+        const bookedCount = bookings.filter(b => b.equipment === eqName && b.date === today).length;
+        const remaining = Math.max(0, MAX_PER_DAY - bookedCount);
 
-        // Tooltip or message
         const info = eq.querySelector('.equipment-info');
-        if (info) info.textContent = remaining > 0
-            ? `${remaining} available today`
-            : "Fully booked";
+        if (remaining > 0) {
+            info.textContent = `${remaining} available today`;
+        } else {
+            info.textContent = "Fully booked today";
+        }
 
-        if (remaining <= 0) {
+        if (remaining === 0) {
             eq.classList.add('disabled');
             eq.style.pointerEvents = 'none';
             eq.style.opacity = '0.5';
@@ -134,47 +69,67 @@ function updateEquipmentAvailability() {
     });
 }
 
-// Hook into confirm button (requires login + limit check)
-const confirmButton = document.getElementById('confirm');
-if (confirmButton) {
-    confirmButton.addEventListener('click', () => {
-        const user = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (!user) {
-            alert("Please sign in before booking.");
-            window.location.href = "../SignIn/indexsignin.html";
-            return;
-        }
+// 🔹 Hover shows available quantity
+equipments.forEach(eq => {
+    eq.addEventListener('mouseenter', () => updateEquipmentAvailability());
+});
 
-        const selectedEquipment = localStorage.getItem('selectedEquipment');
-        const date = document.getElementById('date')?.value;
-
-        if (!selectedEquipment || !date) {
-            alert("Please select an equipment and date first.");
-            return;
-        }
-
-        const booked = countEquipmentBookings(selectedEquipment, date);
-        if (booked >= MAX_EQUIPMENT_PER_DAY) {
-            alert("No more units available for this equipment today!");
-            return;
-        }
-
-        const booking = {
-            equipment: selectedEquipment,
-            date,
-            user: user.email,
-            duration: "24h"
-        };
-
-        const arr = JSON.parse(localStorage.getItem('equipmentBookings') || '[]');
-        arr.push(booking);
-        localStorage.setItem('equipmentBookings', JSON.stringify(arr));
-
-        alert(`Booking confirmed for ${selectedEquipment} on ${date}.`);
-        updateEquipmentAvailability();
+// 🔹 Select an equipment
+equipments.forEach(eq => {
+    eq.addEventListener('click', () => {
+        if (eq.classList.contains('disabled')) return;
+        equipments.forEach(e => e.classList.remove('selected'));
+        eq.classList.add('selected');
+        selectedEquipment = eq.dataset.equipment;
+        toDate.disabled = false;
     });
-}
+});
 
-// Run updates on page load
-resetEquipmentDaily();
-updateEquipmentAvailability();
+// 🔹 Proceed to date selection
+toDate.addEventListener('click', () => {
+    if (!selectedEquipment) return alert("Select an equipment first!");
+    datetime.style.display = 'block';
+    updateEquipmentAvailability();
+
+    const today = new Date();
+    const max = new Date();
+    max.setDate(today.getDate() + 14);
+    dateInput.min = today.toISOString().split('T')[0];
+    dateInput.max = max.toISOString().split('T')[0];
+});
+
+// 🔹 Confirm booking
+confirmButton.addEventListener('click', () => {
+    const date = dateInput.value;
+    if (!date || !selectedEquipment)
+        return alert("Please select an equipment and date.");
+
+    const user = JSON.parse(localStorage.getItem('loggedInUser'));
+    if (!user) {
+        alert("Please sign in before booking.");
+        const pending = { equipment: selectedEquipment, date };
+        localStorage.setItem("pendingEquipmentBooking", JSON.stringify(pending));
+        localStorage.setItem("redirectAfterLogin", "equipment.html");
+        window.location.href = "../SignIn/indexsignin.html";
+        return;
+    }
+
+    const bookings = getBookingsArray();
+    const bookedCount = bookings.filter(b => b.equipment === selectedEquipment && b.date === date).length;
+
+    if (bookedCount >= MAX_PER_DAY)
+        return alert("All units are already booked for that day!");
+
+    const booking = { equipment: selectedEquipment, date, user: user.email };
+    saveBooking(booking);
+
+    document.querySelector('.equipment-selection').style.display = 'none';
+    datetime.style.display = 'none';
+    confirmation.style.display = 'block';
+    summary.innerHTML = `
+        <strong>Equipment:</strong> ${booking.equipment}<br>
+        <strong>Date:</strong> ${booking.date}<br><br>
+        Booking successfully confirmed for 24 hours!
+    `;
+    updateEquipmentAvailability();
+});

@@ -55,51 +55,49 @@
         <li> Only registered students, staff and faculty members with approved access may rent equipments. </li>
         <li> Rentals can be made for same-day or future use (subject to availability).</li>
         <li> All equipment must be returned in the same condition it was rented. </li>
+        <li> Rentals last 24 hours and must be returned to the equipment rental desk beforehand. </li>
         <li> Recurring late returns may result in rental restrictions. </li>
     </ul>
 </div>
 
+
 <br><br><br>
 
-<div class="equip-selection">
-    <h2>Select the equipment you would like to rent</h2><br>
-    <div class="equip-blocks">
-        <div class="equip">Projector</div><br>
-        <div class="equip">Microphone</div><br>
-        <div class="equip">Camera</div><br>
-        <div class="equip">VR Headset</div><br>
-
+<div class="equipment-selection">
+    <h2>Select Equipment</h2>
+    <div class="equipment-blocks">
+        <div class="equipment" data-equipment="Camera">
+            Camera
+            <div class="equipment-info">5 available today</div>
+        </div>
+        <div class="equipment" data-equipment="Tripod">
+            Tripod
+            <div class="equipment-info">5 available today</div>
+        </div>
+        <div class="equipment" data-equipment="Microscope">
+            Microscope
+            <div class="equipment-info">5 available today</div>
+        </div>
+        <div class="equipment" data-equipment="VR Headset">
+            VR Headset
+            <div class="equipment-info">5 available today</div>
+        </div>
     </div>
-    <button id="toDate" > Next </button>
+    <button id="Next" disabled>Next</button>
 </div>
 
-<br><br><br>
-
-<div class="date-selection">
-    <h2> Select a Date and a Time</h2>
-    <br><br>
-    <p id="currentDate" class="currentDate"></p>
-    <br><br>
-
+<div class="date-selection" id="datetime" style="display:none;">
+    <h2>Select a Date</h2>
     <label for="date"></label>
-    <input type="date" id="date" required><br>
+    <input type="date" id="date" required>
     <br><br>
-
-    <label for="startTime"> Start Time </label>
-    <input type="time" id="startTime" required>
-    <br><br>
-
-    <label for="endTime"> End Time </label>
-    <input type="time" id="endTime" required>
-    <br><br>
-
-    <button id="confirm"> Confirm Booking</button>
+    <button id="confirm">Confirm Booking</button>
 </div>
 
-
-
-
-
+<div id="confirmation" style="display:none;">
+    <h2>Booking Confirmed!</h2>
+    <p id="summary"></p>
+</div>
 
 </body>
 </html>

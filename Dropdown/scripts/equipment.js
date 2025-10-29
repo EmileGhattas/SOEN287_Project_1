@@ -86,3 +86,95 @@ function flashConfirm(btn) {
     btn.textContent = original;
   }, 1200);
 }
+
+const MAX_EQUIPMENT_PER_DAY = 5;
+
+// Reset daily equipment availability
+function resetEquipmentDaily() {
+    const today = new Date().toISOString().split('T')[0];
+    const lastReset = localStorage.getItem('equipmentLastReset');
+    if (lastReset !== today) {
+        localStorage.removeItem('equipmentBookings');
+        localStorage.setItem('equipmentLastReset', today);
+    }
+}
+
+// Count how many of one equipment are booked on a date
+function countEquipmentBookings(equipmentName, date) {
+    const bookings = JSON.parse(localStorage.getItem('equipmentBookings') || '[]');
+    return bookings.filter(b => b.equipment === equipmentName && b.date === date).length;
+}
+
+// Disable unavailable equipment
+function updateEquipmentAvailability() {
+    const equipments = document.querySelectorAll('.equipment');
+    const today = new Date().toISOString().split('T')[0];
+    const bookings = JSON.parse(localStorage.getItem('equipmentBookings') || '[]');
+
+    equipments.forEach(eq => {
+        const name = eq.dataset.equipment;
+        const booked = countEquipmentBookings(name, today);
+        const remaining = Math.max(0, MAX_EQUIPMENT_PER_DAY - booked);
+
+        // Tooltip or message
+        const info = eq.querySelector('.equipment-info');
+        if (info) info.textContent = remaining > 0
+            ? `${remaining} available today`
+            : "Fully booked";
+
+        if (remaining <= 0) {
+            eq.classList.add('disabled');
+            eq.style.pointerEvents = 'none';
+            eq.style.opacity = '0.5';
+        } else {
+            eq.classList.remove('disabled');
+            eq.style.pointerEvents = 'auto';
+            eq.style.opacity = '1';
+        }
+    });
+}
+
+// Hook into confirm button (requires login + limit check)
+const confirmButton = document.getElementById('confirm');
+if (confirmButton) {
+    confirmButton.addEventListener('click', () => {
+        const user = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (!user) {
+            alert("Please sign in before booking.");
+            window.location.href = "../SignIn/indexsignin.html";
+            return;
+        }
+
+        const selectedEquipment = localStorage.getItem('selectedEquipment');
+        const date = document.getElementById('date')?.value;
+
+        if (!selectedEquipment || !date) {
+            alert("Please select an equipment and date first.");
+            return;
+        }
+
+        const booked = countEquipmentBookings(selectedEquipment, date);
+        if (booked >= MAX_EQUIPMENT_PER_DAY) {
+            alert("No more units available for this equipment today!");
+            return;
+        }
+
+        const booking = {
+            equipment: selectedEquipment,
+            date,
+            user: user.email,
+            duration: "24h"
+        };
+
+        const arr = JSON.parse(localStorage.getItem('equipmentBookings') || '[]');
+        arr.push(booking);
+        localStorage.setItem('equipmentBookings', JSON.stringify(arr));
+
+        alert(`Booking confirmed for ${selectedEquipment} on ${date}.`);
+        updateEquipmentAvailability();
+    });
+}
+
+// Run updates on page load
+resetEquipmentDaily();
+updateEquipmentAvailability();

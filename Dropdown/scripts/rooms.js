@@ -29,10 +29,9 @@ const summary = document.getElementById('summary');
 
 let selectedRoom = "";
 
-// Room selection
+// Select a room
 rooms.forEach(room => {
     room.addEventListener('click', () => {
-        if (room.classList.contains('disabled')) return; // cannot select
         rooms.forEach(r => r.classList.remove('selected'));
         room.classList.add('selected');
         selectedRoom = room.textContent.trim();
@@ -40,94 +39,76 @@ rooms.forEach(room => {
     });
 });
 
-// Show date picker
+// Display date picker
 toDate.addEventListener('click', () => {
-    if (selectedRoom === "") {
+    if(selectedRoom === "") {
         alert("Please select a room first.");
         return;
     }
-
     datetime.style.display = 'block';
 
-    // Display today's date
+    // Show today's date
     const date = new Date();
     const format = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
     document.getElementById('currentDate').textContent = date.toLocaleDateString('en-US', format);
 
-    // Restrict date range (today to +14 days)
+    // Restrict date selection (today to 10 days ahead)
     const today = new Date();
     const maxdate = new Date();
-    maxdate.setDate(today.getDate() + 14);
+    maxdate.setDate(today.getDate() + 10);
     dateInput.min = today.toISOString().split('T')[0];
     dateInput.max = maxdate.toISOString().split('T')[0];
 
-    // Do NOT update time availability yet; wait until user picks a date
+    updateAvailableTimes();
 });
 
-// Update times when the user selects a date
-dateInput.addEventListener('change', updateTimeAvailability);
+// Update available times based on existing bookings
+function updateAvailableTimes() {
+    const arr = getBookingsArray();
+    const inDate = dateInput.value || new Date().toISOString().split('T')[0];
 
-// If user presses Next and date was already set (e.g., prefilled), we can also call:
-dateInput.addEventListener('input', updateTimeAvailability);
-
-// Update time input options based on existing bookings
-function updateTimeAvailability() {
-    const bookings = getBookingsArray();
-    const date = dateInput.value || new Date().toISOString().split('T')[0];
-    const roomBookings = bookings.filter(b => b.room === selectedRoom && b.date === date);
-
-    // All half-hour times 07:00–23:00
-    const times = [];
-    for (let h = 7; h <= 23; h++) {
-        times.push(h.toString().padStart(2,'0') + ':00');
-        times.push(h.toString().padStart(2,'0') + ':30');
+    // Full list of time options
+    const timeOptions = [];
+    for(let h=7; h<=23; h++) {
+        timeOptions.push(`${String(h).padStart(2,'0')}:00`);
+        timeOptions.push(`${String(h).padStart(2,'0')}:30`);
     }
 
-    // Remove overlapping times
-    const unavailable = new Set();
-    roomBookings.forEach(b => {
-        const [startH, startM] = b.startTime.split(':').map(Number);
-        const [endH, endM] = b.endTime.split(':').map(Number);
-        const startTotal = startH * 60 + startM;
-        const endTotal = endH * 60 + endM;
+    // Filter out already booked times for the selected room and date
+    const booked = arr.filter(b => b.room === selectedRoom && b.date === inDate);
+    const availableTimes = [...timeOptions];
 
-        times.forEach(t => {
-            const [h, m] = t.split(':').map(Number);
-            const total = h * 60 + m;
-            if (total >= startTotal && total < endTotal) unavailable.add(t);
-        });
-    });
+    booked.forEach(b => {
+        const [startHour, startMin] = b.startTime.split(':').map(Number);
+        const [endHour, endMin] = b.endTime.split(':').map(Number);
+        const startTotal = startHour*60 + startMin;
+        const endTotal = endHour*60 + endMin;
 
-    // Populate startTime and endTime inputs
-    startTime.innerHTML = '';
-    endTime.innerHTML = '';
-    times.forEach(t => {
-        if (!unavailable.has(t)) {
-            const optStart = document.createElement('option');
-            optStart.value = t; optStart.textContent = t;
-            startTime.appendChild(optStart);
-
-            const optEnd = document.createElement('option');
-            optEnd.value = t; optEnd.textContent = t;
-            endTime.appendChild(optEnd);
+        // Remove half-hour increments that fall in booked range
+        for(let i=startTotal; i<endTotal; i+=30) {
+            const h = Math.floor(i/60);
+            const m = i%60;
+            const t = `${String(h).padStart(2,'0')}:${m===0?'00':'30'}`;
+            const index = availableTimes.indexOf(t);
+            if(index !== -1) availableTimes.splice(index, 1);
         }
     });
 
-    // Disable room if no times left
-    const roomDiv = Array.from(rooms).find(r => r.textContent.trim() === selectedRoom);
-    if (startTime.options.length === 0) {
-        roomDiv.classList.add('disabled');
-        roomDiv.style.pointerEvents = 'none';
-        roomDiv.style.opacity = '0.5';
-    } else {
-        roomDiv.classList.remove('disabled');
-        roomDiv.style.pointerEvents = 'auto';
-        roomDiv.style.opacity = '1';
-    }
+    startTime.innerHTML = '';
+    endTime.innerHTML = '';
+    availableTimes.forEach(t => {
+        const opt1 = document.createElement('option');
+        opt1.value = t;
+        startTime.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = t;
+        endTime.appendChild(opt2);
+    });
 }
 
-// Update times if date changes
-dateInput.addEventListener('change', updateTimeAvailability);
+// Update available times if date changes
+dateInput.addEventListener('change', updateAvailableTimes);
 
 // Confirm booking
 confirmButton.addEventListener('click', () => {
@@ -145,42 +126,65 @@ confirmButton.addEventListener('click', () => {
     const startTotal = startHour * 60 + startMin;
     const endTotal = endHour * 60 + endMin;
 
-    if (startTotal < 7*60 || endTotal > 23*60) {
+    if (startTotal < 7 * 60 || endTotal > 23 * 60) {
         alert("Bookings must be between 07:00 and 23:00.");
         return;
     }
-
     if (endTotal <= startTotal) {
         alert("End time must be after start time.");
         return;
     }
-
     if (endTotal - startTotal > 240) {
         alert("Booking cannot exceed 4 hours.");
         return;
     }
 
-    // Prevent overlapping booking for this room
-    const bookings = getBookingsArray();
-    const overlap = bookings.some(b => b.room === selectedRoom && b.date === inDate &&
-        !(endTotal <= parseInt(b.startTime.split(':')[0])*60 + parseInt(b.startTime.split(':')[1]) ||
-            startTotal >= parseInt(b.endTime.split(':')[0])*60 + parseInt(b.endTime.split(':')[1])));
-    if (overlap) {
-        alert("This time slot overlaps an existing booking for this room.");
+    // Check login status
+    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    const booking = {
+        room: selectedRoom,
+        date: inDate,
+        startTime: inStartTime,
+        endTime: inEndTime,
+    };
+
+    // If not logged in → save booking temporarily & redirect
+    if (!user) {
+        localStorage.setItem("pendingBooking", JSON.stringify(booking));
+        alert("Please sign in to complete your booking.");
+        window.location.href = "../Sign in/indexsignin.html";
         return;
     }
 
-    const booking = { room: selectedRoom, date: inDate, startTime: inStartTime, endTime: inEndTime };
+    // Weekly limit check
+    const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+    const startWeek = new Date(inDate);
+    startWeek.setDate(startWeek.getDate() - startWeek.getDay());
+    const endWeek = new Date(startWeek);
+    endWeek.setDate(startWeek.getDate() + 6);
+
+    const userWeeklyBookings = bookings.filter(b =>
+        b.user === user.username &&
+        new Date(b.date) >= startWeek &&
+        new Date(b.date) <= endWeek
+    );
+
+    if (userWeeklyBookings.length >= 2) {
+        alert("You have reached your limit of 2 bookings per week.");
+        return;
+    }
+
+    booking.user = user.username;
     saveBooking(booking);
 
-    // Confirm booking
+    // Show confirmation
     datetime.style.display = 'none';
     document.querySelector('.room-selection').style.display = 'none';
     confirmation.style.display = 'block';
     summary.innerHTML = `
-    <strong>Room:</strong> ${booking.room}<br>
-    <strong>Date:</strong> ${booking.date}<br>
-    <strong>Time:</strong> ${booking.startTime} – ${booking.endTime}<br><br>
-    Room successfully booked!
-  `;
+        <strong>Room:</strong> ${booking.room}<br>
+        <strong>Date:</strong> ${booking.date}<br>
+        <strong>Time:</strong> ${booking.startTime} – ${booking.endTime}<br><br>
+        Room successfully booked!
+    `;
 });

@@ -104,13 +104,13 @@ confirmButton.addEventListener('click', () => {
     if (!date || !selectedEquipment)
         return alert("Please select an equipment and date.");
 
-    const user = JSON.parse(localStorage.getItem('loggedInUser'));
+    const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
         alert("Please sign in before booking.");
         const pending = { equipment: selectedEquipment, date };
         localStorage.setItem("pendingEquipmentBooking", JSON.stringify(pending));
         localStorage.setItem("redirectAfterLogin", "equipment.html");
-        window.location.href = "../SignIn/indexsignin.html";
+        window.location.href = "../Sign in/indexsignin.html";
         return;
     }
 

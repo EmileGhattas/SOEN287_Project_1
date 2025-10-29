@@ -23,11 +23,12 @@ function getAllBookings() {
   const out = [];
   for (const b of merged) {
     if (!b || typeof b !== 'object') continue;
-    const room = b.room || b.Room || b.name || 'Room';
+    const isEquipment = Boolean(b.equipment && !b.room);
+    const room = b.room || b.Room || b.equipment || b.name || 'Room';
     const date = b.date || b.Date || b.day || '';
-    const start = b.startTime || b.start || b.from || '';
-    const end = b.endTime || b.end || b.to || '';
-    const type = b.type || 'Reservation';
+    const start = b.startTime || b.start || b.from || (isEquipment ? 'All day' : '');
+    const end = b.endTime || b.end || b.to || (isEquipment ? 'All day' : '');
+    const type = b.type || (isEquipment ? 'Equipment' : 'Reservation');
     const key = `${room}__${date}__${start}__${end}`;
     if (!seen.has(key)) { seen.add(key); out.push({ room, date, startTime: start, endTime: end, type }); }
   }

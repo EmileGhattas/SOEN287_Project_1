@@ -47,7 +47,10 @@ function updateEquipmentAvailability() {
 
     equipments.forEach(eq => {
         const eqName = eq.dataset.equipment;
-        const bookedCount = bookings.filter(b => b.equipment === eqName && b.date === today).length;
+        const bookedCount = bookings.filter(b => {
+            const bookedName = b?.equipment || b?.room || b?.name;
+            return bookedName === eqName && b?.date === today;
+        }).length;
         const remaining = Math.max(0, MAX_PER_DAY - bookedCount);
 
         const info = eq.querySelector('.equipment-info');
@@ -104,23 +107,35 @@ confirmButton.addEventListener('click', () => {
     if (!date || !selectedEquipment)
         return alert("Please select an equipment and date.");
 
-    const user = JSON.parse(localStorage.getItem('loggedInUser'));
+    const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
         alert("Please sign in before booking.");
         const pending = { equipment: selectedEquipment, date };
         localStorage.setItem("pendingEquipmentBooking", JSON.stringify(pending));
         localStorage.setItem("redirectAfterLogin", "equipment.html");
-        window.location.href = "../SignIn/indexsignin.html";
+        window.location.href = "../Sign in/indexsignin.html";
         return;
     }
 
     const bookings = getBookingsArray();
-    const bookedCount = bookings.filter(b => b.equipment === selectedEquipment && b.date === date).length;
+    const bookedCount = bookings.filter(b => {
+        const bookedName = b?.equipment || b?.room || b?.name;
+        return bookedName === selectedEquipment && b?.date === date;
+    }).length;
 
     if (bookedCount >= MAX_PER_DAY)
         return alert("All units are already booked for that day!");
 
-    const booking = { equipment: selectedEquipment, date, user: user.email };
+    const username = user.username || user.email;
+    const booking = {
+        type: 'Equipment',
+        equipment: selectedEquipment,
+        room: selectedEquipment,
+        date,
+        startTime: 'All day',
+        endTime: 'All day',
+        user: username,
+    };
     saveBooking(booking);
 
     document.querySelector('.equipment-selection').style.display = 'none';

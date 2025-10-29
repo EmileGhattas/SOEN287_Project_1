@@ -22,8 +22,8 @@ loginForm.addEventListener('submit', function(e) {
 
         const pending = JSON.parse(localStorage.getItem("pendingBooking"));
         if (pending) {
-            const user = JSON.parse(localStorage.getItem("loggedInUser"));
-            const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+            const username = user.username || user.email;
+            const bookings = JSON.parse(localStorage.getItem('bookings')) || [];
 
             // Weekly limit check again
             const startWeek = new Date(pending.date);
@@ -32,7 +32,7 @@ loginForm.addEventListener('submit', function(e) {
             endWeek.setDate(startWeek.getDate() + 6);
 
             const userWeeklyBookings = bookings.filter(b =>
-                b.user === user.username &&
+                b.user === username &&
                 new Date(b.date) >= startWeek &&
                 new Date(b.date) <= endWeek
             );
@@ -41,7 +41,7 @@ loginForm.addEventListener('submit', function(e) {
                 alert("You already have 2 bookings this week. Pending booking was not saved.");
                 localStorage.removeItem("pendingBooking");
             } else {
-                pending.user = user.username;
+                pending.user = username;
                 bookings.push(pending);
                 localStorage.setItem("bookings", JSON.stringify(bookings));
                 localStorage.removeItem("pendingBooking");

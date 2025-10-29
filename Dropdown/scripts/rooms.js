@@ -140,7 +140,7 @@ confirmButton.addEventListener('click', () => {
     }
 
     // Check login status
-    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    const user = JSON.parse(localStorage.getItem("user"));
     const booking = {
         room: selectedRoom,
         date: inDate,
@@ -163,8 +163,9 @@ confirmButton.addEventListener('click', () => {
     const endWeek = new Date(startWeek);
     endWeek.setDate(startWeek.getDate() + 6);
 
+    const username = user.username || user.email;
     const userWeeklyBookings = bookings.filter(b =>
-        b.user === user.username &&
+        b.user === username &&
         new Date(b.date) >= startWeek &&
         new Date(b.date) <= endWeek
     );
@@ -174,7 +175,7 @@ confirmButton.addEventListener('click', () => {
         return;
     }
 
-    booking.user = user.username;
+    booking.user = username;
     saveBooking(booking);
 
     // Show confirmation

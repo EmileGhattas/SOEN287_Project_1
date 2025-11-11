@@ -4,36 +4,36 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>My Bookings</title>
-  <link rel="stylesheet" href="../MainPage/Style/style.css" />
-  <link rel="stylesheet" href="./styles/bookings.css" />
+  <link rel="stylesheet" href="../../pages/css/landing.css" />
+  <link rel="stylesheet" href="../css/bookings.css" />
 </head>
 <body>
   <header>
     <nav class="navbar">
       <h1 class="logo">
-        <img src="../Images/image-removebg-preview.png" alt="Website Logo">
+        <img src="../../../assets/image-removebg-preview.png" alt="Website Logo">
       </h1>
 
       <ul class="navLinks">
-        <li><a href="../MainPage/index.html">Home</a></li>
-        <li><a href="../MainPage/about.html">About</a></li>
+        <li><a href="../../pages/html/landing.html">Home</a></li>
+        <li><a href="../../pages/html/about.html">About</a></li>
 
         <li class="dropdown">
           <a href="../Dropdown/bookings.html">Bookings</a>
           <ul class="dropdown-menu">
             <li><a class="active" href="../Dropdown/bookings.html">My Bookings</a></li>
-            <li><a href="../Dropdown/rooms.html">Rooms</a></li>
-            <li><a href="../Dropdown/labs.html">Labs</a></li>
-            <li><a href="../Dropdown/equipment.html">Equipment</a></li>
+            <li><a href="rooms.html">Rooms</a></li>
+            <li><a href="labs.html">Labs</a></li>
+            <li><a href="equipment.html">Equipment</a></li>
           </ul>
         </li>
 
-        <li><a href="../Dropdown/contact.html">Contact</a></li>
+        <li><a href="../../pages/html/contact.html">Contact</a></li>
 
         <li class="dropdown" id="profileDropdown">
           <a href="#" id="profileLink">Log In</a>
           <ul class="dropdown-menu" id="profileMenu">
-            <!-- Filled by mainpage.js -->
+            <!-- Filled by landing.js -->
           </ul>
         </li>
       </ul>
@@ -61,13 +61,13 @@
 
     <section id="bookingsEmpty" class="bookings-empty" style="display:none;">
       <strong>No bookings to show.</strong>
-      <p>When you reserve a room or equipment, it will appear here. Try booking from <a href="./rooms.html">Rooms</a> or <a href="./equipment.html">Equipment</a>.</p>
+      <p>When you reserve a room or equipment, it will appear here. Try booking from <a href="rooms.html">Rooms</a> or <a href="equipment.html">Equipment</a>.</p>
     </section>
 
     <section id="bookingsGrid" class="bookings-grid" aria-live="polite"></section>
   </main>
 
-  <script src="../MainPage/mainpage.js"></script>
-  <script src="./scripts/bookings.js"></script>
+  <script src="../../pages/js/landing.js"></script>
+  <script src="../js/bookings.js"></script>
 </body>
 </html>

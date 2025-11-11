@@ -1,4 +1,4 @@
-// Optional: profile menu updates if your mainpage.js needs an element
+// Optional: profile menu updates if your landing.js needs an element
 // <div id="profileMenu"></div> exists in the header.
 
 function readLocalJSON(key) {

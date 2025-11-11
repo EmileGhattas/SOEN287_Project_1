@@ -152,7 +152,7 @@ confirmButton.addEventListener('click', () => {
     if (!user) {
         localStorage.setItem("pendingBooking", JSON.stringify(booking));
         alert("Please sign in to complete your booking.");
-        window.location.href = "../Sign in/indexsignin.html";
+        window.location.href = "../../auth/html/signin.html";
         return;
     }
 

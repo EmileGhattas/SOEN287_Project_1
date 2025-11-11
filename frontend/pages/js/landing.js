@@ -1,4 +1,4 @@
-// mainpage.js
+// landing.js
 document.addEventListener("DOMContentLoaded", () => {
   const profileLink = document.getElementById("profileLink");
   const profileMenu = document.getElementById("profileMenu");
@@ -20,15 +20,15 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.removeItem("user");
         localStorage.removeItem("pendingBooking");
         updateProfileMenu(); // Update menu after logout
-        window.location.href = "../Sign in/indexsignin.html";
+        window.location.href = "../../auth/html/signin.html";
       });
     } else {
       // User is not logged in
       profileLink.textContent = "Log In";
-      profileLink.setAttribute("href", "../Sign in/indexsignin.html");
+      profileLink.setAttribute("href", "../Sign in/signin.html");
       profileMenu.innerHTML = `
-        <li><a href="../Sign in/indexsignin.html">Sign In</a></li>
-        <li><a href="../Sign up/indexsignup.html">Sign Up</a></li>
+        <li><a href="../../auth/html/signin.html">Sign In</a></li>
+        <li><a href="../../auth/html/signup.html">Sign Up</a></li>
       `;
     }
   }

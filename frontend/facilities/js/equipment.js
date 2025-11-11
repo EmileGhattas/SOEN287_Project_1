@@ -113,7 +113,7 @@ confirmButton.addEventListener('click', () => {
         const pending = { equipment: selectedEquipment, date };
         localStorage.setItem("pendingEquipmentBooking", JSON.stringify(pending));
         localStorage.setItem("redirectAfterLogin", "equipment.html");
-        window.location.href = "../Sign in/indexsignin.html";
+        window.location.href = "../../auth/html/signin.html";
         return;
     }
 

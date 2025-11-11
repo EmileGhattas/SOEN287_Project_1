@@ -1,78 +1,78 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f8f8f8;
-    color: #333;
-    line-height: 1.6;
-}
-
 .about-hero {
-    background-color: #3d5d60;
-    color: white;
+    background: linear-gradient(135deg, var(--color-primary) 0%, #2f4648 100%);
+    color: #ffffff;
     text-align: center;
-    padding: 40px 20px;
+    padding: 80px 20px 70px;
 }
 
-.about-hero .logo img {
-    width: 110px;
-    height: auto;
-    margin-bottom: 15px;
+.about-hero .logo {
+    margin-bottom: 24px;
 }
 
 .about-hero__text {
-    max-width: 600px;
+    max-width: 620px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .about-hero__text h1 {
-    font-size: 32px;
-    margin-bottom: 12px;
+    font-size: 2.6rem;
+    color: #ffffff;
 }
 
 .about-hero__text p {
-    font-size: 18px;
-    color: #e0e0e0;
+    color: #d9e5e7;
+    font-size: 1.05rem;
 }
 
 .about-content {
-    max-width: 900px;
-    margin: 40px auto;
-    padding: 0 20px 60px;
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding-top: 60px;
 }
 
 .about-content section {
-    margin-bottom: 35px;
+    padding: 40px;
 }
 
 .about-content h2 {
-    color: #3d5d60;
-    font-size: 28px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .about-content p {
-    margin-bottom: 15px;
-    font-size: 17px;
+    margin-bottom: 14px;
 }
 
 .values ul {
     list-style: none;
-    padding: 0;
-    margin: 20px 0;
+    display: grid;
+    gap: 16px;
+    margin: 24px 0 0;
 }
 
 .values li {
-    background-color: #e8eded;
-    border-left: 5px solid #3d5d60;
-    padding: 10px 15px;
-    margin-bottom: 10px;
-    border-radius: 5px;
+    background-color: var(--color-surface-muted);
+    border-left: 6px solid var(--color-primary);
+    padding: 16px 20px;
+    border-radius: 12px;
+    color: var(--color-text);
 }
 
 .about-content .contact {
-    background-color: #f1f1f1;
-    padding: 20px;
-    border-radius: 8px;
+    background: var(--color-surface-muted);
+    box-shadow: none;
+}
+
+@media (max-width: 768px) {
+    .about-hero {
+        padding: 60px 20px 50px;
+    }
+
+    .about-hero__text h1 {
+        font-size: 2.2rem;
+    }
+
+    .about-content section {
+        padding: 32px;
+    }
 }

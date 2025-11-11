@@ -1,107 +1,74 @@
-
-body {
-    font-family: Arial, sans-serif;
-    background-color: white;
-    color: #333;
-    line-height: 1.6;
-}
-
-/* ---------- HERO ---------- */
 .safety-hero {
-    background-color: #3d5d60;
-    color: white;
+    background: linear-gradient(135deg, var(--color-primary) 0%, #2f4648 100%);
+    color: #ffffff;
     text-align: center;
-    padding: 60px 20px 40px 20px;
-    border-bottom: 4px solid #8f9498;
+    padding: 80px 20px 70px;
+    border-bottom: 4px solid var(--color-primary-muted);
 }
 
-.safety-hero .logo img {
-    width: 120px;
-    height: auto;
-    margin-bottom: 20px;
+.safety-hero .logo {
+    margin-bottom: 24px;
 }
 
 .safety-hero h1 {
-    font-size: 32px;
+    font-size: 2.6rem;
+    color: #ffffff;
     margin-bottom: 10px;
-    letter-spacing: 1px;
 }
 
 .safety-hero p {
-    font-size: 17px;
-    color: #e0e0e0;
+    color: #d9e5e7;
 }
 
-/* ---------- MAIN CONTENT ---------- */
 main {
-    max-width: 950px;
-    margin: 50px auto;
-    padding: 40px 50px;
-    background-color: #f8f8f8;
-    border-radius: 10px;
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+    padding-top: 60px;
 }
 
-.intro, .conclusion {
-    margin-bottom: 40px;
+.intro,
+.rules,
+.conclusion {
+    padding: 40px;
 }
 
 .intro h2,
 .rules h2,
 .conclusion h2 {
-    color: #3d5d60;
-    margin-bottom: 12px;
-    border-left: 6px solid #8f9498;
-    padding-left: 10px;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    font-size: 22px;
+    margin-bottom: 14px;
 }
 
 .intro p,
 .conclusion p {
-    font-size: 17px;
-    color: #444;
-    margin-top: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 14px;
 }
 
 .rules ul {
-    margin-left: 30px;
-    padding-left: 10px;
-    margin-bottom: 30px;
+    list-style: disc;
+    padding-left: 20px;
+    display: grid;
+    gap: 10px;
 }
 
 .rules li {
-    margin-bottom: 8px;
-    font-size: 16px;
-    color: #333;
+    color: var(--color-text);
 }
 
-strong {
-    color: #3d5d60;
-}
-
-/* ---------- CONCLUSION SECTION ---------- */
 .conclusion {
-    background-color: #e6ecec;
-    padding: 25px 30px;
-    border-radius: 10px;
-    border: 1px solid #cfd6d6;
+    background: var(--color-surface-muted);
+    box-shadow: none;
 }
 
-/* ---------- RESPONSIVE DESIGN ---------- */
 @media (max-width: 768px) {
-    main {
-        padding: 25px 20px;
-        margin: 25px;
+    .safety-hero {
+        padding: 60px 20px 50px;
     }
 
     .safety-hero h1 {
-        font-size: 26px;
+        font-size: 2.2rem;
     }
 
-    .rules ul {
-        margin-left: 20px;
+    .intro,
+    .rules,
+    .conclusion {
+        padding: 32px;
     }
 }

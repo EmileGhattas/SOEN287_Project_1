@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       // User is not logged in
       profileLink.textContent = "Log In";
-      profileLink.setAttribute("href", "../Sign in/signin.html");
+      profileLink.setAttribute("href", "../../auth/html/signin.html");
       profileMenu.innerHTML = `
         <li><a href="../../auth/html/signin.html">Sign In</a></li>
         <li><a href="../../auth/html/signup.html">Sign Up</a></li>

@@ -1,7 +1,7 @@
 const express = require("express");
 const sql = require("mysql2");
 
-const app = express();
+
 
 const db = sql.createConnection({
     host: "localhost",
@@ -19,4 +19,3 @@ db.connect((err)=>{
 });
 
 const PORT = 5000;
-    app.listen(PORT, () => "Server running ");

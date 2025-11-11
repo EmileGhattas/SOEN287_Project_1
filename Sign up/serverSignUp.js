@@ -1,4 +1,3 @@
-const db = require("mysql2");
 const sql = require("mysql2");
 
 

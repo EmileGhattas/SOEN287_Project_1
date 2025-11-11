@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
-const signin = require('./Sign in/ServerSignIn');
-const signup = require('./Sign up/ServerSignUp');
+const signin = require('./auth/serverSignIn');
+const signup = require('./auth/serverSignUp');
 
 
 

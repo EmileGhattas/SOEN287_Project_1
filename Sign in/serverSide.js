@@ -17,3 +17,6 @@ db.connect((err)=>{
         console.log("Connected");
     }
 });
+
+const PORT = 5000;
+    app.listen(PORT, () => "Server running ");

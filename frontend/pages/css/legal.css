@@ -1,0 +1,40 @@
+body {
+    background-color: #f9fbfc;
+}
+
+.legal-page {
+    max-width: 900px;
+    margin: 60px auto;
+    padding: 0 24px 60px;
+    color: #222;
+    line-height: 1.7;
+}
+
+.legal-page h1 {
+    color: #3d5d60;
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+.legal-page h2 {
+    color: #0b3d91;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    font-size: 24px;
+}
+
+.legal-page a {
+    color: #0b3d91;
+}
+
+.legal-page .back-link {
+    display: inline-block;
+    margin-top: 32px;
+    font-weight: bold;
+}
+
+@media (max-width: 600px) {
+    .legal-page {
+        margin: 40px auto;
+    }
+}

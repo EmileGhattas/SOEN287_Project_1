@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Room Booking</title>
-    <link rel="stylesheet" href="../../pages/css/landing.css">
+    <link rel="stylesheet" href="../../shared/style.css">
     <link rel="stylesheet" href="../css/rooms.css">
     <script defer src="../js/rooms.js"></script>
 
@@ -19,15 +19,15 @@
 
         <ul class="navLinks">
 
-            <li><a href="../../pages/html/landing.html" class="active">Home</a></li>
+            <li><a href="../../pages/html/landing.html">Home</a></li>
             <li><a href="../../pages/html/about.html">About</a></li>
 
 
             <li class="dropdown">
-                <a href="bookings.html">Bookings</a>
+                <a href="bookings.html" class="active">Bookings</a>
                 <ul class="dropdown-menu">
                     <li><a href="bookings.html">My Bookings</a></li>
-                    <li><a href="../Dropdown/rooms.html">Rooms</a></li>
+                    <li><a href="rooms.html" class="active">Rooms</a></li>
                     <li><a href="labs.html">Labs</a></li>
                     <li><a href="equipment.html">Equipment</a></li>
                 </ul>
@@ -36,7 +36,7 @@
             <li><a href="../../pages/html/contact.html">Contact</a></li>
 
             <li class="dropdown" id="profileDropdown">
-                <a href="#" id="profileLink">Log In</a>
+                <a href="../../auth/html/signin.html" id="profileLink">Log In</a>
                 <ul class="dropdown-menu" id="profileMenu">
                     <!-- Menu items will be added dynamically through js -->
                 </ul>
@@ -231,5 +231,6 @@
     <p id="summary"></p>
 </div>
 
+<script src="../../pages/js/landing.js"></script>
 </body>
 </html>

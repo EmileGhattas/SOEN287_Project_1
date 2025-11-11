@@ -2,9 +2,109 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Contact LearnSpace</title>
+    <link rel="stylesheet" href="../../shared/style.css">
+    <style>
+        body {
+            margin: 0;
+            background-color: #f5f7f7;
+            color: #2d3a3a;
+        }
+        main {
+            max-width: 960px;
+            margin: 60px auto;
+            padding: 0 20px 80px;
+        }
+        .contact-hero {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .contact-hero h1 {
+            color: #3d5d60;
+            margin-bottom: 12px;
+        }
+        .contact-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+        .contact-grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            margin-top: 24px;
+        }
+        .contact-item h2 {
+            color: #3d5d60;
+            margin-bottom: 10px;
+            font-size: 1.25rem;
+        }
+        .contact-item a {
+            color: #0b3d91;
+            text-decoration: none;
+        }
+        .contact-item a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-
+    <header>
+        <nav class="navbar">
+            <h1 class="logo">
+                <img src="../../../assets/image-removebg-preview.png" alt="Website Logo">
+            </h1>
+            <ul class="navLinks">
+                <li><a href="landing.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li class="dropdown">
+                    <a href="../../facilities/html/bookings.html">Bookings</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="../../facilities/html/bookings.html">My Bookings</a></li>
+                        <li><a href="../../facilities/html/rooms.html">Rooms</a></li>
+                        <li><a href="../../facilities/html/labs.html">Labs</a></li>
+                        <li><a href="../../facilities/html/equipment.html">Equipment</a></li>
+                    </ul>
+                </li>
+                <li><a href="contact.html" class="active">Contact</a></li>
+                <li class="dropdown" id="profileDropdown">
+                    <a href="../../auth/html/signin.html" id="profileLink">Log In</a>
+                    <ul class="dropdown-menu" id="profileMenu"></ul>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="contact-hero">
+            <h1>We're here to help</h1>
+            <p>Reach out to the LearnSpace team for support, feedback, or partnership opportunities.</p>
+        </section>
+        <section class="contact-card">
+            <div class="contact-grid">
+                <div class="contact-item">
+                    <h2>Phone</h2>
+                    <p>(438) 345 9821</p>
+                </div>
+                <div class="contact-item">
+                    <h2>Email</h2>
+                    <p><a href="mailto:learnspace@gmail.com">learnspace@gmail.com</a></p>
+                </div>
+                <div class="contact-item">
+                    <h2>Location</h2>
+                    <p>1515 Ste-Catherine St W<br>Montreal, QC H3G 2W1</p>
+                </div>
+                <div class="contact-item">
+                    <h2>Social</h2>
+                    <p>
+                        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a><br>
+                        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a><br>
+                        <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer">Twitter</a>
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="../js/landing.js"></script>
 </body>
 </html>

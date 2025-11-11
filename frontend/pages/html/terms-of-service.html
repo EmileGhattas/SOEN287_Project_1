@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Terms of Service - LearnSpace</title>
-    <link rel="stylesheet" href="../css/landing.css">
+    <link rel="stylesheet" href="../../shared/style.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 40px auto;
-            max-width: 900px;
-            line-height: 1.6;
+            margin: 0;
             color: #222;
+        }
+        main {
+            max-width: 900px;
+            margin: 60px auto;
+            padding: 0 20px 80px;
+            line-height: 1.6;
         }
         h1, h2 {
             color: #0b3d91;
@@ -25,23 +28,51 @@
     </style>
 </head>
 <body>
-    <h1>Terms of Service</h1>
-    <p>Welcome to LearnSpace! These Terms of Service ("Terms") govern your use of our website and booking services. By creating an account or using the site, you agree to these Terms.</p>
+    <header>
+        <nav class="navbar">
+            <h1 class="logo">
+                <img src="../../../assets/image-removebg-preview.png" alt="Website Logo">
+            </h1>
+            <ul class="navLinks">
+                <li><a href="landing.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li class="dropdown">
+                    <a href="../../facilities/html/bookings.html">Bookings</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="../../facilities/html/bookings.html">My Bookings</a></li>
+                        <li><a href="../../facilities/html/rooms.html">Rooms</a></li>
+                        <li><a href="../../facilities/html/labs.html">Labs</a></li>
+                        <li><a href="../../facilities/html/equipment.html">Equipment</a></li>
+                    </ul>
+                </li>
+                <li><a href="contact.html">Contact</a></li>
+                <li class="dropdown" id="profileDropdown">
+                    <a href="../../auth/html/signin.html" id="profileLink">Log In</a>
+                    <ul class="dropdown-menu" id="profileMenu"></ul>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>Terms of Service</h1>
+        <p>Welcome to LearnSpace! These Terms of Service ("Terms") govern your use of our website and booking services. By creating an account or using the site, you agree to these Terms.</p>
 
-    <h2>Accounts</h2>
-    <p>You must provide accurate information when creating an account. You are responsible for safeguarding your password and for any activities under your account.</p>
+        <h2>Accounts</h2>
+        <p>You must provide accurate information when creating an account. You are responsible for safeguarding your password and for any activities under your account.</p>
 
-    <h2>Bookings</h2>
-    <p>Bookings are limited to the availability of our facilities. You agree to follow all posted rules for labs, rooms, and equipment, and to cancel bookings when you cannot attend.</p>
+        <h2>Bookings</h2>
+        <p>Bookings are limited to the availability of our facilities. You agree to follow all posted rules for labs, rooms, and equipment, and to cancel bookings when you cannot attend.</p>
 
-    <h2>Acceptable Use</h2>
-    <p>Do not misuse the services. This includes attempting to access data that does not belong to you, disrupting the experience of other users, or using the platform for unlawful purposes.</p>
+        <h2>Acceptable Use</h2>
+        <p>Do not misuse the services. This includes attempting to access data that does not belong to you, disrupting the experience of other users, or using the platform for unlawful purposes.</p>
 
-    <h2>Changes to These Terms</h2>
-    <p>We may update these Terms periodically. Any changes will be posted on this page with an updated revision date.</p>
+        <h2>Changes to These Terms</h2>
+        <p>We may update these Terms periodically. Any changes will be posted on this page with an updated revision date.</p>
 
-    <p>If you have questions about these Terms, please contact us at <a href="mailto:learnspace@gmail.com">learnspace@gmail.com</a>.</p>
+        <p>If you have questions about these Terms, please contact us at <a href="mailto:learnspace@gmail.com">learnspace@gmail.com</a>.</p>
 
-    <a href="landing.html" class="back-link">Return to LearnSpace</a>
+        <a href="landing.html" class="back-link">Return to LearnSpace</a>
+    </main>
+    <script src="../js/landing.js"></script>
 </body>
 </html>

@@ -3,19 +3,45 @@
 <head>
     <meta charset="UTF-8" />
     <title>Laboratory Safety Code</title>
+    <link rel="stylesheet" href="../../shared/style.css" />
     <link rel="stylesheet" href="../css/safety.css" />
 </head>
 <body>
 <header>
-    <div class="logo">
-    <img src="../../../assets/image-removebg-preview.png" alt="Website Logo">
-    </div>
-    <h1>Laboratory Safety Code</h1>
-    <p>Your guide to safe and responsible laboratory practices.</p>
+    <nav class="navbar">
+        <h1 class="logo">
+            <img src="../../../assets/image-removebg-preview.png" alt="Website Logo">
+        </h1>
+        <ul class="navLinks">
+            <li><a href="landing.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li class="dropdown">
+                <a href="../../facilities/html/bookings.html">Bookings</a>
+                <ul class="dropdown-menu">
+                    <li><a href="../../facilities/html/bookings.html">My Bookings</a></li>
+                    <li><a href="../../facilities/html/rooms.html">Rooms</a></li>
+                    <li><a href="../../facilities/html/labs.html">Labs</a></li>
+                    <li><a href="../../facilities/html/equipment.html">Equipment</a></li>
+                </ul>
+            </li>
+            <li><a href="contact.html">Contact</a></li>
+            <li class="dropdown" id="profileDropdown">
+                <a href="../../auth/html/signin.html" id="profileLink">Log In</a>
+                <ul class="dropdown-menu" id="profileMenu"></ul>
+            </li>
+        </ul>
+    </nav>
 </header>
 
 
 <main>
+    <section class="safety-hero">
+        <div class="hero-logo">
+            <img src="../../../assets/image-removebg-preview.png" alt="Website Logo">
+        </div>
+        <h1>Laboratory Safety Code</h1>
+        <p>Your guide to safe and responsible laboratory practices.</p>
+    </section>
     <section class="intro">
         <h2>General Overview</h2>
         <p>
@@ -92,5 +118,6 @@
 <footer>
     <p>© 2025 LearnSpace Laboratory Safety Department | Contact: learnspace@gmail.com</p>
 </footer>
+<script src="../js/landing.js"></script>
 </body>
 </html>

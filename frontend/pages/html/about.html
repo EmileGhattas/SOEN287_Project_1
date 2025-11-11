@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>About LearnSpace</title>
-    <link rel="stylesheet" href="../css/landing.css">
+    <link rel="stylesheet" href="../../shared/style.css">
     <link rel="stylesheet" href="../css/about.css">
 </head>
 <body>
-<header class="about-header">
+<header>
     <nav class="navbar">
 
         <h1 class="logo">
@@ -17,23 +17,23 @@
         <ul class="navLinks">
 
             <li><a href="landing.html" class="active">Home</a></li>
-            <li><a href="../MainPage/about.html">About</a></li>
+            <li><a href="about.html">About</a></li>
 
 
             <li class="dropdown">
-                <a href="../../../Dropdown/bookings.html">Bookings</a>
+                <a href="../../facilities/html/bookings.html">Bookings</a>
                 <ul class="dropdown-menu">
-                    <li><a href="../../../Dropdown/bookings.html">My Bookings</a></li>
-                    <li><a href="../../../Dropdown/rooms.html">Rooms</a></li>
-                    <li><a href="../../../Dropdown/labs.html">Labs</a></li>
-                    <li><a href="../../../Dropdown/equipment.html">Equipment</a></li>
+                    <li><a href="../../facilities/html/bookings.html">My Bookings</a></li>
+                    <li><a href="../../facilities/html/rooms.html">Rooms</a></li>
+                    <li><a href="../../facilities/html/labs.html">Labs</a></li>
+                    <li><a href="../../facilities/html/equipment.html">Equipment</a></li>
                 </ul>
             </li>
 
-            <li><a href="../../../Dropdown/contact.html">Contact</a></li>
+            <li><a href="contact.html">Contact</a></li>
 
             <li class="dropdown" id="profileDropdown">
-                <a href="#" id="profileLink">Log In</a>
+                <a href="../../auth/html/signin.html" id="profileLink">Log In</a>
                 <ul class="dropdown-menu" id="profileMenu">
                     <!-- Menu items will be added dynamically through js -->
                 </ul>
@@ -43,7 +43,7 @@
 
 </header>
 
-<main class="about-content">
+<main class="about-content page-section">
     <h1>About LearnSpace</h1>
     <section class="intro">
         <h2>Our Story</h2>
@@ -120,5 +120,6 @@
 
     <p class="footer-note"> 2025 Learn Space</p>
 </footer>
+<script src="../js/landing.js"></script>
 </body>
 </html>

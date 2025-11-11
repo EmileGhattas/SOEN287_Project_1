@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>My Bookings</title>
-  <link rel="stylesheet" href="../../pages/css/landing.css" />
+  <link rel="stylesheet" href="../../shared/style.css" />
   <link rel="stylesheet" href="../css/bookings.css" />
 </head>
 <body>
@@ -19,9 +19,9 @@
         <li><a href="../../pages/html/about.html">About</a></li>
 
         <li class="dropdown">
-          <a href="../Dropdown/bookings.html">Bookings</a>
+          <a href="bookings.html" class="active">Bookings</a>
           <ul class="dropdown-menu">
-            <li><a class="active" href="../Dropdown/bookings.html">My Bookings</a></li>
+            <li><a class="active" href="bookings.html">My Bookings</a></li>
             <li><a href="rooms.html">Rooms</a></li>
             <li><a href="labs.html">Labs</a></li>
             <li><a href="equipment.html">Equipment</a></li>
@@ -31,7 +31,7 @@
         <li><a href="../../pages/html/contact.html">Contact</a></li>
 
         <li class="dropdown" id="profileDropdown">
-          <a href="#" id="profileLink">Log In</a>
+          <a href="../../auth/html/signin.html" id="profileLink">Log In</a>
           <ul class="dropdown-menu" id="profileMenu">
             <!-- Filled by landing.js -->
           </ul>

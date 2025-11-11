@@ -1,65 +1,121 @@
-body {
-    margin: 0;
-    padding: 0;
-
+body.signup-page {
+    background-color: #36393F;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-#Main {
+.auth-container {
     display: flex;
-    flex-direction: column; /* stack children vertically */
-    justify-content: flex-start; /* align to top */
-    align-items: center; /* center horizontally */
-    background-color: #36393F; 
-    /* background-image: url(https://www.shutterstock.com/shutterstock/photos/2497073191/display_1500/stock-vector-beautiful-cow-cartoon-character-seamless-pattern-cute-kawaii-farm-animal-hand-drawn-style-2497073191.jpg);*/
-    background-position: center;
-    height: 100vh; 
-    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 20px;
+    gap: 30px;
+    flex: 1;
+}
+
+#Welcome {
+    text-align: center;
+    font-size: 40px;
+    text-shadow: 1px 1px 2px black;
 }
 
 #S-U {
-    display: block;
     background-color: #3d5d60;
-    width: 350px; /* slightly bigger if you want */;;
-    padding: 20px;;
-    border-radius: 4px;;
+    width: 360px;
+    padding: 30px 25px;
+    border-radius: 8px;
     text-align: left;
-
     box-shadow: 0 10px 12px rgba(0, 0, 0, 0.4);
 }
 
-.Whitetxt{
+#S-U form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+label {
+    font-weight: 600;
+}
+
+.bar {
+    width: 100%;
+    border-radius: 6px;
+    height: 40px;
+    border: none;
+    padding: 0 12px;
+}
+
+.barcolor {
+    background-color: white;
+    color: black;
+}
+
+.dob_bar {
+    width: 100px;
+    height: 40px;
+    border: none;
+    border-radius: 6px;
+    margin-right: 8px;
+}
+
+#dob-container {
+    display: flex;
+    gap: 10px;
+}
+
+.dob-error {
+    color: red;
+    display: none;
+    font-size: 14px;
+    margin-top: -8px;
+}
+
+.terms-label {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
     color: white;
 }
-#Welcome {
-    display: block;
-    text-align: center;
-    margin-bottom: 1px; /* smaller spacing between welcome and form */
-    font-size: 40px; /* bigger for emphasis */
-    text-shadow: 1px 1px 2px black;
+
+.terms-label input {
+    margin-top: 4px;
 }
-.bar{
-    width: 340px;
-    border-radius: 6px;
-    height: 20px
+
+.Whitetxt {
+    color: white;
 }
-#cac{
-    text-align: center ;
-    
-}
-.barcolor{
-    background-color: white;
-    color: black
-}
-.dob_bar{
-    width:113px;
-}
-.hyperlinks{
-    color:lightblue;
+
+.hyperlinks {
+    color: lightblue;
     text-decoration: none;
 }
-.CAbar{
+
+.CAbar {
     background-color: #5865F2;
     color: white;
-    /*color:white */
-    height: 35px;
+    height: 45px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.CAbar:hover {
+    background-color: #4653c4;
+}
+
+@media (max-width: 480px) {
+    #S-U {
+        width: 100%;
+    }
+
+    #dob-container {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .dob_bar {
+        width: 100%;
+    }
 }

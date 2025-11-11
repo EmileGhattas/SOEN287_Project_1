@@ -1,0 +1,164 @@
+/* Universal styles shared across all pages */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background: #ffffff;
+    color: #333333;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    line-height: 1.6;
+}
+
+main {
+    min-height: 60vh;
+}
+
+header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #3d5d60;
+    padding: 15px 30px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.logo img {
+    width: 110px;
+    height: auto;
+}
+
+.navLinks {
+    list-style: none;
+    display: flex;
+    align-items: center;
+}
+
+.navLinks li {
+    margin-left: 20px;
+    position: relative;
+}
+
+.navLinks a {
+    display: block;
+    padding: 8px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #ffffff;
+    font-size: 18px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.navLinks a:hover,
+.navLinks a.active {
+    background-color: #8f9498;
+    color: #ffffff;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    list-style: none;
+    margin: 8px 0 0 0;
+    padding: 10px 0;
+    background-color: #808080;
+    border-radius: 8px;
+    min-width: 180px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-menu li {
+    padding: 0;
+}
+
+.dropdown-menu a {
+    padding: 10px 20px;
+    color: #ffffff;
+}
+
+.dropdown:hover .dropdown-menu,
+.dropdown:focus-within .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu a:hover {
+    background-color: #a3a6a8;
+    color: #1f1f1f;
+}
+
+footer.contact {
+    background-color: #3d5d60;
+    color: #ffffff;
+    text-align: center;
+    padding: 60px 20px;
+    margin-top: 50px;
+}
+
+footer.contact h2 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+footer.contact p {
+    font-size: 16px;
+    margin: 8px 0;
+    color: #e0e0e0;
+}
+
+.contact-info {
+    margin-top: 15px;
+}
+
+.social-links {
+    margin: 20px 0;
+}
+
+.social-links a {
+    color: #ffffff;
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: 600;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+    color: #cfd6d6;
+}
+
+.footer-note {
+    margin-top: 30px;
+    font-size: 14px;
+    color: #cccccc;
+}
+
+section {
+    margin-bottom: 40px;
+}
+
+a {
+    color: #3d5d60;
+}
+
+a:hover {
+    color: #2b4447;
+}

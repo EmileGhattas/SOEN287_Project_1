@@ -3,29 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Lab Booking</title>
-    <link rel="stylesheet" href="../../pages/css/landing.css">
+    <link rel="stylesheet" href="../../shared/style.css">
     <link rel="stylesheet" href="../css/labs.css">
     <script defer src="../js/labs.js"></script>
-
-
 </head>
 <body>
 <header>
-
     <nav class="navbar">
-
         <h1 class="logo">
             <img src="../../../assets/image-removebg-preview.png" alt="Website Logo">
         </h1>
 
         <ul class="navLinks">
-
             <li><a href="../../pages/html/landing.html">Home</a></li>
             <li><a href="../../pages/html/about.html">About</a></li>
-
-
             <li class="dropdown">
-                <a href="bookings.html">Bookings</a>
+                <a href="bookings.html" class="active">Bookings</a>
                 <ul class="dropdown-menu">
                     <li><a href="bookings.html">My Bookings</a></li>
                     <li><a href="rooms.html">Rooms</a></li>
@@ -33,9 +26,7 @@
                     <li><a href="equipment.html">Equipment</a></li>
                 </ul>
             </li>
-
             <li><a href="../../pages/html/contact.html">Contact</a></li>
-
             <li class="dropdown" id="profileDropdown">
                 <a href="#" id="profileLink">Log In</a>
                 <ul class="dropdown-menu" id="profileMenu">
@@ -46,76 +37,83 @@
     </nav>
 </header>
 
-<br><br><br>
-<h1> LearnSpace Lab Facilities </h1>
+<main class="facility-page labs-page">
+    <section class="facility-intro">
+        <h1>LearnSpace Lab Facilities</h1>
+        <div class="info">
+            <p>There are 2 laboratories available for each of the following departments: Chemistry, Physics, Computer and Robotics.</p>
+            <p><strong>Please follow our booking and safety procedures.</strong></p>
+            <ul>
+                <li>Only registered students, staff and faculty members with approved access may book laboratories.</li>
+                <li>Undergraduate students must have a supervising professor or lab technician present during the entirety of the booking.</li>
+                <li>There are three lab booking slots per day: 8:00 am to 11:30 am, 12:00 pm to 3:30 pm and 4:00 pm to 7:30 pm.</li>
+                <li>There is a maximum of one reservation per day and 1 reservation per week, Monday to Sunday.</li>
+                <li>Labs operate from 8:00 am to 6:00 pm.</li>
+                <li>You must submit your booking at least 48 hours in advance.</li>
+                <li><a href="../../pages/html/safety.html" target="_blank" rel="noopener noreferrer">You must read the Laboratory Safety Code and complete the Laboratory Safety Quiz before submitting a booking.</a></li>
+            </ul>
+        </div>
+    </section>
 
-<div class="info">
-    <br><br>
-    <p> There are 2 laboratories available for each of the following departments: Chemistry, Physics, Computer and Robotics
-    </p><br>
-    <p><b> Please follow our booking and safety procedures. </b></p></br>
-    <ul>
-        <li> Only registered students, staff and faculty members with approved access may book laboratories. </li>
-        <li> Undergraduate Students must have a supervising professor or lab technician present during the entirety of the booking.</li>
-        <li> There are three lab booking slots per day: 8:00 am to 11:30 pm, 12:00pm to 3:30 pm and 4:00pm to 7:30pm.</li>
-        <li> There is a maximum of one reservation per day and 1 reservations per week, Monday to Sunday. </li>
-        <li> Labs operate from 8:00 am to 6:00 pm</li>
-        <li> You must submit your booking at least 48 hours in advance.</li>
-        <li><a href="../../pages/html/safety.html" target="_blank">You must read the Laboratory Safety Code and complete the Laboratory Safety Quiz before submitting a booking</a> </li>
+    <section class="lab-selection">
+        <h2>Select a Lab</h2>
+        <div class="lab-blocks">
+            <div class="lab" data-lab="Chemistry Lab">Chemistry Lab
+                <div class="lab-info"></div>
+            </div>
+            <div class="lab" data-lab="Physics Lab">Physics Lab
+                <div class="lab-info"></div>
+            </div>
+            <div class="lab" data-lab="Computer Lab">Computer Lab
+                <div class="lab-info"></div>
+            </div>
+            <div class="lab" data-lab="Robotics Lab">Robotics Lab
+                <div class="lab-info"></div>
+            </div>
+        </div>
+        <button id="toDate" disabled>Next</button>
+    </section>
 
-    </ul>
-</div>
+    <section class="date-selection" id="datetime" style="display:none;">
+        <h2>Select a Date and Slot</h2>
+        <p id="currentDate" class="currentDate"></p>
 
-<br><br><br>
-<div class="lab-selection">
-    <h2>Select a Lab</h2>
-    <div class="lab-blocks">
-        <div class="lab" data-lab="Chemistry Lab">Chemistry Lab
-            <div class="lab-info"></div>
-        </div>
-        <div class="lab" data-lab="Physics Lab">Physics Lab
-            <div class="lab-info"></div>
-        </div>
-        <div class="lab" data-lab="Computer Lab">Computer Lab
-            <div class="lab-info"></div>
-        </div>
-        <div class="lab" data-lab="Robotics Lab">Robotics Lab
-            <div class="lab-info"></div>
-        </div>
+        <label for="date">Date</label>
+        <input type="date" id="date" required>
+
+        <label for="slot">Available Slot</label>
+        <select id="slot" required>
+            <option value="">Select</option>
+            <option value="8:00-11:30">8:00 – 11:30</option>
+            <option value="12:00-15:30">12:00 – 15:30</option>
+            <option value="16:00-19:30">16:00 – 19:30</option>
+        </select>
+
+        <button id="confirm">Confirm Booking</button>
+    </section>
+
+    <section id="confirmation" class="confirmation" style="display:none;">
+        <h2>Booking Confirmed!</h2>
+        <p id="summary"></p>
+    </section>
+</main>
+
+<footer class="contact">
+    <h2>Contact Us</h2>
+    <p>Reach out through any of the options below:</p>
+
+    <div class="contact-info">
+        <p><strong>Phone:</strong> (438) 345 9821</p>
+        <p><strong>Email:</strong> learnspace@gmail.com</p>
     </div>
-    <button id="toDate" disabled>Next</button>
-</div>
 
-<div class="date-selection" id="datetime" style="display:none;">
-    <h2>Select a Date and Slot</h2>
-    <p id="currentDate" class="currentDate"></p>
+    <div class="social-links">
+        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a>
+        <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer">Twitter</a>
+    </div>
 
-    <label for="date">Date:</label>
-    <input type="date" id="date" required><br><br>
-
-    <label for="slot">Available Slot:</label>
-    <select id="slot" required>
-        <option value="">Select</option>
-        <option value="8:00-11:30">8:00 – 11:30</option>
-        <option value="12:00-15:30">12:00 – 15:30</option>
-        <option value="16:00-19:30">16:00 – 19:30</option>
-    </select><br><br>
-
-    <button id="confirm">Confirm Booking</button>
-</div>
-
-<div id="confirmation" style="display:none;">
-    <h2>Booking Confirmed!</h2>
-    <p id="summary"></p>
-</div>
-
-
-<br><br><br>
-
-
-
-
-
-
+    <p class="footer-note">2025 Learn Space</p>
+</footer>
 </body>
 </html>

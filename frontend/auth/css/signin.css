@@ -1,64 +1,75 @@
-body {
-    margin: 0;
-    padding: 0;
-
+body.signin-page {
+    background-color: #36393F;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-#Main {
+.auth-container {
     display: flex;
-    flex-direction: column; /* stack children vertically */
-    justify-content: flex-start; /* align to top */
-    align-items: center; /* center horizontally */
-   /* background-color: #FFE4C4; */
-    background-color: #36393F;
-   /* background-image: url(https://www.shutterstock.com/shutterstock/photos/2497073191/display_1500/stock-vector-beautiful-cow-cartoon-character-seamless-pattern-cute-kawaii-farm-animal-hand-drawn-style-2497073191.jpg); */
-    background-position: center;
-    height: 100vh; 
-    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 20px;
+    gap: 30px;
+    flex: 1;
+}
+
+#WelcomeB {
+    text-align: center;
+    font-size: 40px;
+    text-shadow: 1px 2px 3px black;
 }
 
 #S-I {
-    display: block;
     background-color: #3d5d60;
-    width: 350px; /* slightly bigger if you want */;;
-    padding: 20px;;
-    border-radius: 4px;;
+    width: 350px;
+    padding: 30px 25px;
+    border-radius: 8px;
     text-align: left;
-
     box-shadow: 0 10px 12px rgba(0, 0, 0, 0.4);
 }
 
-.Whitetxt{
-    color: white;
-}
-#WelcomeB {
-    display: block;
-    text-align: center;
-    margin-bottom: 50px; /* smaller spacing between welcome and form */
-    font-size: 40px; /* bigger for emphasis */
-    text-shadow: 1px 2px 3px black;
-}
-.bar{
-    width: 340px;
-    border-radius: 6px;
-    height: 20px
-}
-#greeting{
-    text-align: center ;
-    
-}
-.barcolor{
-    background-color: white;
-    color: black 
+#S-I form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
 }
 
-.hyperlinks{
-    color:lightblue;
+label {
+    font-weight: 600;
+}
+
+.bar {
+    width: 100%;
+    border-radius: 6px;
+    height: 40px;
+    border: none;
+    padding: 0 12px;
+}
+
+.barcolor {
+    background-color: white;
+    color: black;
+}
+
+.Whitetxt {
+    color: white;
+}
+
+.hyperlinks {
+    color: lightblue;
     text-decoration: none;
 }
-.loginbar{
+
+.loginbar {
     background-color: #5865F2;
     color: white;
-    /*color:white */
-    height: 35px;
+    height: 45px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.loginbar:hover {
+    background-color: #4653c4;
 }

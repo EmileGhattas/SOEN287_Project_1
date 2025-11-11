@@ -1,0 +1,94 @@
+main.contact-page {
+    max-width: 960px;
+    margin: 40px auto;
+    padding: 0 20px 60px 20px;
+}
+
+.contact-hero {
+    background-color: #3d5d60;
+    color: #ffffff;
+    padding: 40px 30px;
+    border-radius: 12px;
+    margin-bottom: 40px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.contact-hero h1 {
+    font-size: 38px;
+    margin-bottom: 12px;
+}
+
+.contact-hero p {
+    font-size: 18px;
+    color: #e0e0e0;
+}
+
+.contact-details,
+.contact-support {
+    background-color: #f8f8f8;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+    margin-bottom: 30px;
+}
+
+.contact-details h2,
+.contact-support h2 {
+    margin-bottom: 15px;
+    color: #3d5d60;
+}
+
+.contact-details ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.contact-details li {
+    margin-bottom: 12px;
+    font-size: 17px;
+}
+
+.contact-form {
+    display: grid;
+    gap: 15px;
+}
+
+.contact-form label {
+    font-weight: 600;
+}
+
+.contact-form input,
+.contact-form textarea {
+    padding: 12px 14px;
+    border: 1px solid #cccccc;
+    border-radius: 8px;
+    font-size: 16px;
+    resize: vertical;
+}
+
+.contact-form button {
+    background-color: #3d5d60;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    justify-self: start;
+}
+
+.contact-form button:hover {
+    background-color: #2f4749;
+}
+
+@media (max-width: 768px) {
+    .contact-hero h1 {
+        font-size: 30px;
+    }
+
+    .contact-form {
+        gap: 12px;
+    }
+}

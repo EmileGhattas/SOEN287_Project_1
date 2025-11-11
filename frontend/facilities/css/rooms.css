@@ -1,73 +1,135 @@
-.currentDate{
-    font-size: 2em;
+main.facility-page {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px 60px 20px;
 }
 
-
-.info, h1, p, h2{
-   padding-left:50px;
-}
-
-ul{
-    padding-left:80px;
-}
-
-
-.room-blocks{
-    display: grid;
-    position: relative;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap:15px;
+.facility-intro h1 {
+    font-size: 38px;
     margin-bottom: 20px;
-    padding: 30px;
 }
 
-.info-image{
+.facility-intro .info p {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.facility-intro .info ul {
+    padding-left: 20px;
+    list-style: disc;
+}
+
+.facility-intro .info li {
+    margin-bottom: 10px;
+}
+
+.room-selection {
+    margin-top: 40px;
+}
+
+.room-selection h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+.room-blocks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+}
+
+.info-image {
     width: 200px;
     height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 8px;
 }
 
-.room{
-    background:#3d5d60;
+.room {
+    background: #3d5d60;
     position: relative;
     border-radius: 12px;
-    padding:30px;
+    padding: 30px 20px;
     cursor: pointer;
-    font-weight: 300;
+    font-weight: 500;
     text-align: center;
     color: white;
     overflow: visible;
+    transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
-.room-info{
+.room:hover {
+    transform: translateY(-4px);
+}
+
+.room-info {
     display: none;
     position: absolute;
     bottom: 120%;
-    background: white;
-    color: black;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 1em;
+    background: #ffffff;
+    color: #000000;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    width: 220px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     z-index: 10;
 }
 
-.room:hover .room-info{
-    opacity:1;
-    bottom: 125%;
+.room:hover .room-info {
     display: block;
 }
 
 .room.selected {
-    border-color: #04282B;
-    background-color: #04282B;
+    border: 2px solid #ffffff;
+    background-color: #04282b;
 }
 
-button {
+.room-selection button,
+.date-selection button {
+    background-color: #3d5d60;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
     cursor: pointer;
-    position: absolute;
-    right: 30px;
+    margin-top: 20px;
 }
 
-.date-selection{
-    position: absolute;
-    left: 30px;
+.date-selection {
+    margin-top: 40px;
+    display: grid;
+    gap: 15px;
+    max-width: 400px;
+}
+
+.date-selection label {
+    font-weight: 600;
+}
+
+.date-selection input,
+.date-selection select {
+    padding: 10px 12px;
+    border: 1px solid #cccccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.confirmation {
+    margin-top: 40px;
+    background-color: #e8eded;
+    padding: 20px;
+    border-radius: 12px;
+    max-width: 500px;
+}
+
+@media (max-width: 768px) {
+    .info-image {
+        width: 160px;
+        height: 120px;
+    }
 }

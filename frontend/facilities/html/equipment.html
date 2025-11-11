@@ -3,29 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Equipment Booking</title>
-    <link rel="stylesheet" href="../../pages/css/landing.css">
+    <link rel="stylesheet" href="../../shared/style.css">
     <link rel="stylesheet" href="../css/equipment.css">
-
     <script defer src="../js/equipment.js"></script>
-
 </head>
 <body>
 <header>
-
     <nav class="navbar">
-
         <h1 class="logo">
             <img src="../../../assets/image-removebg-preview.png" alt="Website Logo">
         </h1>
 
         <ul class="navLinks">
-
             <li><a href="../../pages/html/landing.html">Home</a></li>
             <li><a href="../../pages/html/about.html">About</a></li>
-
-
             <li class="dropdown">
-                <a href="bookings.html">Bookings</a>
+                <a href="bookings.html" class="active">Bookings</a>
                 <ul class="dropdown-menu">
                     <li><a href="bookings.html">My Bookings</a></li>
                     <li><a href="rooms.html">Rooms</a></li>
@@ -33,71 +26,84 @@
                     <li><a class="active" href="equipment.html">Equipment</a></li>
                 </ul>
             </li>
-
             <li><a href="../../pages/html/contact.html">Contact</a></li>
-
             <li class="dropdown" id="profileDropdown">
                 <a href="#" id="profileLink">Log In</a>
                 <ul class="dropdown-menu" id="profileMenu">
+                    <!-- Menu items will be added dynamically through js -->
                 </ul>
             </li>
         </ul>
     </nav>
 </header>
 
-<br><br><br>
-<h1> LearnSpace Equipment rentals </h1>
-
-<div class="info">
-    <br><br>
-    <p> We offer a variety of equipment rentals </p><br>
-    <ul>
-        <li> Only registered students, staff and faculty members with approved access may rent equipments. </li>
-        <li> Rentals can be made for same-day or future use (subject to availability).</li>
-        <li> All equipment must be returned in the same condition it was rented. </li>
-        <li> Rentals last 24 hours and must be returned to the equipment rental desk beforehand. </li>
-        <li> Recurring late returns may result in rental restrictions. </li>
-    </ul>
-</div>
-
-
-<br><br><br>
-
-<div class="equipment-selection">
-    <h2>Select Equipment</h2>
-    <div class="equipment-blocks">
-        <div class="equipment" data-equipment="Camera">
-            Camera
-            <div class="equipment-info">5 available today</div>
+<main class="facility-page equipment-page">
+    <section class="facility-intro">
+        <h1>LearnSpace Equipment Rentals</h1>
+        <div class="info">
+            <p>We offer a variety of equipment rentals to support your projects and presentations.</p>
+            <ul>
+                <li>Only registered students, staff and faculty members with approved access may rent equipment.</li>
+                <li>Rentals can be made for same-day or future use (subject to availability).</li>
+                <li>All equipment must be returned in the same condition it was rented.</li>
+                <li>Rentals last 24 hours and must be returned to the equipment rental desk beforehand.</li>
+                <li>Recurring late returns may result in rental restrictions.</li>
+            </ul>
         </div>
-        <div class="equipment" data-equipment="Tripod">
-            Tripod
-            <div class="equipment-info">5 available today</div>
+    </section>
+
+    <section class="equipment-selection">
+        <h2>Select Equipment</h2>
+        <div class="equipment-blocks">
+            <div class="equipment" data-equipment="Camera">
+                Camera
+                <div class="equipment-info">5 available today</div>
+            </div>
+            <div class="equipment" data-equipment="Tripod">
+                Tripod
+                <div class="equipment-info">5 available today</div>
+            </div>
+            <div class="equipment" data-equipment="Microscope">
+                Microscope
+                <div class="equipment-info">5 available today</div>
+            </div>
+            <div class="equipment" data-equipment="VR Headset">
+                VR Headset
+                <div class="equipment-info">5 available today</div>
+            </div>
         </div>
-        <div class="equipment" data-equipment="Microscope">
-            Microscope
-            <div class="equipment-info">5 available today</div>
-        </div>
-        <div class="equipment" data-equipment="VR Headset">
-            VR Headset
-            <div class="equipment-info">5 available today</div>
-        </div>
+        <button id="Next" disabled>Next</button>
+    </section>
+
+    <section class="date-selection" id="datetime" style="display:none;">
+        <h2>Select a Date</h2>
+        <label for="date">Date</label>
+        <input type="date" id="date" required>
+        <button id="confirm">Confirm Booking</button>
+    </section>
+
+    <section id="confirmation" class="confirmation" style="display:none;">
+        <h2>Booking Confirmed!</h2>
+        <p id="summary"></p>
+    </section>
+</main>
+
+<footer class="contact">
+    <h2>Contact Us</h2>
+    <p>Reach out through any of the options below:</p>
+
+    <div class="contact-info">
+        <p><strong>Phone:</strong> (438) 345 9821</p>
+        <p><strong>Email:</strong> learnspace@gmail.com</p>
     </div>
-    <button id="Next" disabled>Next</button>
-</div>
 
-<div class="date-selection" id="datetime" style="display:none;">
-    <h2>Select a Date</h2>
-    <label for="date"></label>
-    <input type="date" id="date" required>
-    <br><br>
-    <button id="confirm">Confirm Booking</button>
-</div>
+    <div class="social-links">
+        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a>
+        <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer">Twitter</a>
+    </div>
 
-<div id="confirmation" style="display:none;">
-    <h2>Booking Confirmed!</h2>
-    <p id="summary"></p>
-</div>
-
+    <p class="footer-note">2025 Learn Space</p>
+</footer>
 </body>
 </html>

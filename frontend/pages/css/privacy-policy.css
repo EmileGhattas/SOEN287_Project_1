@@ -1,0 +1,29 @@
+main.legal-page {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px 60px 20px;
+}
+
+.legal-page h1 {
+    font-size: 42px;
+    margin-bottom: 20px;
+    color: #3d5d60;
+}
+
+.legal-page h2 {
+    font-size: 26px;
+    margin-top: 30px;
+    margin-bottom: 12px;
+    color: #3d5d60;
+}
+
+.legal-page p {
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 24px;
+    font-weight: 600;
+}

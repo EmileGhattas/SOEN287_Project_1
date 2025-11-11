@@ -3,28 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Room Booking</title>
-    <link rel="stylesheet" href="../../pages/css/landing.css">
+    <link rel="stylesheet" href="../../shared/style.css">
     <link rel="stylesheet" href="../css/rooms.css">
     <script defer src="../js/rooms.js"></script>
-
 </head>
 <body>
 <header>
-
     <nav class="navbar">
-
         <h1 class="logo">
             <img src="../../../assets/image-removebg-preview.png" alt="Website Logo">
         </h1>
 
         <ul class="navLinks">
-
             <li><a href="../../pages/html/landing.html">Home</a></li>
             <li><a href="../../pages/html/about.html">About</a></li>
-
-
             <li class="dropdown">
-                <a href="bookings.html">Bookings</a>
+                <a href="bookings.html" class="active">Bookings</a>
                 <ul class="dropdown-menu">
                     <li><a href="bookings.html">My Bookings</a></li>
                     <li><a class="active" href="rooms.html">Rooms</a></li>
@@ -32,9 +26,7 @@
                     <li><a href="equipment.html">Equipment</a></li>
                 </ul>
             </li>
-
             <li><a href="../../pages/html/contact.html">Contact</a></li>
-
             <li class="dropdown" id="profileDropdown">
                 <a href="#" id="profileLink">Log In</a>
                 <ul class="dropdown-menu" id="profileMenu">
@@ -45,191 +37,195 @@
     </nav>
 </header>
 
-<br><br><br>
-<h1> LearnSpace Group Study Rooms </h1>
+<main class="facility-page rooms-page">
+    <section class="facility-intro">
+        <h1>LearnSpace Group Study Rooms</h1>
+        <div class="info">
+            <p>LearnSpace offers 10 study rooms and 2 conference rooms available at LearnSpace.</p>
+            <ul>
+                <li>Only registered students, staff and faculty members with approved access may book study or conference rooms.</li>
+                <li>Rooms can last up to 4 hours per day.</li>
+                <li>There is a maximum of one reservation per day, 2 reservations per week, Monday to Sunday.</li>
+                <li>Bookings can be made up to 10 days in advance.</li>
+            </ul>
+        </div>
+    </section>
 
-<div class="info">
-    <br><br>
-    <p> LearnSpace offers 10 study rooms and 2 conference rooms available at Learnspace. </p><br>
-    <ul>
-        <li> Only registered students, staff and faculty members with approved access may book study or conference rooms.</li>
-        <li> Rooms can last up to 4 hours per day. </li>
-        <li> There is a maximum of one reservation per day, 2 reservations per week, Monday to Sunday. </li>
-        <li> Bookings can be made up to 10 days in advance.</li>
-        <li> </li>
-    </ul>
-</div>
+    <section class="room-selection">
+        <h2>Select a Room</h2>
+        <div class="room-blocks">
+            <div class="room">Room 1
+                <div class="room-info">
+                    <img src="../../../assets/room1.jpg" alt="Room 1" class="info-image">
+                    Capacity: 4 people<br>
+                    Location: 1st floor, NI building
+                </div>
+            </div>
+            <div class="room">Room 2
+                <div class="room-info">
+                    <img src="../../../assets/room3.jpg" alt="Room 2" class="info-image">
+                    Capacity: 4 people<br>
+                    Location: 1st floor, NI building
+                </div>
+            </div>
+            <div class="room">Room 3
+                <div class="room-info">
+                    <img src="../../../assets/room2.jpg" alt="Room 3" class="info-image">
+                    Capacity: 6 people<br>
+                    Has: WhiteBoard, Smart Tv, Projector<br>
+                    Location: 2nd floor, NI building
+                </div>
+            </div>
+            <div class="room">Room 4
+                <div class="room-info">
+                    <img src="../../../assets/room6.jpg" alt="Room 4" class="info-image">
+                    Capacity: 4 people<br>
+                    Has: WhiteBoard, Projector<br>
+                    Location: 1st floor, EG building
+                </div>
+            </div>
+            <div class="room">Room 5
+                <div class="room-info">
+                    <img src="../../../assets/room8.jpg" alt="Room 5" class="info-image">
+                    Capacity: 4 people<br>
+                    Has: WhiteBoard, Smart Tv<br>
+                    Location: 2nd floor, EG building
+                </div>
+            </div>
+            <div class="room">Room 6
+                <div class="room-info">
+                    <img src="../../../assets/room10.jpg" alt="Room 6" class="info-image">
+                    Capacity: 6 people<br>
+                    Has: WhiteBoard, Smart TV, Projector<br>
+                    Location: 3rd floor, EG building
+                </div>
+            </div>
+            <div class="room">Room 7
+                <div class="room-info">
+                    <img src="../../../assets/Screenshot%202025-10-27%20170107.png" alt="Room 7" class="info-image">
+                    Capacity: 6 people<br>
+                    Has: WhiteBoard<br>
+                    Location: 1st floor, S building
+                </div>
+            </div>
+            <div class="room">Room 8
+                <div class="room-info">
+                    <img src="../../../assets/room4.jpg" alt="Room 8" class="info-image">
+                    Capacity: 6 people<br>
+                    Has: WhiteBoard, Smart Tv, Projector<br>
+                    Location: 3rd floor, S building
+                </div>
+            </div>
+            <div class="room">Room 9
+                <div class="room-info">
+                    <img src="../../../assets/room5.jpg" alt="Room 9" class="info-image">
+                    Capacity: 6 people<br>
+                    Has: WhiteBoard, Smart TV<br>
+                    Location: 4th floor, S building
+                </div>
+            </div>
+            <div class="room">Room 10
+                <div class="room-info">
+                    <img src="../../../assets/room9.jpg" alt="Room 10" class="info-image">
+                    Capacity: 3 people<br>
+                    (Presentation room - No table)<br>
+                    Has: Whiteboard, Smart TV, Projector<br>
+                    Location: 1st floor, AB building
+                </div>
+            </div>
+            <div class="room">Conference Room A
+                <div class="room-info">
+                    <img src="../../../assets/ConfRoomA.jpg" alt="Conference Room A" class="info-image">
+                    Capacity: 12 people<br>
+                    Has: Smart TV, Projector<br>
+                    Location: 6th floor, AB building
+                </div>
+            </div>
+            <div class="room">Conference Room B
+                <div class="room-info">
+                    <img src="../../../assets/ConfRoomB.jpg" alt="Conference Room B" class="info-image">
+                    Capacity: 20 people<br>
+                    Has: Smart TV, Projector<br>
+                    Location: 5th floor, AB building
+                </div>
+            </div>
+        </div>
+        <button id="toDate" disabled>Next</button>
+    </section>
 
-<br><br><br>
+    <section class="date-selection" id="datetime" style="display:none;">
+        <h2>Select a Date and a Time</h2>
+        <p id="currentDate" class="currentDate"></p>
 
-<div class="room-selection">
-    <h2>Select a Room</h2>
-    <div class="room-blocks">
-        <div class="room">Room 1
-            <div class="room-info">
-                <img src="../../../assets/room1.jpg" alt="Room 1" class="info-image" >
-                Capacity: 4 people<br>
-                Location: 1st floor, NI building
-            </div>
-        </div>
-        <div class="room">Room 2
-            <div class="room-info">
-                <img src="../../../assets/room3.jpg" alt="Room 2" class="info-image" >
-                Capacity: 4 people<br>
-                Location: 1st floor, NI building
-            </div>
-        </div>
-        <div class="room">Room 3
-            <div class="room-info">
-                <img src="../../../assets/room2.jpg" alt="Room 3" class="info-image" >
-                Capacity: 6 people<br>
-                Has: WhiteBoard, Smart Tv, Projector<br>
-                Location: 2nd floor, NI building
-            </div>
-        </div>
-        <div class="room">Room 4
-            <div class="room-info">
-                <img src="../../../assets/room6.jpg" alt="Room 5" class="info-image" >
-                Capacity: 4 people<br>
-                Has: WhiteBoard, Projector <br>
-                Location: 1st floor, EG building
-            </div>
-        </div>
-        <div class="room">Room 5
-            <div class="room-info">
-                <img src="../../../assets/room8.jpg" alt="Room 5" class="info-image" >
-                Capacity: 4 people<br>
-                Has: WhiteBoard, Smart Tv <br>
-                Location: 2nd floor, EG building
-            </div>
-        </div>
-        <div class="room">Room 6
-            <div class="room-info">
-                <img src="../../../assets/room10.jpg" alt="Room 6" class="info-image" >
-                Capacity: 6 people<br>
-                Has: WhiteBoard, Smart TV, Projector<br>
-                Location: 3rd floor, EG building
-            </div>
-        </div>
-        <div class="room">Room 7
-            <div class="room-info">
-                <img src="../../../assets/Screenshot%202025-10-27%20170107.png" alt="Room 7" class="info-image" >
-                Capacity: 6 people<br>
-                Has: WhiteBoard<br>
-                Location: 1st floor, S building
-            </div>
-        </div>
-        <div class="room">Room 8
-            <div class="room-info">
-                <img src="../../../assets/room4.jpg" alt="Room 8" class="info-image" >
-                Capacity: 6 people<br>
-                Has: WhiteBoard, Smart Tv, Projector<br>
-                Location: 3rd floor, S building
-            </div>
-        </div>
-        <div class="room">Room 9
-            <div class="room-info">
-                <img src="../../../assets/room5.jpg" alt="Room 9 " class="info-image" >
-                Capacity: 6 people<br>
-                Has: WhiteBoard, Smart TV<br>
-                Location: 4th floor, S building
-            </div>
-        </div>
-        <div class="room">Room 10
-            <div class="room-info">
-                <img src="../../../assets/room9.jpg" alt="Room 10" class="info-image" >
-                Capacity: 3 people<br>
-                (Presentation room - No table)<br>
-                Has: Whiteboard, Smart TV, Projector<br>
-                Location: 1st floor, AB building
-            </div>
-        </div>
-        <div class="room">Conference Room A
-            <div class="room-info">
-                <img src="../../../assets/ConfRoomA.jpg" alt="Conference Room A" class="info-image" >
-                Capacity: 12 people<br>
-                Has: Smart TV, Projector<br>
-                Location: 6th floor, AB building
-            </div>
-        </div>
-        <div class="room">Conference Room B
-            <div class="room-info">
-                <img src="../../../assets/ConfRoomB.jpg" alt="Conference Room A" class="info-image" >
-                Capacity: 20 people<br>
-                Has: Smart TV, Projector<br>
-                Location: 5th floor, AB building
-            </div>
-        </div>
+        <label for="date">Date</label>
+        <input type="date" id="date" required>
+
+        <label for="startTime">Start Time</label>
+        <input type="time" id="startTime" list="times" required>
+        <datalist id="times">
+            <option value="07:00"></option>
+            <option value="07:30"></option>
+            <option value="08:00"></option>
+            <option value="08:30"></option>
+            <option value="09:00"></option>
+            <option value="09:30"></option>
+            <option value="10:00"></option>
+            <option value="10:30"></option>
+            <option value="11:00"></option>
+            <option value="11:30"></option>
+            <option value="12:00"></option>
+            <option value="12:30"></option>
+            <option value="13:00"></option>
+            <option value="13:30"></option>
+            <option value="14:00"></option>
+            <option value="14:30"></option>
+            <option value="15:00"></option>
+            <option value="15:30"></option>
+            <option value="16:00"></option>
+            <option value="16:30"></option>
+            <option value="17:00"></option>
+            <option value="17:30"></option>
+            <option value="18:00"></option>
+            <option value="18:30"></option>
+            <option value="19:00"></option>
+            <option value="19:30"></option>
+            <option value="20:00"></option>
+            <option value="20:30"></option>
+            <option value="21:00"></option>
+            <option value="21:30"></option>
+            <option value="22:00"></option>
+            <option value="22:30"></option>
+            <option value="23:00"></option>
+        </datalist>
+
+        <label for="endTime">End Time</label>
+        <input type="time" id="endTime" list="times" required>
+
+        <button id="confirm">Confirm Booking</button>
+    </section>
+
+    <section id="confirmation" class="confirmation" style="display:none;">
+        <h2>Booking Confirmed!</h2>
+        <p id="summary"></p>
+    </section>
+</main>
+
+<footer class="contact">
+    <h2>Contact Us</h2>
+    <p>Reach out through any of the options below:</p>
+
+    <div class="contact-info">
+        <p><strong>Phone:</strong> (438) 345 9821</p>
+        <p><strong>Email:</strong> learnspace@gmail.com</p>
     </div>
-    <button id="toDate" disabled> Next </button>
-</div>
 
-<br><br><br>
+    <div class="social-links">
+        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a>
+        <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer">Twitter</a>
+    </div>
 
-<div class="date-selection" id="datetime" style="display:none;">
-    <h2> Select a Date and a Time</h2>
-    <br><br>
-
-    <p id="currentDate" class="currentDate"></p>
-    <br><br>
-
-    <label for="date"></label>
-    <input type="date" id="date" required><br>
-    <br><br>
-
-    <label for="startTime"> Start Time </label>
-    <input type="time" id="startTime" list="times" required/>
-    <datalist id="times">
-        <option value="07:00"></option>
-        <option value="07:30"></option>
-        <option value="08:00"></option>
-        <option value="08:30"></option>
-        <option value="09:00"></option>
-        <option value="09:30"></option>
-        <option value="10:00"></option>
-        <option value="10:30"></option>
-        <option value="11:00"></option>
-        <option value="11:30"></option>
-        <option value="12:00"></option>
-        <option value="12:30"></option>
-        <option value="13:00"></option>
-        <option value="13:30"></option>
-        <option value="14:00"></option>
-        <option value="14:30"></option>
-        <option value="15:00"></option>
-        <option value="15:30"></option>
-        <option value="16:00"></option>
-        <option value="16:30"></option>
-        <option value="17:00"></option>
-        <option value="17:30"></option>
-        <option value="18:00"></option>
-        <option value="18:30"></option>
-        <option value="19:00"></option>
-        <option value="19:30"></option>
-        <option value="20:00"></option>
-        <option value="20:30"></option>
-        <option value="21:00"></option>
-        <option value="21:30"></option>
-        <option value="22:00"></option>
-        <option value="22:30"></option>
-        <option value="23:00"></option>
-    </datalist>
-
-    <br><br>
-
-    <label for="endTime"> End Time </label>
-    <input type="time" id="endTime" list="times" required/>
-
-    <br><br>
-
-    <button id="confirm"> Confirm Booking</button>
-</div>
-
-<!--confirmation of booking -->
-<div id="confirmation" style="display:none;">
-    <h2>Booking Confirmed!</h2>
-    <p id="summary"></p>
-</div>
-
+    <p class="footer-note">2025 Learn Space</p>
+</footer>
 </body>
 </html>

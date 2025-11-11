@@ -16,8 +16,3 @@ db.connect((err)=>{
     }
 });
 
-async function signup(req, res) {
-
-
-}
-module.export = signup;

@@ -11,5 +11,8 @@ app.use(express.json());
 app.post('/auth/signin', signin);
 app.post('/auth/signup', signup);
 
+app.use('/auth', signUp);
+app.use('/auth', signIn);
+
 const PORT = 5000;
 app.listen(PORT, () => "Server running");

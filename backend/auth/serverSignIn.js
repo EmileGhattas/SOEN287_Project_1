@@ -1,4 +1,6 @@
 const sql = require("mysql2");
+const express = require("express");
+
 
 
 
@@ -16,7 +18,4 @@ db.connect((err)=>{
         console.log("Connected");
     }
 });
-async function signin(req, res) {
 
-}
-module.exports = signin;

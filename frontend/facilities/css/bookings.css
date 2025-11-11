@@ -1,18 +1,26 @@
-.info, h1, h2, p {
-    padding-left: 30px;
+main.page-wrap {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px 60px 20px;
 }
 
-.page-wrap {
-    padding-bottom: 30px;
+.page-title {
+    font-size: 36px;
+    margin-bottom: 30px;
 }
 
 .toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 30px 10px 30px;
+    padding: 0 0 20px 0;
     flex-wrap: wrap;
     gap: 10px;
+}
+
+.toolbar label {
+    font-weight: 600;
+    margin-right: 10px;
 }
 
 .toolbar input[type="date"] {
@@ -35,24 +43,25 @@
     display: grid;
     justify-content: center;
     grid-template-columns: repeat(1, 300px);
-    gap: 6px;
+    gap: 12px;
     margin-bottom: 20px;
-    padding: 30px;
+    padding: 0;
 }
 
 .booking-card {
     background: #ffffff;
     border: 1px solid #ddd;
     border-radius: 12px;
-    padding: 12px;
+    padding: 16px;
     color: #000;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .booking-card__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .booking-card__title {
@@ -74,7 +83,7 @@
     border: 1px solid #ddd;
     border-radius: 12px;
     padding: 20px 30px;
-    margin: 10px 30px 20px 30px;
+    margin: 20px 0;
     color: #000;
 }
 

@@ -1,49 +1,38 @@
-
-body {
-    font-family: Arial, sans-serif;
-    background-color: white;
-    color: #333;
-    line-height: 1.6;
+main {
+    max-width: 950px;
+    margin: 50px auto;
+    padding: 0 20px 60px 20px;
 }
 
-/* ---------- HEADER ---------- */
-header {
+.safety-hero {
     background-color: #3d5d60;
-    color: white;
+    color: #ffffff;
     text-align: center;
     padding: 50px 20px 30px 20px;
     border-bottom: 4px solid #8f9498;
+    border-radius: 0 0 12px 12px;
+    margin-bottom: 40px;
 }
 
-header .logo img {
-    width: 120px;
-    height: auto;
-    margin-bottom: 15px;
-}
-
-header h1 {
-    font-size: 32px;
+.safety-hero h1 {
+    font-size: 36px;
     margin-bottom: 8px;
     letter-spacing: 1px;
 }
 
-header p {
-    font-size: 17px;
+.safety-hero p {
+    font-size: 18px;
     color: #e0e0e0;
 }
 
-/* ---------- MAIN CONTENT ---------- */
-main {
-    max-width: 950px;
-    margin: 50px auto;
-    padding: 40px 50px;
-    background-color: #f8f8f8;
-    border-radius: 10px;
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.intro, .conclusion {
+.intro,
+.rules,
+.conclusion {
     margin-bottom: 40px;
+    background-color: #f8f8f8;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .intro h2,
@@ -53,15 +42,13 @@ main {
     margin-bottom: 12px;
     border-left: 6px solid #8f9498;
     padding-left: 10px;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    font-size: 22px;
+    font-size: 24px;
 }
 
 .intro p,
 .conclusion p {
     font-size: 17px;
-    color: #444;
+    color: #444444;
     margin-top: 10px;
     margin-bottom: 15px;
 }
@@ -75,45 +62,26 @@ main {
 .rules li {
     margin-bottom: 8px;
     font-size: 16px;
-    color: #333;
+    color: #333333;
 }
 
 strong {
     color: #3d5d60;
 }
 
-/* ---------- CONCLUSION SECTION ---------- */
 .conclusion {
     background-color: #e6ecec;
-    padding: 25px 30px;
-    border-radius: 10px;
     border: 1px solid #cfd6d6;
 }
 
-/* ---------- FOOTER ---------- */
-footer {
-    background-color: #3d5d60;
-    color: white;
-    text-align: center;
-    padding: 40px 20px;
-    margin-top: 60px;
-    font-size: 15px;
-    border-top: 4px solid #8f9498;
-}
-
-footer p {
-    color: #e0e0e0;
-}
-
-/* ---------- RESPONSIVE DESIGN ---------- */
 @media (max-width: 768px) {
     main {
-        padding: 25px 20px;
-        margin: 25px;
+        padding: 0 15px 40px 15px;
+        margin: 30px auto;
     }
 
-    header h1 {
-        font-size: 26px;
+    .safety-hero h1 {
+        font-size: 30px;
     }
 
     .rules ul {

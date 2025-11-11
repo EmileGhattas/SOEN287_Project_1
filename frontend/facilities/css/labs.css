@@ -1,28 +1,40 @@
-ul{
-    padding-left:60px;
+main.facility-page {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px 60px 20px;
 }
 
-.info, h1, p, h2{
-    padding-left:30px;
+.facility-intro h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
 }
 
-.logo img {
-    width: 110px;
-    height: auto;
+.facility-intro .info p {
+    font-size: 18px;
+    margin-bottom: 12px;
 }
 
-.currentDate {
-    font-size: 1.5em;
+.facility-intro .info ul {
+    list-style: disc;
+    padding-left: 20px;
+}
+
+.facility-intro .info li {
     margin-bottom: 10px;
 }
 
 .lab-selection {
-    padding: 30px;
+    margin-top: 40px;
+}
+
+.lab-selection h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
 }
 
 .lab-blocks {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 20px;
 }
 
@@ -30,11 +42,15 @@ ul{
     background-color: #3d5d60;
     color: white;
     text-align: center;
-    padding: 25px;
+    padding: 30px 20px;
     border-radius: 10px;
     cursor: pointer;
     position: relative;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.lab:hover {
+    transform: translateY(-3px);
 }
 
 .lab.disabled {
@@ -42,35 +58,68 @@ ul{
     cursor: not-allowed;
 }
 
+.lab-info {
+    display: none;
+    background: rgba(255, 255, 255, 0.95);
+    color: #000000;
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    width: 200px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+}
+
 .lab:hover .lab-info {
     display: block;
 }
 
-.lab-info {
-    display: none;
-    background: grey;
-    opacity: 95%;
-    width: 120px;
-    height: 100px;
-    color: black;
-    position: absolute;
-    bottom: 120%;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 0.9em;
-    z-index: 10;
-}
-
-.lab.selected{
-    border-color: #04282B;
-    background-color: #04282B;
+.lab.selected {
+    background-color: #04282b;
 }
 
 button {
     cursor: pointer;
-    position: absolute;
-    right: 30px;
 }
 
+.lab-selection button,
+.date-selection button {
+    background-color: #3d5d60;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    margin-top: 20px;
+}
+
+.date-selection {
+    margin-top: 40px;
+    display: grid;
+    gap: 15px;
+    max-width: 320px;
+}
+
+.date-selection label {
+    font-weight: 600;
+}
+
+.date-selection input,
+.date-selection select {
+    padding: 10px 12px;
+    border: 1px solid #cccccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.confirmation {
+    margin-top: 40px;
+    background-color: #e8eded;
+    padding: 20px;
+    border-radius: 12px;
+    max-width: 480px;
+}

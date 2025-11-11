@@ -1,4 +1,3 @@
-const express = require("express");
 const sql = require("mysql2");
 
 
@@ -17,5 +16,7 @@ db.connect((err)=>{
         console.log("Connected");
     }
 });
+async function signin(req, res) {
 
-const PORT = 5000;
+}
+module.exports = signin;

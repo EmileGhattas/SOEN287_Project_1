@@ -1,0 +1,83 @@
+body {
+    background-color: #f4f7f8;
+}
+
+.contact-page {
+    max-width: 960px;
+    margin: 60px auto;
+    padding: 0 24px 40px;
+}
+
+.contact-intro {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.contact-intro h2 {
+    font-size: 32px;
+    color: #3d5d60;
+    margin-bottom: 12px;
+}
+
+.contact-intro p {
+    font-size: 18px;
+    color: #555;
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.contact-card {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    padding: 24px;
+    text-align: center;
+}
+
+.contact-card h3 {
+    color: #3d5d60;
+    margin-bottom: 12px;
+}
+
+.contact-card a {
+    color: #3d5d60;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.contact-card a:hover {
+    text-decoration: underline;
+}
+
+.contact-hours {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 24px 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.contact-hours h3 {
+    color: #3d5d60;
+    margin-bottom: 12px;
+}
+
+.contact-hours ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.contact-hours li {
+    margin-bottom: 8px;
+    color: #444;
+}
+
+@media (max-width: 600px) {
+    .contact-page {
+        margin: 40px auto;
+    }
+}

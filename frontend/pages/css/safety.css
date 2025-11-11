@@ -6,28 +6,28 @@ body {
     line-height: 1.6;
 }
 
-/* ---------- HEADER ---------- */
-header {
+/* ---------- HERO ---------- */
+.safety-hero {
     background-color: #3d5d60;
     color: white;
     text-align: center;
-    padding: 50px 20px 30px 20px;
+    padding: 60px 20px 40px 20px;
     border-bottom: 4px solid #8f9498;
 }
 
-header .logo img {
+.safety-hero .logo img {
     width: 120px;
     height: auto;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
-header h1 {
+.safety-hero h1 {
     font-size: 32px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     letter-spacing: 1px;
 }
 
-header p {
+.safety-hero p {
     font-size: 17px;
     color: #e0e0e0;
 }
@@ -90,21 +90,6 @@ strong {
     border: 1px solid #cfd6d6;
 }
 
-/* ---------- FOOTER ---------- */
-footer {
-    background-color: #3d5d60;
-    color: white;
-    text-align: center;
-    padding: 40px 20px;
-    margin-top: 60px;
-    font-size: 15px;
-    border-top: 4px solid #8f9498;
-}
-
-footer p {
-    color: #e0e0e0;
-}
-
 /* ---------- RESPONSIVE DESIGN ---------- */
 @media (max-width: 768px) {
     main {
@@ -112,7 +97,7 @@ footer p {
         margin: 25px;
     }
 
-    header h1 {
+    .safety-hero h1 {
         font-size: 26px;
     }
 

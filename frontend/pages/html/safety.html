@@ -7,13 +7,41 @@
     <link rel="stylesheet" href="../css/safety.css" />
 </head>
 <body>
-<header>
-    <div class="logo">
-    <img src="../../../assets/image-removebg-preview.png" alt="Website Logo">
-    </div>
-    <h1>Laboratory Safety Code</h1>
-    <p>Your guide to safe and responsible laboratory practices.</p>
-</header>
+    <header class="site-header">
+        <nav class="navbar">
+            <h1 class="logo">
+                <img src="../../../assets/image-removebg-preview.png" alt="Website Logo">
+            </h1>
+            <ul class="navLinks">
+                <li><a href="landing.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li class="dropdown">
+                    <a href="../../facilities/html/bookings.html">Bookings</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="../../facilities/html/bookings.html">My Bookings</a></li>
+                        <li><a href="../../facilities/html/rooms.html">Rooms</a></li>
+                        <li><a href="../../facilities/html/labs.html">Labs</a></li>
+                        <li><a href="../../facilities/html/equipment.html">Equipment</a></li>
+                    </ul>
+                </li>
+                <li><a href="contact.html">Contact</a></li>
+                <li class="dropdown" id="profileDropdown">
+                    <a href="#" id="profileLink">Log In</a>
+                    <ul class="dropdown-menu" id="profileMenu">
+                        <!-- Menu items will be added dynamically through js -->
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="safety-hero">
+        <div class="logo">
+            <img src="../../../assets/image-removebg-preview.png" alt="Website Logo">
+        </div>
+        <h1>Laboratory Safety Code</h1>
+        <p>Your guide to safe and responsible laboratory practices.</p>
+    </section>
 
 
 <main>
@@ -90,8 +118,21 @@
     </section>
 </main>
 
-<footer>
-    <p>© 2025 LearnSpace Laboratory Safety Department | Contact: learnspace@gmail.com</p>
-</footer>
+    <footer class="contact">
+        <h2>Contact Us</h2>
+        <p>Reach out through any of the options below:</p>
+        <div class="contact-info">
+            <p><strong>Phone:</strong> (438) 345 9821</p>
+            <p><strong>Email:</strong> learnspace@gmail.com</p>
+        </div>
+        <div class="social-links">
+            <a href="https://www.instagram.com" target="_blank" rel="noreferrer">Instagram</a>
+            <a href="https://www.facebook.com" target="_blank" rel="noreferrer">Facebook</a>
+            <a href="https://www.twitter.com" target="_blank" rel="noreferrer">Twitter</a>
+        </div>
+        <p class="footer-note">2025 Learn Space</p>
+    </footer>
+
+    <script src="../js/landing.js"></script>
 </body>
 </html>

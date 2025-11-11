@@ -89,6 +89,11 @@ header {
     z-index: 200;
 }
 
+#profileMenu.dropdown-menu {
+    left: auto;
+    right: 0;
+}
+
 .dropdown-menu li {
     padding: 0;
 }

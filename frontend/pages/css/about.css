@@ -1,40 +1,55 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 body {
     font-family: Arial, sans-serif;
     background-color: #f8f8f8;
     color: #333;
     line-height: 1.6;
-    padding-bottom: 60px;
 }
 
-.about-header {
+.about-hero {
     background-color: #3d5d60;
     color: white;
     text-align: center;
     padding: 40px 20px;
 }
 
-.about-header .logo img {
-    width: 100px;
+.about-hero .logo img {
+    width: 110px;
     height: auto;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.about-hero__text {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.about-hero__text h1 {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.about-hero__text p {
+    font-size: 18px;
+    color: #e0e0e0;
 }
 
 .about-content {
     max-width: 900px;
     margin: 40px auto;
-    padding: 0 20px;
+    padding: 0 20px 60px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.about-content section {
+    margin-bottom: 35px;
 }
 
 .about-content h2 {
     color: #3d5d60;
     font-size: 28px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .about-content p {
@@ -56,19 +71,8 @@ body {
     border-radius: 5px;
 }
 
-.contact {
+.about-content .contact {
     background-color: #f1f1f1;
     padding: 20px;
-    margin-top: 40px;
     border-radius: 8px;
-}
-
-.about-footer {
-    background-color: #3d5d60;
-    color: white;
-    text-align: center;
-    padding: 25px;
-    position: fixed;
-    width: 100%;
-    bottom: 0;
 }

@@ -78,7 +78,8 @@ header {
     display: none;
     position: absolute;
     top: calc(100% + 1px);
-    left: 0;
+    left: 50%;
+    transform: translateX(-50%);
     list-style: none;
     margin: 0;
     padding: 10px 0;
@@ -92,15 +93,20 @@ header {
 #profileMenu.dropdown-menu {
     left: auto;
     right: 0;
+    transform: none;
 }
 
 .dropdown-menu li {
-    padding: 0;
+    padding: 4px 0;
 }
 
 .dropdown-menu a {
-    padding: 10px 20px;
+    display: block;
+    margin: 0 14px;
+    padding: 10px 16px;
+    border-radius: 6px;
     color: #ffffff;
+    text-align: center;
 }
 
 .dropdown:hover .dropdown-menu,

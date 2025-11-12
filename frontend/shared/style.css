@@ -50,7 +50,7 @@ header {
 }
 
 .navLinks li {
-    margin-left: 20px;
+    margin-left: 0;
     position: relative;
 }
 
@@ -78,11 +78,10 @@ header {
     display: none;
     position: absolute;
     top: calc(100% + 1px);
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
     list-style: none;
     margin: 0;
-    padding: 12px;
+    padding: 10px 0;
     background-color: #808080;
     border-radius: 8px;
     min-width: 180px;
@@ -93,28 +92,15 @@ header {
 #profileMenu.dropdown-menu {
     left: auto;
     right: 0;
-    transform: none;
 }
-
 
 .dropdown-menu li {
-    width: 100%;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-}
-
-.dropdown-menu li + li {
-    margin-top: 6px;
+    padding: 2px 10px;
 }
 
 .dropdown-menu a {
-    display: inline-block;
-    margin: 0 auto;
-    padding: 10px 16px;
-    border-radius: 6px;
+    padding: 10px 10px;
     color: #ffffff;
-    text-align: center;
 }
 
 .dropdown:hover .dropdown-menu,

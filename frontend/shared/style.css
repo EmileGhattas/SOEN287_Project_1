@@ -82,7 +82,7 @@ header {
     transform: translateX(-50%);
     list-style: none;
     margin: 0;
-    padding: 10px 0;
+    padding: 12px;
     background-color: #808080;
     border-radius: 8px;
     min-width: 180px;
@@ -96,13 +96,21 @@ header {
     transform: none;
 }
 
+
 .dropdown-menu li {
-    padding: 4px 0;
+    width: 100%;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.dropdown-menu li + li {
+    margin-top: 6px;
 }
 
 .dropdown-menu a {
-    display: block;
-    margin: 0 14px;
+    display: inline-block;
+    margin: 0 auto;
     padding: 10px 16px;
     border-radius: 6px;
     color: #ffffff;

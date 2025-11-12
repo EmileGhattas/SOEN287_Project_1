@@ -78,7 +78,8 @@ header {
     display: none;
     position: absolute;
     top: calc(100% + 1px);
-    left: 0;
+    left: 50%;
+    transform: translateX(-50%);
     list-style: none;
     margin: 0;
     padding: 10px 0;
@@ -92,14 +93,18 @@ header {
 #profileMenu.dropdown-menu {
     left: auto;
     right: 0;
+    transform: none;
 }
 
 .dropdown-menu li {
-    padding: 0;
+    padding: 4px 0;
+    text-align: center;
 }
 
 .dropdown-menu a {
+    display: inline-block;
     padding: 10px 20px;
+    border-radius: 6px;
     color: #ffffff;
 }
 

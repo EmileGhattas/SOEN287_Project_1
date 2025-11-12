@@ -98,14 +98,15 @@ header {
 
 .dropdown-menu li {
     padding: 4px 0;
-    text-align: center;
 }
 
 .dropdown-menu a {
-    display: inline-block;
-    padding: 10px 20px;
+    display: block;
+    margin: 0 14px;
+    padding: 10px 16px;
     border-radius: 6px;
     color: #ffffff;
+    text-align: center;
 }
 
 .dropdown:hover .dropdown-menu,

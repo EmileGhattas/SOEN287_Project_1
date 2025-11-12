@@ -78,10 +78,11 @@ header {
     display: none;
     position: absolute;
     top: calc(100% + 1px);
-    left: 0;
+    left: 50%;
+    transform: translateX(-50%);
     list-style: none;
     margin: 0;
-    padding: 10px 0;
+    padding: 12px;
     background-color: #808080;
     border-radius: 8px;
     min-width: 180px;
@@ -92,15 +93,28 @@ header {
 #profileMenu.dropdown-menu {
     left: auto;
     right: 0;
+    transform: none;
 }
 
+
 .dropdown-menu li {
+    width: 100%;
     padding: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.dropdown-menu li + li {
+    margin-top: 6px;
 }
 
 .dropdown-menu a {
-    padding: 10px 20px;
+    display: inline-block;
+    margin: 0 auto;
+    padding: 10px 16px;
+    border-radius: 6px;
     color: #ffffff;
+    text-align: center;
 }
 
 .dropdown:hover .dropdown-menu,

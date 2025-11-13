@@ -15,4 +15,4 @@ app.use('/auth', signUp);
 app.use('/auth', signIn);
 
 const PORT = 5000;
-app.listen(PORT, () => "Server running");
+app.listen(PORT, () => console.log("Server running"));

@@ -3,7 +3,24 @@ const app = express();
 const signin = require('./auth/serverSignIn');
 const signup = require('./auth/serverSignUp');
 
+app.get("/", (req, res) => {
+    // main page
+});
 
+app.get("/Sign in", (req, res) => {
+    // sign in page
+    }
+)
+
+app.get("/Sign up", (req, res) => {
+        // sign up page
+    }
+)
+
+app.get("/booking", (req, res) => {
+        // booking
+    }
+)
 
 
 app.use(express.json());

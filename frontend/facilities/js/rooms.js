@@ -141,7 +141,9 @@ confirmButton.addEventListener('click', () => {
 
     // Check login status
     const user = JSON.parse(localStorage.getItem("user"));
+
     const booking = {
+        userId: user,
         room: selectedRoom,
         date: inDate,
         startTime: inStartTime,
@@ -178,6 +180,10 @@ confirmButton.addEventListener('click', () => {
     booking.user = username;
     saveBooking(booking);
 
+    if(user){
+        sendRoomBookingToDB(booking);
+    }
+
     // Show confirmation
     datetime.style.display = 'none';
     document.querySelector('.room-selection').style.display = 'none';
@@ -189,3 +195,18 @@ confirmButton.addEventListener('click', () => {
         Room successfully booked!
     `;
 });
+
+function sendRoomBookingToDB(booking){
+    fetch('../../backend/room_booking.php',{
+            method: 'POST',
+            headers: {'Content-Type' : 'application/json'},
+            body: JSON.stringify(booking)
+})
+        .then(function(response){
+            return response.text();
+        })
+
+.catch(function (err){
+        console.error('Failed to save booking to database')
+    });
+}

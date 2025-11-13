@@ -28,3 +28,23 @@ if (!$checkUser->fetch()) {
     http_response_code(400);
     exit("User not found.");
 }
+
+/*
+Find room_id
+*/
+$checkRoom = $pdo->prepare("SELECT room_id FROM rooms WHERE room_id = ?");
+$checkRoom->execute([$room_id]);
+$room = $checkRoom->fetch();
+
+if (!$room) {
+    http_response_code(400);
+    exit("Room not found.");
+}
+
+try{
+    $stmt = $pdo->prepare("
+    INSERT INTO bookings (user_id, room_id, date, startTime, endTime) VALUES(?,?,?,?,?)");
+
+}catch(PDOException $e){
+
+}

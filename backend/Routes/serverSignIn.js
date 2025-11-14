@@ -1,22 +1,9 @@
 const express = require("express");
-const db = require("../mysql2/db.js");
-const router  = express.Router();
+const router = express.Router();
+const sqlite3 = require("sqlite3").verbose();
+const path = require("path");
 
+// Path to your SQLite DB file
+const dbPath = path.join(__dirname, "../287_D.db");
 
-
-
-const db = sql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "287_D",
-});
-db.connect((err)=>{
-    if(err){
-        console.log("Error connecting to DataBase");
-    }
-    else{
-        console.log("Connected");
-    }
-});
-
+module.exports = router;

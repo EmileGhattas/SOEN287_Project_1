@@ -15,32 +15,29 @@ app.get("/", (req, res) => {
 });
 
 //Sign in page
-app.get("/Sign in", (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'auth', 'signin.html'));
-    }
-)
+//app.get("/Signin", (req, res) => {
+ //   res.sendFile(path.join(__dirname, 'frontend', 'auth', 'signin.html'));
+  //  }
+//)
 
 // sign up page
-app.get("/Sign up", (req, res) => {
-        // sign up page
+app.get("/Signup", (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'auth', 'signup.html'));
     }
 )
 
 // booking page
 app.get("/booking", (req, res) => {
 
-
+    res.sendFile(path.join(__dirname, 'frontend', 'facilities', 'signup.html'));
 });
 
 
 
 app.use(express.json());
 
-app.post('/auth/signin', signin);
-app.post('/auth/signup', signup);
 
-app.use('/Routes', signUp);
-app.use('/Routes', signIn);
+
 
 const PORT = 5000;
 app.listen(PORT, () => console.log("Server running"));

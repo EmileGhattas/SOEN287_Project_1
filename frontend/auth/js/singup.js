@@ -97,5 +97,5 @@ document.getElementById('signupForm').addEventListener('submit', function(e) {
     alert('Account created successfully!');
 
     // Redirect to main page
-    window.location.href = '../../pages/html/landing.html';
+    window.location.href = '../../pages/landing.html';
 });

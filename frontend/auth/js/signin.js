@@ -53,7 +53,7 @@ loginForm.addEventListener('submit', function(e) {
         }
 
         // Redirect to main page
-        window.location.href = '../../pages/html/landing.html';
+        window.location.href = '../../pages/landing.html';
     } else {
         alert('Invalid email or password');
     }

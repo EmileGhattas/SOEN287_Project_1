@@ -45,6 +45,9 @@ try{
     $stmt = $pdo->prepare("
     INSERT INTO bookings (user_id, room_id, date, startTime, endTime) VALUES(?,?,?,?,?)");
 
-}catch(PDOException $e){
+    $stmt->execute([$user_id, $room_id, $date, $Stime, $Etime]);
 
+}catch(PDOException $e){
+    http_response_code(400);
+    exit("Error saving booking");
 }

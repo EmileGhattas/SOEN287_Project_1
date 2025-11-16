@@ -63,15 +63,15 @@
             localStorage.removeItem('user');
             localStorage.removeItem('pendingBooking');
             updateMenu();
-            window.location.href = resolvePath('Routes/html/signin.html');
+            window.location.href = resolvePath('routes/html/signin.html');
           });
         }
       } else {
         profileLink.textContent = 'Profile';
-        profileLink.setAttribute('href', resolvePath('Routes/html/signin.html'));
+        profileLink.setAttribute('href', resolvePath('routes/html/signin.html'));
         profileMenu.innerHTML = `
-          <li><a href="${resolvePath('Routes/html/signin.html')}">Sign In</a></li>
-          <li><a href="${resolvePath('Routes/html/signup.html')}">Sign Up</a></li>
+          <li><a href="${resolvePath('routes/html/signin.html')}">Sign In</a></li>
+          <li><a href="${resolvePath('routes/html/signup.html')}">Sign Up</a></li>
         `;
       }
     }

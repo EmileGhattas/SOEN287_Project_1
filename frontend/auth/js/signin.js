@@ -1,60 +1,40 @@
-// Get form and inputs
-const loginForm = document.querySelector('form');
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
+document.addEventListener("DOMContentLoaded", () => {
+    const loginForm = document.querySelector('form');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
 
-loginForm.addEventListener('submit', function(e) {
-    e.preventDefault();
+    loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-    const email = emailInput.value.trim().toLowerCase();
-    const password = passwordInput.value.trim();
+        const email = emailInput.value.trim().toLowerCase();
+        const password = passwordInput.value.trim();
 
-    // Get users from LocalStorage
-    const users = JSON.parse(localStorage.getItem('users')) || [];
+        try {
+            const response = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
 
-    // Find user that matches email and password
-    const user = users.find(u =>
-        (u.email || '').toLowerCase() === email &&
-        (u.password || '').trim() === password
-    );
+            const data = await response.json();
 
-    if (user) {
-        alert(`Welcome back, ${user.username || 'user'}!`);
-        // Save logged-in user to localStorage
-        localStorage.setItem('user', JSON.stringify(user));
+            if (response.ok) {
+                // Login successful
+                console.log("Logged in!", data);
 
-        const pending = JSON.parse(localStorage.getItem("pendingBooking"));
-        if (pending) {
-            const username = user.username || user.email;
-            const bookings = JSON.parse(localStorage.getItem('bookings')) || [];
+                // Save JWT token for staying logged in
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
 
-            // Weekly limit check again
-            const startWeek = new Date(pending.date);
-            startWeek.setDate(startWeek.getDate() - startWeek.getDay());
-            const endWeek = new Date(startWeek);
-            endWeek.setDate(startWeek.getDate() + 6);
-
-            const userWeeklyBookings = bookings.filter(b =>
-                b.user === username &&
-                new Date(b.date) >= startWeek &&
-                new Date(b.date) <= endWeek
-            );
-
-            if (userWeeklyBookings.length >= 2) {
-                alert("You already have 2 bookings this week. Pending booking was not saved.");
-                localStorage.removeItem("pendingBooking");
+                // Redirect after login (adjust as needed)
+                window.location.href = '/booking';
             } else {
-                pending.user = username;
-                bookings.push(pending);
-                localStorage.setItem("bookings", JSON.stringify(bookings));
-                localStorage.removeItem("pendingBooking");
-                alert("Your pending booking has been successfully saved!");
+                // Login failed
+                alert(data.message || "Invalid email or password");
             }
+        } catch (err) {
+            console.error("Login error:", err);
+            alert("An error occurred. Please try again later.");
         }
-
-        // Redirect to main page
-        window.location.href = '../../pages/landing.html';
-    } else {
-        alert('Invalid email or password');
-    }
+    });
 });

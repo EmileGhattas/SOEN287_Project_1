@@ -1,43 +1,40 @@
 const express = require("express");
-const app = express();
-
 const path = require("path");
+const app = express();
+const PORT = 5000;
 
-const signin = require('./Routes/serverSignIn');
-const signup = require('./Routes/serverSignUp');
+// Import auth routes
+const authRoutes = require("./routes/authRoutes");
 
-// Gives us access to everything inside 'frontend' folder
-app.use(express.static(path.join(__dirname, 'frontend')));
-
-//main page connecting all the other files within the pages dir.
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'pages', 'landing.html'));
-});
-
-//Sign in page
-//app.get("/Signin", (req, res) => {
- //   res.sendFile(path.join(__dirname, 'frontend', 'auth', 'signin.html'));
-  //  }
-//)
-
-// sign up page
-app.get("/Signup", (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'auth', 'signup.html'));
-    }
-)
-
-// booking page
-app.get("/booking", (req, res) => {
-
-    res.sendFile(path.join(__dirname, 'frontend', 'facilities', 'signup.html'));
-});
-
-
-
+// Middleware to parse JSON
 app.use(express.json());
 
+// Mount authentication routes under /api/auth
+app.use("/api/auth", authRoutes);
 
+// Serve static files from frontend folder
+app.use(express.static(path.join(__dirname, "frontend")));
 
+// Routes for frontend pages. unsure what pages to .get(). I might delete some later.
+// Landing/Main page
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "frontend", "pages", "landing.html"));
+});
 
-const PORT = 5000;
-app.listen(PORT, () => console.log("Server running"));
+// Sign up page
+app.get("/signup", (req, res) => {
+    res.sendFile(path.join(__dirname, "frontend", "auth", "signup.html"));
+});
+
+// Sign in page
+app.get("/signin", (req, res) => {
+    res.sendFile(path.join(__dirname, "frontend", "auth", "signin.html"));
+});
+
+// Booking page
+app.get("/booking", (req, res) => {
+    res.sendFile(path.join(__dirname, "frontend", "facilities", "bookings.html"));
+});
+
+// Start server
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

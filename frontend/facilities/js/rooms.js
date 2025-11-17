@@ -180,7 +180,7 @@ confirmButton.addEventListener('click', () => {
     booking.user = username;
     saveBooking(booking);
 
-
+    sendRoomBookingToDB(booking);
 
     // Show confirmation
     datetime.style.display = 'none';
@@ -193,5 +193,26 @@ confirmButton.addEventListener('click', () => {
         Room successfully booked!
     `;
 });
+
+function sendRoomBookingToDB(booking) {
+    fetch('../../backend/php/room_booking.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(booking)
+    })
+        .then(function (response) {
+            if (!response.ok) {
+                console.error('Server error:', response.status);
+            }
+            return response.text();
+        })
+        .then(function (text) {
+            console.log('Server response:', text);
+        })
+        .catch(function (err) {
+            console.error('Failed to save booking to database:', err);
+        });
+}
+
 
 

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../shared/style.css">
+    <link rel="stylesheet" href="main.css">
+    <script defer src="js/resources.js"></script>
+    <title>Manage Resources</title>
+</head>
+
+<body>
+<header>
+    <nav class="navbar">
+        <h1 class="logo">
+            <img src="../../assets/image-removebg-preview.png" alt="Website Logo">
+        </h1>
+
+        <ul class="navLinks">
+            <li><a href="main.html">Dashboard</a></li>
+            <li> <a href="bookings1.html"> Manage Bookings</a></li>
+            <li><a class="active" href="resources.html">Manage Resources</a></li>
+            <li><a href="schedules.html">Set Availability</a></li>
+            <li><a href="analytics.html">View Analytics</a></li>
+        </ul>
+    </nav>
+</header>
+
+
+<main class="page">
+
+    <h1 class="title">Set Availability</h1>
+
+   
+    <label for="resourceSelect"><strong>Select Resource:</strong></label>
+    <select id="resourceSelect">
+
+        
+        <option value="Room">Room</option>
+        <option value="Lab">Lab</option>
+        <option value="Equipment">Equipment</option>
+    </select>
+
+    <hr>
+
+    
+    <h2>Working Hours</h2>
+    <div class="schedule-section">
+        <label>Open Time:</label>
+        <input type="time" id="openTime">
+
+        <label>Close Time:</label>
+        <input type="time" id="closeTime">
+
+        <button class="btn" id="saveHoursBtn">Save Hours</button>
+    </div>
+
+    <hr>
+
+    <h2>Exceptions </h2>
+    <div class="schedule-section">
+
+
+        <label>Date:</label>
+        <input type="date" id="exceptionDate">
+
+        <label>Open:</label>
+        <input type="time" id="exceptionOpen">
+
+        <label>Close:</label>
+        <input type="time" id="exceptionClose">
+
+        <button class="btn" id="addExceptionBtn">Add Exception</button>
+    </div>
+
+    <ul id="exceptionList"></ul>
+
+    <hr>
+
+    
+    <h2>Blackout Dates</h2>
+    <div class="schedule-section">
+        <label>Date:</label>
+        <input type="date" id="blackoutDate">
+
+        <button class="btn" id="addBlackoutBtn">Add Blackout</button>
+    </div>
+
+    <ul id="blackoutList"></ul>
+
+</main>
+
+<script defer src="js/schedules.js"></script>

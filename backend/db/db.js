@@ -2,7 +2,7 @@
 const mysql = require("mysql2/promise");
 require("dotenv").config();
 
-// Needs editing. We can secure it using local .env files or just hardcode it making it less secure.
+// Possible Need of editing. We can secure it using local .env files or just hardcode it making it less secure.
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,

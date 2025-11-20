@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign In</title>
+    <link rel="stylesheet" href="../shared/style.css"><!-- Path editing? -->
+    <link rel="stylesheet" href="css/signin.css">
+</head>
+<body class="signin-page">
+<header>
+    <nav class="navbar">
+        <h1 class="logo">
+            <img src="../../assets/image-removebg-preview.png" alt="Website Logo"> <!-- Path editing? -->
+        </h1>
+
+        <ul class="navLinks">
+            <li><a href="/pages/landing.html">Home</a></li>
+            <li><a href="/pages/about.html">About</a></li>
+            <li class="dropdown">
+                <a href="/facilities/bookings.html">Bookings</a>
+                <ul class="dropdown-menu">
+                    <li><a href="/facilities/bookings.html">My Bookings</a></li>
+                    <li><a href="/facilities/rooms.html">Rooms</a></li>
+                    <li><a href="/facilities/labs.html">Labs</a></li>
+                    <li><a href="/facilities/equipment.html">Equipment</a></li>
+                </ul>
+            </li>
+            <li><a href="/pages/contact.html">Contact</a></li>
+            <li class="dropdown" id="profileDropdown">
+                <a href="#" id="profileLink" class="active">Log In</a>
+                <ul class="dropdown-menu" id="profileMenu">
+                    <!-- Menu items will be added dynamically through js -->
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<main id="Main" class="auth-container">
+    <div id="WelcomeB">
+        <h1 class="Whitetxt">Welcome Back!</h1>
+    </div>
+    <div id="S-I">
+        <h3 id="greeting" class="Whitetxt">Great to see you again!</h3>
+        <form action="/auth/adminsignin" method="POST">
+            <label for="email" class="Whitetxt">Admin Email*</label>
+            <input class="bar barcolor" type="email" id="email" name="email" required>
+
+            <label for="password" class="Whitetxt">Password*</label>
+            <input class="bar barcolor" type="password" id="password" name="password" required>
+
+            <input class="barcolor bar loginbar" type="submit" value="Log in" id="submitbtn">
+
+        </form>
+    </div>
+</main>
+
+<footer class="contact">
+    <h2>Contact Us</h2>
+    <p>Reach out through any of the options below:</p>
+
+    <div class="contact-info">
+        <p><strong>Phone:</strong> (438) 345 9821</p>
+        <p><strong>Email:</strong> learnspace@gmail.com</p>
+    </div>
+
+    <div class="social-links">
+        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a>
+        <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer">Twitter</a>
+    </div>
+
+    <p class="footer-note">2025 Learn Space</p>
+</footer>
+
+<script src="../shared/profile-menu.js"></script><!-- Path editing? -->
+<script src="js/signin.js"></script>
+</body>
+</html>

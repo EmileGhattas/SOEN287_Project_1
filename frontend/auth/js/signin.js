@@ -26,8 +26,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
 
-                // Redirect after login (adjust as needed)
-                window.location.href = '/booking';
+                if (data.user.admin === true) {
+                    window.location.href = '/admin/main.html'; // Admin main page
+                } else {
+                    window.location.href = '/pages/landing.html'; // Student/main user page
+                }
             } else {
                 // Login failed
                 alert(data.message || "Invalid email or password");

@@ -15,7 +15,7 @@ const findByEmail = async (email) => {
 // Create user
 const createUser = async ({ name, email, passwordHash }) => {
     const [result] = await db.execute(
-        "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
+        "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
         [name, email, passwordHash]
     );
     return { id: result.insertId, name, email };

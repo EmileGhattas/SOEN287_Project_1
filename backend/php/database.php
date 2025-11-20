@@ -1,15 +1,15 @@
 <?php
 
 $DB_HOST = 'localhost';
-$DB_NAME = '287_D';
+$DB_NAME = 'learnspace';
 $DB_USER = 'root';
-$DB_PASS = '';
+$DB_PASSWORD = 'yourpassword';
 
 
 try {
     $dsn = "mysql:host=$DB_HOST;dbname=$DB_NAME;charset=utf8mb4";
 
-    $pdo = new PDO($dsn, $DB_USER, $DB_PASS);
+    $pdo = new PDO($dsn, $DB_USER, $DB_PASSWORD);
 
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 

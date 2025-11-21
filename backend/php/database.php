@@ -24,7 +24,38 @@ function get_user_username($username){
     $conn = get_connection();
 
     $stmt = $conn->prepare(
-"SELECT user_id, users.username, password, is_admin FROM users WHERE username = ?");
+"SELECT user_id, username, password, is_admin FROM users WHERE username = ?");
+
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
+    $conn->close();
+
+    return $user;
+}
+
+//This is for regular user not admin
+function create_user($username, $password, $email){
+    $conn = get_connection();
+
+    $stmt = $conn->prepare(
+        "INSERT INTO users (username, password, email, is_admin) VALUES (?, ?, ?, FALSE)");
+
+    $stmt->bind_param("ssi", $username, $password, $email);
+
+    $ok = $stmt->execute();
+
+    $stmt->close();
+    $conn->close();
+    return $ok;
+}
+
+function create_lab_booking($user_id, $lab_id, $booking_date, $time_slot, &$errorMsg) {
+    $conn = get_connection();
+
+
 }
 
 

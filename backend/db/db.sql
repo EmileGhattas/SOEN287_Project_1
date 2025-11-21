@@ -2,7 +2,6 @@ USE 287_D;
 
 SET FOREIGN_KEY_CHECKS =0;
 
-
 DROP TABLE IF EXISTS equipment_bookings;
 DROP TABLE IF EXISTS lab_bookings;
 DROP TABLE IF EXISTS room_bookings;

@@ -22,38 +22,76 @@ if (!$userId || !$roomName || !$date || !$start || !$end) {
     exit("Missing required fields.");
 }
 
-$checkUser = $pdo->prepare("SELECT user_id FROM users WHERE user_id = ?");
-$checkUser->execute([$userId]);
-if (!$checkUser->fetch()) {
+$conn = get_connection();
+
+$stmt = $conn->prepare("SELECT user_id FROM users WHERE user_id = ?");
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$result = $stmt->get_result();
+if (!$result->fetch_assoc()) {
+    $stmt->close();
+    $conn->close();
     http_response_code(400);
     exit("User not found.");
 }
+$stmt->close();
 
-$checkRoom = $pdo->prepare("SELECT room_id FROM rooms WHERE name = ?");
-$checkRoom->execute([$roomName]);
-$room = $checkRoom->fetch(PDO::FETCH_ASSOC);
+// --- VALIDATE ROOM ---
+$stmt = $conn->prepare("SELECT room_id FROM rooms WHERE name = ?");
+$stmt->bind_param("s", $roomName);
+$stmt->execute();
+$result = $stmt->get_result();
+$room = $result->fetch_assoc();
+$stmt->close();
+
 if (!$room) {
+    $conn->close();
     http_response_code(400);
     exit("Room not found.");
 }
 
+$roomId = (int)$room['room_id'];
+
+if (strlen($start) == 5) $start .= ':00';
+if (strlen($end) == 5)   $end   .= ':00';
+
+$conn->begin_transaction();
+
 try {
-    $stmt = $pdo->prepare("
-        INSERT INTO room_bookings (user_id, room_id, booking_date, start_time, end_time)
-        VALUES (?, ?, ?, ?, ?)
+    $stmt = $conn->prepare("
+        INSERT INTO bookings (user_id, booking_type, booking_date)
+        VALUES (?, 'room', ?)
     ");
+    $stmt->bind_param("is", $userId, $date);
 
-    $stmt->execute([
-        $userId,
-        $room['room_id'],
-        $date,
-        $start . ':00',
-        $end   . ':00'
-    ]);
+    if (!$stmt->execute()) {
+        throw new Exception("Error creating booking: " . $stmt->error);
+    }
 
-    echo "Room booking saved ";
+    $bookingId = $stmt->insert_id;
+    $stmt->close();
 
-} catch (PDOException $e) {
+    $stmt = $conn->prepare("
+        INSERT INTO room_bookings (booking_id, room_id, start_time, end_time)
+        VALUES (?, ?, ?, ?)
+    ");
+    $stmt->bind_param("iiss", $bookingId, $roomId, $start, $end);
+
+    if (!$stmt->execute()) {
+        throw new Exception("Error creating room booking: " . $stmt->error);
+    }
+
+    $stmt->close();
+
+    $conn->commit();
+    $conn->close();
+
+    echo "Room booking saved.";
+
+} catch (Exception $e) {
+    $conn->rollback();
+    $conn->close();
+
     http_response_code(400);
     exit("Error saving booking: " . $e->getMessage());
 }

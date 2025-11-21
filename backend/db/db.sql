@@ -1,4 +1,5 @@
-USE 287_D;
+CREATE DATABASE IF NOT EXISTS learnspace;
+USE learnspace;
 
 SET FOREIGN_KEY_CHECKS =0;
 
@@ -82,7 +83,7 @@ created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
 CONSTRAINT booking_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 
-)ENGINE=InnoDB;;
+)ENGINE=InnoDB;
 
 
 CREATE TABLE room_bookings(

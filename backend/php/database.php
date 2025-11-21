@@ -43,7 +43,7 @@ function create_user($username, $password, $email){
     $stmt = $conn->prepare(
         "INSERT INTO users (username, password, email, is_admin) VALUES (?, ?, ?, FALSE)");
 
-    $stmt->bind_param("ssi", $username, $password, $email);
+    $stmt->bind_param("sss", $username, $password, $email);
 
     $ok = $stmt->execute();
 
@@ -56,15 +56,13 @@ function create_booking($user_id, $booking_type, $booking_date, $errorMessage){
 
     $conn = get_connection();
 
-    $stmt = $conn->prepare("
-        INSERT INTO bookings (user_id, booking_type, booking_date)
-        VALUES (?, ?, ?)
-    ");
+    $stmt = $conn->prepare("INSERT INTO bookings (user_id, booking_type, booking_date) VALUES (?, ?, ?)");
+
     $stmt->bind_param("iss", $user_id, $booking_type, $booking_date);
 
     $ok = $stmt->execute();
     if (!$ok) {
-        $errorMsg = "Database error while creating booking.";
+        $errorMessage = "Database error while creating booking:". $stmt->error;
         $stmt->close();
         $conn->close();
         return false;
@@ -74,5 +72,5 @@ function create_booking($user_id, $booking_type, $booking_date, $errorMessage){
 
     $stmt->close();
     $conn->close();
-    return true;
+    return $booking_id;
 }

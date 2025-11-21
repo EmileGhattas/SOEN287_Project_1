@@ -15,20 +15,20 @@
       </h1>
 
       <ul class="navLinks">
-        <li><a href="../pages/landing">Home</a></li>
-        <li><a href="../pages/about">About</a></li>
+        <li><a href="/frontend/pages/landing.html">Home</a></li>
+        <li><a href="/frontend/pages/about.html">About</a></li>
 
         <li class="dropdown">
-          <a class="active" href="bookings">Bookings</a>
+          <a class="active" href="/frontend/facilities/bookings.html">Bookings</a>
           <ul class="dropdown-menu">
-            <li><a class="active" href="bookings">My Bookings</a></li>
-            <li><a href="rooms">Rooms</a></li>
-            <li><a href="labs">Labs</a></li>
-            <li><a href="equipment">Equipment</a></li>
+            <li><a class="active" href="/frontend/facilities/bookings.html">My Bookings</a></li>
+            <li><a href="/frontend/facilities/rooms.html">Rooms</a></li>
+            <li><a href="/frontend/facilities/labs.html">Labs</a></li>
+            <li><a href="/frontend/facilities/equipment.html">Equipment</a></li>
           </ul>
         </li>
 
-        <li><a href="../pages/contact">Contact</a></li>
+        <li><a href="/frontend/pages/contact.html">Contact</a></li>
 
         <li class="dropdown" id="profileDropdown">
           <a href="#" id="profileLink">Log In</a>
@@ -61,7 +61,7 @@
 
     <section id="bookingsEmpty" class="bookings-empty" style="display:none;">
       <strong>No bookings to show.</strong>
-      <p>When you reserve a room or equipment, it will appear here. Try booking from <a href="rooms">Rooms</a> or <a href="equipment">Equipment</a>.</p>
+      <p>When you reserve a room or equipment, it will appear here. Try booking from <a href="/frontend/facilities/rooms.html">Rooms</a> or <a href="/frontend/facilities/equipment.html">Equipment</a>.</p>
     </section>
 
     <section id="bookingsGrid" class="bookings-grid" aria-live="polite"></section>
@@ -87,5 +87,6 @@
 
   <script src="../shared/profile-menu.js"></script>
   <script src="js/bookings.js"></script>
+        <script src="../shared/url-cleanup.js"></script>
 </body>
 </html>

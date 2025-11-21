@@ -14,18 +14,18 @@
             </h1>
 
             <ul class="navLinks">
-                <li><a href="../pages/landing">Home</a></li>
-                <li><a href="../pages/about">About</a></li>
+                <li><a href="/frontend/pages/landing.html">Home</a></li>
+                <li><a href="/frontend/pages/about.html">About</a></li>
                 <li class="dropdown">
-                    <a href="../facilities/bookings">Bookings</a>
+                    <a href="/frontend/facilities/bookings.html">Bookings</a>
                     <ul class="dropdown-menu">
-                        <li><a href="../facilities/bookings">My Bookings</a></li>
-                        <li><a href="../facilities/rooms">Rooms</a></li>
-                        <li><a href="../facilities/labs">Labs</a></li>
-                        <li><a href="../facilities/equipment">Equipment</a></li>
+                        <li><a href="/frontend/facilities/bookings.html">My Bookings</a></li>
+                        <li><a href="/frontend/facilities/rooms.html">Rooms</a></li>
+                        <li><a href="/frontend/facilities/labs.html">Labs</a></li>
+                        <li><a href="/frontend/facilities/equipment.html">Equipment</a></li>
                     </ul>
                 </li>
-                <li><a href="../pages/contact">Contact</a></li>
+                <li><a href="/frontend/pages/contact.html">Contact</a></li>
                 <li class="dropdown" id="profileDropdown">
                     <a href="#" id="profileLink" class="active">Create Account</a>
                     <ul class="dropdown-menu" id="profileMenu">
@@ -70,11 +70,11 @@
 
                 <label class="terms-label">
                     <input type="checkbox" id="terms" name="terms" required>
-                    <span>By clicking 'Create Account' you agree to our <a href="../pages/terms-of-service" class="hyperlinks" target="_blank" rel="noopener noreferrer">Terms of Service</a> and acknowledge our <a href="../pages/privacy-policy" class="hyperlinks" target="_blank" rel="noopener noreferrer">Privacy Policy</a></span>
+                    <span>By clicking 'Create Account' you agree to our <a href="/frontend/pages/terms-of-service.html" class="hyperlinks" target="_blank" rel="noopener noreferrer">Terms of Service</a> and acknowledge our <a href="/frontend/pages/privacy-policy.html" class="hyperlinks" target="_blank" rel="noopener noreferrer">Privacy Policy</a></span>
                 </label>
 
                 <input class="barcolor bar CAbar" type="submit" value="Create Account" id="submitbtn">
-                <a href="signin" class="hyperlinks">Already have an account? Log in</a>
+                <a href="/auth/signin" class="hyperlinks">Already have an account? Log in</a>
             </form>
         </div>
     </main>
@@ -99,5 +99,6 @@
 
     <script src="../shared/profile-menu.js"></script>
     <script src="js/signup.js"></script>
+        <script src="../shared/url-cleanup.js"></script>
 </body>
 </html>

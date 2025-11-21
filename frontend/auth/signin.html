@@ -14,18 +14,18 @@
             </h1>
 
             <ul class="navLinks">
-                <li><a href="../pages/landing">Home</a></li>
-                <li><a href="../pages/about">About</a></li>
+                <li><a href="/frontend/pages/landing.html">Home</a></li>
+                <li><a href="/frontend/pages/about.html">About</a></li>
                 <li class="dropdown">
-                    <a href="../facilities/bookings">Bookings</a>
+                    <a href="/frontend/facilities/bookings.html">Bookings</a>
                     <ul class="dropdown-menu">
-                        <li><a href="../facilities/bookings">My Bookings</a></li>
-                        <li><a href="../facilities/rooms">Rooms</a></li>
-                        <li><a href="../facilities/labs">Labs</a></li>
-                        <li><a href="../facilities/equipment">Equipment</a></li>
+                        <li><a href="/frontend/facilities/bookings.html">My Bookings</a></li>
+                        <li><a href="/frontend/facilities/rooms.html">Rooms</a></li>
+                        <li><a href="/frontend/facilities/labs.html">Labs</a></li>
+                        <li><a href="/frontend/facilities/equipment.html">Equipment</a></li>
                     </ul>
                 </li>
-                <li><a href="../pages/contact">Contact</a></li>
+                <li><a href="/frontend/pages/contact.html">Contact</a></li>
                 <li class="dropdown" id="profileDropdown">
                     <a href="#" id="profileLink" class="active">Log In</a>
                     <ul class="dropdown-menu" id="profileMenu">
@@ -50,7 +50,7 @@
                 <input class="bar barcolor" type="password" id="password" name="password" required>
 
                 <input class="barcolor bar loginbar" type="submit" value="Log in" id="submitbtn">
-                <p class="Whitetxt">Need an account? <a href="signup" class="hyperlinks">Register</a></p>
+                <p class="Whitetxt">Need an account? <a href="/auth/signup" class="hyperlinks">Register</a></p>
                 <p class="Whitetxt">log in as an admin? <a href="/auth/adminsignin" class="hyperlinks">log in</a></p>
             </form>
         </div>
@@ -76,5 +76,6 @@
 
     <script src="../shared/profile-menu.js"></script>
     <script src="js/signin.js"></script>
+        <script src="../shared/url-cleanup.js"></script>
 </body>
 </html>

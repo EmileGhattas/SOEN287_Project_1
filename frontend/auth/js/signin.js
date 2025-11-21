@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (data.user.admin === true) {
                     window.location.href = '/admin/main'; // Admin main page
                 } else {
-                    window.location.href = '/pages/landing'; // Student/main user page
+                    window.location.href = '/'; // Student/main user page
                 }
             } else {
                 // Login failed

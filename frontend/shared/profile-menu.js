@@ -52,6 +52,7 @@
         profileLink.textContent = 'Profile';
         profileLink.setAttribute('href', '#');
         profileMenu.innerHTML = `
+          <li><a href="${resolvePath('auth/myprofile.html')}">My Profile</a></li>
           <li><a href="${resolvePath('facilities/bookings.html')}">My Bookings</a></li>
           <li><a href="#" id="logout">Logout</a></li>
         `;

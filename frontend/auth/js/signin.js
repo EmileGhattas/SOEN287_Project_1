@@ -27,9 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 localStorage.setItem('user', JSON.stringify(data.user));
 
                 if (data.user.admin === true) {
-                    window.location.href = '/admin/main.html'; // Admin main page
+                    window.location.href = '/admin/main'; // Admin main page
                 } else {
-                    window.location.href = '/pages/landing.html'; // Student/main user page
+                    window.location.href = '/pages/landing'; // Student/main user page
                 }
             } else {
                 // Login failed

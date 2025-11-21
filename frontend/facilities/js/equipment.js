@@ -112,8 +112,8 @@ confirmButton.addEventListener('click', () => {
         alert("Please sign in before booking.");
         const pending = { equipment: selectedEquipment, date };
         localStorage.setItem("pendingEquipmentBooking", JSON.stringify(pending));
-        localStorage.setItem("redirectAfterLogin", "equipment.html");
-        window.location.href = "../../auth/signin.html";
+        localStorage.setItem("redirectAfterLogin", "equipment");
+        window.location.href = "../../auth/signin";
         return;
     }
 

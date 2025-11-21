@@ -2,19 +2,29 @@
 
 $DB_HOST = 'localhost';
 $DB_NAME = 'learnspace';
-$DB_USER = 'root';
+$DB_USER = 'roots';
 $DB_PASSWORD = 'yourpassword';
 
 
-try {
-    $dsn = "mysql:host=$DB_HOST;dbname=$DB_NAME;charset=utf8mb4";
+function get_connection() {
+    global $DB_HOST, $DB_NAME, $DB_USER, $DB_PASSWORD;
 
-    $pdo = new PDO($dsn, $DB_USER, $DB_PASSWORD);
+    $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASSWORD, $DB_NAME);
 
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
 
-} catch (PDOException $e) {
-    die("MySQL connection failed: " . $e->getMessage());
+    $conn->set_charset("utf8mb4");
+    return $conn;
+}
+
+
+function get_user_username($username){
+    $conn = get_connection();
+
+    $stmt = $conn->prepare(
+"SELECT user_id, users.username, password, is_admin FROM users WHERE username = ?");
 }
 
 

@@ -3,6 +3,7 @@ const path = require("path");
 const app = express();
 const PORT = 5000;
 const frontendPath = path.join(__dirname, "../frontend");
+const staticHtmlOptions = { extensions: ["html"] };
 
 // Import auth routes
 const authRoutes = require("./routes/authRoutes");
@@ -14,11 +15,11 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 
 // Serve static files from frontend folder and allow extensionless HTML routes
-app.use(
-    express.static(frontendPath, {
-        extensions: ["html"],
-    })
-);
+app.use(express.static(frontendPath, staticHtmlOptions));
+app.use(express.static(path.join(frontendPath, "pages"), staticHtmlOptions));
+app.use("/facilities", express.static(path.join(frontendPath, "facilities"), staticHtmlOptions));
+app.use("/admin", express.static(path.join(frontendPath, "admin"), staticHtmlOptions));
+app.use("/auth", express.static(path.join(frontendPath, "auth"), staticHtmlOptions));
 
 // Routes for frontend pages. unsure what pages to .get(). I might delete some later.
 // Landing/Main page

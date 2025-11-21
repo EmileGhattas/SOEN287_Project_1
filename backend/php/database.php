@@ -52,10 +52,27 @@ function create_user($username, $password, $email){
     return $ok;
 }
 
-function create_lab_booking($user_id, $lab_id, $booking_date, $time_slot, &$errorMsg) {
+function create_booking($user_id, $booking_type, $booking_date, $errorMessage){
+
     $conn = get_connection();
 
+    $stmt = $conn->prepare("
+        INSERT INTO bookings (user_id, booking_type, booking_date)
+        VALUES (?, ?, ?)
+    ");
+    $stmt->bind_param("iss", $user_id, $booking_type, $booking_date);
 
+    $ok = $stmt->execute();
+    if (!$ok) {
+        $errorMsg = "Database error while creating booking.";
+        $stmt->close();
+        $conn->close();
+        return false;
+    }
+
+    $booking_id = $stmt->insert_id;
+
+    $stmt->close();
+    $conn->close();
+    return true;
 }
-
-

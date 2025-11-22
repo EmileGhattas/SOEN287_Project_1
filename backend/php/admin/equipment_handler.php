@@ -1,6 +1,8 @@
 <?php
 
-require_once "database.php";
+require_once __DIR__ . '/../database.php';
+
+$pdo = get_connection();
 
 $data = json_decode(file_get_contents("php://input"), true);
 
@@ -56,10 +58,6 @@ if($action === "create"){
 
 
 /* update equipment */
-
-
-
-$action = isset($data['action']) ? $data['action'] : null;
 
 
 if ($action === "edit") {

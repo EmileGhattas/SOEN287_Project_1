@@ -1,27 +1,18 @@
-`<?php
+<?php
 
-require_once "database.php";
+require_once __DIR__ . '/../database.php';
+
+$pdo = get_connection();
 
 $data = json_decode(file_get_contents("php://input"), true);
-
 
 if (!$data) {
     http_response_code(400);
     exit("No data received.");
 }
 
-
-
-
-
 /*create a lab*/
-
-
-
-
-
 $action = isset($data['action']) ? $data['action'] : null;
-
 
 if($action === "create"){
 
@@ -33,12 +24,9 @@ if($action === "create"){
 
     $name = $data['name'];
 
-
-
     try {
         $stmt = $pdo->prepare("INSERT INTO labs (name) VALUES (?)");
         $stmt->execute([$name]);
-
 
 
         echo json_encode(["success" => true, "message" => "Lab created"]);
@@ -51,19 +39,9 @@ if($action === "create"){
 }
 
 
-
-
 /*update lab */
 
-
-
-
-
-
-
-
 if($action === "edit"){
-
 
     if(empty($data['name'])){
         echo json_encode(["error"=> "lab name is required"]);
@@ -72,13 +50,9 @@ if($action === "edit"){
 
 
 
-
-    
     $id = intval($data['lab_id']);
 
      $name = $data['name'];
-
-
 
 
 
@@ -90,11 +64,10 @@ if($action === "edit"){
         echo json_encode(["success" => true, "message" => "Lab updated"]);
     } catch (PDOException $e) {
         echo json_encode(["error" => "Error updating lab: " . $e->getMessage()]);
-    
+
     }
 
     exit;
-
 
 
 
@@ -103,12 +76,7 @@ if($action === "edit"){
 
 /*delete lab*/
 
-
-
-
-
 if ($action === "delete") {
-
 
 
     if (empty($data['lab_id'])) {
@@ -137,7 +105,3 @@ if ($action === "delete") {
 echo json_encode(["error" => "Unknown action"]);
 
 ?>
-
-
-
-

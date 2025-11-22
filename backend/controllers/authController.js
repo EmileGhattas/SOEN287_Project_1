@@ -2,7 +2,8 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
-const { validationResult } = require("express-validator");
+const {validationResult } = require("express-validator");
+const JWT_SECRET = "supersecretkey123";
 
 
 const SALT_ROUNDS = 10;
@@ -28,14 +29,15 @@ exports.signup = async (req, res) => {
 
 
         const token = jwt.sign(
-            { id: user.id, email: user.email },
-            process.env.JWT_SECRET,
+            { user_id: user.user_id, email: user.email },
+            JWT_SECRET,
             { expiresIn: "1d" }
         );
 
 
         res.status(201).json({ user, token });
     } catch (err) {
+        console.error("Signup error:", err);
         res.status(500).json({ message: "Server error" });
     }
 };
@@ -59,13 +61,13 @@ exports.login = async (req, res) => {
 
 
         const token = jwt.sign(
-            { id: user.user_id, email: user.email, admin: user.is_admin },
-            process.env.JWT_SECRET,
+            { user_id: user.user_id, email: user.email, admin: user.is_admin },
+            JWT_SECRET,
             { expiresIn: "1d" }
         );
 
 
-        res.json({ user: { id: user.user_id, username: user.username, email: user.email, admin: user.is_admin }, token });
+        res.json({ user: { user_id: user.user_id, username: user.username, email: user.email, admin: user.is_admin }, token });
     } catch (err) {
         res.status(500).json({ message: "Server error" });
     }

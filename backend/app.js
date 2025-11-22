@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 const app = express();
+const db = require("./db/db");
 const PORT = 5000;
 
 // Import auth routes
@@ -18,7 +19,8 @@ app.use(express.static(path.join(__dirname, "frontend")));
 // Routes for frontend pages. unsure what pages to .get(). I might delete some later.
 // Landing/Main page
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "frontend", "pages", "landing.html"));
+    res.sendFile(path.join(__dirname, "frontend", "pages", "landing.htm"));
+
 });
 
 // Sign up page

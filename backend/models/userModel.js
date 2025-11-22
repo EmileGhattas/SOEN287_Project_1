@@ -18,7 +18,7 @@ const createUser = async ({ username, email, passwordHash }) => {
         "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
         [username, email, passwordHash]
     );
-    return { id: result.insertId, username, email, is_admin:false};
+    return { user_id: result.insertId, username, email, is_admin:false};
 };
 
 

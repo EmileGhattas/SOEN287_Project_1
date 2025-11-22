@@ -4,10 +4,10 @@ require("dotenv").config();
 
 // Possible Need of editing. We can secure it using local .env files or just hardcode it making it less secure.
 const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    host: "localhost",
+    user: "roots",
+    password: "yourpassword",
+    database: "287_d",
 });
 
 /*

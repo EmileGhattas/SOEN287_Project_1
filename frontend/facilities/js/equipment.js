@@ -148,3 +148,17 @@ confirmButton.addEventListener('click', () => {
     `;
     updateEquipmentAvailability();
 });
+
+
+function sendEquipmentBookingToDB(booking) {
+    fetch('../../backend/php/bookings.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            type: "equipment",
+            userId: booking.userId,
+            equipmentId: booking.equipmentId,
+            date: booking.date
+        })
+    });
+}

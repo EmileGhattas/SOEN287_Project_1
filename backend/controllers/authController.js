@@ -54,18 +54,18 @@ exports.login = async (req, res) => {
         if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
 // fix/edit needed. Possible column name mismatch
-        const match = await bcrypt.compare(password, user.password_hash);
+        const match = await bcrypt.compare(password, user.password);
         if (!match) return res.status(401).json({ message: "Invalid credentials" });
 
 
         const token = jwt.sign(
-            { id: user.id, email: user.email, admin: user.admin },
+            { id: user.user_id, email: user.email, admin: user.is_admin },
             process.env.JWT_SECRET,
             { expiresIn: "1d" }
         );
 
 
-        res.json({ user: { id: user.id, name: user.name, email: user.email, admin: user.admin }, token });
+        res.json({ user: { id: user.user_id, name: user.username, email: user.email, admin: user.is_admin }, token });
     } catch (err) {
         res.status(500).json({ message: "Server error" });
     }

@@ -158,3 +158,18 @@ confirmButton.addEventListener('click', () => {
 
     updateLabAvailability();
 });
+
+
+function sendLabBookingToDB(booking) {
+    fetch('../../backend/php/bookings.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            type: "lab",
+            userId: booking.userId,
+            labId: LAB_MAP[selectedLab],
+            date: booking.date,
+            slot: booking.slot
+        })
+    });
+}

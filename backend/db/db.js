@@ -15,7 +15,7 @@ What the .env would relatively look like:
 
 # MySQL Database Configuration
 DB_HOST=localhost       # database host
-DB_USER=root            # your MySQL username
+DB_USER=roots          # your MySQL username
 DB_PASSWORD=yourpassword  # your MySQL password
 DB_NAME=learnspace      # your database name
 

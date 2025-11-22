@@ -198,20 +198,16 @@ function sendRoomBookingToDB(booking) {
     fetch('../../backend/php/room_booking.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(booking)
+        body: JSON.stringify({            type: "room",
+            userId: booking.userId,
+            date: booking.date,
+            roomId: booking.roomId,
+            startTime: booking.startTime,
+            endTime: booking.endTime})
     })
-        .then(function (response) {
-            if (!response.ok) {
-                console.error('Server error:', response.status);
-            }
-            return response.text();
-        })
-        .then(function (text) {
-            console.log('Server response:', text);
-        })
-        .catch(function (err) {
-            console.error('Failed to save booking to database:', err);
-        });
+        .then(res => res.json())
+        .then(data => console.log("Saved:", data))
+        .catch(err => console.error(err));
 }
 
 

@@ -1,35 +1,34 @@
-// This file lets us talk to the database to read or write user information.
+// Database connection pool for MySQL queries
 const mysql = require("mysql2/promise");
-require("dotenv").config();
+const dotenv = require("dotenv");
 
-// Possible Need of editing. We can secure it using local .env files or just hardcode it making it less secure.
+dotenv.config();
+
+const {
+    DB_HOST = "localhost",
+    DB_USER = "roots",
+    DB_PASSWORD = "yourpassword",
+    DB_NAME = "287_d",
+    DB_PORT = 3306,
+} = process.env;
+
 const pool = mysql.createPool({
-    host: "localhost",
-    user: "roots",
-    password: "yourpassword",
-    database: "287_d",
+    host: DB_HOST,
+    user: DB_USER,
+    password: DB_PASSWORD,
+    database: DB_NAME,
+    port: Number(DB_PORT),
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
 });
 
-/*
-What the .env would relatively look like:
-
-# MySQL Database Configuration
-DB_HOST=localhost       # database host
-DB_USER=roots          # your MySQL username
-DB_PASSWORD=yourpassword  # your MySQL password
-DB_NAME=287_d          # your database name
-
-# JWT Configuration
-JWT_SECRET=supersecretkey  # secret key to sign JWT tokens
-
-# Server Configuration
-PORT=5000               # port your Node.js server will listen on
-
-
- */
-
+// Verify the pool can obtain a connection at startup
+pool
+    .getConnection()
+    .then((connection) => connection.release())
+    .catch((err) => {
+        console.error("Unable to establish a database connection:", err.message);
+    });
 
 module.exports = pool;
-
-
-

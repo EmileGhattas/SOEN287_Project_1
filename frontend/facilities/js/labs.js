@@ -164,7 +164,10 @@ confirmButton.addEventListener('click', () => {
         userId: user.id,
         labId: LAB_MAP[selectedLab],
         user: user.username,
-    };    saveBooking(booking);
+    };
+
+    saveBooking(booking);
+    sendLabBookingToDB(booking);
 
     document.querySelector('.lab-selection').style.display = 'none';
     datetime.style.display = 'none';

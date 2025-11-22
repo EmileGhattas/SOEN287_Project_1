@@ -142,6 +142,7 @@ confirmButton.addEventListener('click', () => {
         user: user.username,
     };
     saveBooking(booking);
+    sendEquipmentBookingToDB(booking);
 
     document.querySelector('.equipment-selection').style.display = 'none';
     datetime.style.display = 'none';

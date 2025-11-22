@@ -14,7 +14,7 @@ exports.signup = async (req, res) => {
         if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
 
-        const { name, email, password } = req.body;
+        const { username, email, password } = req.body;
 
 
         const existing = await User.findByEmail(email);
@@ -24,7 +24,7 @@ exports.signup = async (req, res) => {
         const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
 
-        const user = await User.createUser({ name, email, passwordHash });
+        const user = await User.createUser({ username, email, passwordHash });
 
 
         const token = jwt.sign(
@@ -65,7 +65,7 @@ exports.login = async (req, res) => {
         );
 
 
-        res.json({ user: { id: user.user_id, name: user.username, email: user.email, admin: user.is_admin }, token });
+        res.json({ user: { id: user.user_id, username: user.username, email: user.email, admin: user.is_admin }, token });
     } catch (err) {
         res.status(500).json({ message: "Server error" });
     }

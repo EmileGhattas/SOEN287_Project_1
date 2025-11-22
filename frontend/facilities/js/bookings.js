@@ -88,10 +88,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('clearMyBookings').addEventListener('click', () => {
     if (!confirm('Remove locally stored bookings from this device?')) return;
-    localStorage.removeItem('Booking');
-    localStorage.removeItem('booking');
-    localStorage.removeItem('bookings');
-    refresh();
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user || !user.id) {
+          alert("You must be logged in to clear server bookings.");
+      } else {
+          fetch('../../backend/php/delete_booking.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId: user.id })
+          })
+              .then(res => res.json())
+              .then(data => {
+                  console.log("Deleted bookings from DB:", data);
+              })
+              .catch(err => console.error("Delete bookings error:", err));
+      }
+
+      // Always clear local copies too
+      localStorage.removeItem('Booking');
+      localStorage.removeItem('booking');
+      localStorage.removeItem('bookings');
+      localStorage.removeItem('labBookings');
+      localStorage.removeItem('pendingBooking');
+      localStorage.removeItem('pendingLabBooking');
+      localStorage.removeItem('pendingEquipmentBooking');
+      refresh();
   });
 
 

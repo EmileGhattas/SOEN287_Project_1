@@ -1,7 +1,7 @@
 <?php
 
 $DB_HOST = 'localhost';
-$DB_NAME = 'learnspace';
+$DB_NAME = '287_d';
 $DB_USER = 'roots';
 $DB_PASSWORD = 'yourpassword';
 

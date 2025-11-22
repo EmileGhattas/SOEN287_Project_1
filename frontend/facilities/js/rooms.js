@@ -17,6 +17,21 @@ function saveBooking(booking) {
     localStorage.setItem('Booking', JSON.stringify(booking));
 }
 
+const ROOM_MAP = {
+    'Room 1': 1,
+    'Room 2': 2,
+    'Room 3': 3,
+    'Room 4': 4,
+    'Room 5': 5,
+    'Room 6': 6,
+    'Room 7': 7,
+    'Room 8': 8,
+    'Room 9': 9,
+    'Room 10': 10,
+    'Conference Room A': 11,
+    'Conference Room B': 12,
+};
+
 const rooms = document.querySelectorAll('.room');
 const dateInput = document.getElementById('date');
 const toDate = document.getElementById('toDate');
@@ -142,13 +157,14 @@ confirmButton.addEventListener('click', () => {
     // Check login status
     const user = JSON.parse(localStorage.getItem("user"));
 
-    const booking = {
-        userId: user,
+    const pendingBooking = {
+        type: "room",
         room: selectedRoom,
         date: inDate,
         startTime: inStartTime,
         endTime: inEndTime,
     };
+
 
     // If not logged in → save booking temporarily & redirect
     if (!user) {
@@ -157,6 +173,12 @@ confirmButton.addEventListener('click', () => {
         window.location.href = "../../auth/signin.html";
         return;
     }
+    const booking = {
+        ...pendingBooking,
+        userId: user,
+        roomId: ROOM_MAP[selectedRoom],
+        user: user.username
+    };
 
     // Weekly limit check
     const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
@@ -179,7 +201,6 @@ confirmButton.addEventListener('click', () => {
 
     booking.user = username;
     saveBooking(booking);
-
     sendRoomBookingToDB(booking);
 
     // Show confirmation

@@ -17,6 +17,13 @@ function saveBooking(booking) {
     localStorage.setItem('labBookings', JSON.stringify(arr));
 }
 
+const LAB_MAP = {
+    'Chemistry Lab': 1,
+    'Physics Lab': 2,
+    'Computer Lab': 3,
+    'Robotics Lab': 4,
+};
+
 // Elements
 const labs = document.querySelectorAll('.lab');
 const dateInput = document.getElementById('date');
@@ -130,6 +137,15 @@ confirmButton.addEventListener('click', () => {
     if (!date || !slot || !selectedLab)
         return alert("Please select a lab, date, and time slot.");
 
+    const user = JSON.parse(localStorage.getItem("user"));
+    const pending = { type: 'lab', lab: selectedLab, date, slot };
+
+    if (!user) {
+        localStorage.setItem("pendingLabBooking", JSON.stringify(pending));
+        alert("Please sign in to complete your booking.");
+        window.location.href = "../../auth/signin.html";
+        return;
+    }
     const bookings = getBookingsArray();
     const exists = bookings.find(
         b => b.lab === selectedLab && b.date === date && b.slot === slot
@@ -143,8 +159,12 @@ confirmButton.addEventListener('click', () => {
     if (labBookingsToday.length >= MAX_SLOTS_PER_DAY)
         return alert("All slots are already taken for this lab on this date!");
 
-    const booking = { lab: selectedLab, date, slot };
-    saveBooking(booking);
+    const booking = {
+        ...pending,
+        userId: user.id,
+        labId: LAB_MAP[selectedLab],
+        user: user.username,
+    };    saveBooking(booking);
 
     document.querySelector('.lab-selection').style.display = 'none';
     datetime.style.display = 'none';

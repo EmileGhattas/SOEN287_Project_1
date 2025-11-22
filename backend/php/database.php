@@ -1,15 +1,18 @@
 <?php
 
-$DB_HOST = 'localhost';
-$DB_NAME = '287_d';
-$DB_USER = 'roots';
-$DB_PASSWORD = 'yourpassword';
+$DB_HOST = getenv('DB_HOST') ?: 'localhost';
+$DB_PORT = getenv('DB_PORT') ?: 3306;
+$DB_NAME = getenv('DB_NAME') ?: '287_d';
+$DB_USER = getenv('DB_USER') ?: 'roots';
+$DB_PASSWORD = getenv('DB_PASSWORD') ?: 'yourpassword';
 
 
 function get_connection() {
-    global $DB_HOST, $DB_NAME, $DB_USER, $DB_PASSWORD;
+    global $DB_HOST, $DB_PORT, $DB_NAME, $DB_USER, $DB_PASSWORD;
 
-    $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASSWORD, $DB_NAME);
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
+    $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASSWORD, $DB_NAME, (int)$DB_PORT);
 
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);

@@ -3,7 +3,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const {validationResult } = require("express-validator");
-const JWT_SECRET = "supersecretkey123";
+require("dotenv").config();
+const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey123";
 
 
 const SALT_ROUNDS = 10;
@@ -56,7 +57,11 @@ exports.login = async (req, res) => {
         if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
 // fix/edit needed. Possible column name mismatch
-        const match = await bcrypt.compare(password, user.password);
+        const isBcryptHash = typeof user.password === "string" && user.password.startsWith("$2");
+        const match = isBcryptHash
+            ? await bcrypt.compare(password, user.password)
+            : password === user.password;
+
         if (!match) return res.status(401).json({ message: "Invalid credentials" });
 
 

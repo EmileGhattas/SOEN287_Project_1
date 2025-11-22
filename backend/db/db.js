@@ -4,10 +4,10 @@ require("dotenv").config();
 
 // Possible Need of editing. We can secure it using local .env files or just hardcode it making it less secure.
 const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    host: "localhost",
+    user: "roots",
+    password: "yourpassword",
+    database: "287_d",
 });
 
 /*
@@ -15,9 +15,9 @@ What the .env would relatively look like:
 
 # MySQL Database Configuration
 DB_HOST=localhost       # database host
-DB_USER=root            # your MySQL username
+DB_USER=roots          # your MySQL username
 DB_PASSWORD=yourpassword  # your MySQL password
-DB_NAME=learnspace      # your database name
+DB_NAME=287_d          # your database name
 
 # JWT Configuration
 JWT_SECRET=supersecretkey  # secret key to sign JWT tokens

@@ -15,6 +15,12 @@ function saveBooking(booking) {
   localStorage.setItem('Booking', JSON.stringify(booking));
 }
 
+const EQUIPMENT_MAP = {
+    'Camera': 1,
+    'Tripod': 2,
+    'Microscope': 3,
+    'VR Headset': 4,
+};
 // Selection handling
 const items = document.querySelectorAll('.equip');
 let selectedName = null;
@@ -108,9 +114,10 @@ confirmButton.addEventListener('click', () => {
         return alert("Please select an equipment and date.");
 
     const user = JSON.parse(localStorage.getItem('user'));
+    const pending = { type: 'equipment', equipment: selectedEquipment, date };
+
     if (!user) {
         alert("Please sign in before booking.");
-        const pending = { equipment: selectedEquipment, date };
         localStorage.setItem("pendingEquipmentBooking", JSON.stringify(pending));
         localStorage.setItem("redirectAfterLogin", "equipment.html");
         window.location.href = "../../auth/signin.html";
@@ -126,17 +133,16 @@ confirmButton.addEventListener('click', () => {
     if (bookedCount >= MAX_PER_DAY)
         return alert("All units are already booked for that day!");
 
-    const username = user.username || user.email;
     const booking = {
         type: 'Equipment',
         equipment: selectedEquipment,
         room: selectedEquipment,
-        date,
         startTime: 'All day',
         endTime: 'All day',
-        user: username,
+        user: user.username,
     };
     saveBooking(booking);
+    sendEquipmentBookingToDB(booking);
 
     document.querySelector('.equipment-selection').style.display = 'none';
     datetime.style.display = 'none';
@@ -148,3 +154,17 @@ confirmButton.addEventListener('click', () => {
     `;
     updateEquipmentAvailability();
 });
+
+
+function sendEquipmentBookingToDB(booking) {
+    fetch('../../backend/php/bookings.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            type: "equipment",
+            userId: booking.userId,
+            equipmentId: booking.equipmentId,
+            date: booking.date
+        })
+    });
+}

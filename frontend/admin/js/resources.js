@@ -155,8 +155,6 @@ function editResource(index) {
 
 
 function deleteResource(index) {
-    if (!confirm("Are you sure you want to delete this?")) 
-        return;
 
     const resources = loadResources();
     resources.splice(index, 1);

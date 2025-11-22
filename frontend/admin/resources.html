@@ -4,13 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../shared/style.css">
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="css/main.css">
     <script defer src="js/resources.js"></script>
     <title>Manage Resources</title>
 </head>
 
 <body>
-
 <header>
     <nav class="navbar">
         <h1 class="logo">
@@ -18,11 +17,28 @@
         </h1>
 
         <ul class="navLinks">
-            <li><a href="main.html">Dashboard</a></li>
-            <li><a href="bookings1.html">Manage Bookings</a></li>
-            <li><a class="active" href="resources.html">Manage Resources</a></li>
-            <li><a href="schedules.html">Set Availability</a></li>
-            <li><a href="analytics.html">View Analytics</a></li>
+            <li><a href="main.html" class="active">Admin</a></li>
+            <li><a href="../pages/landing.html">Home</a></li>
+            
+            <li><a href="../pages/about.html">About</a></li>
+
+            <li class="dropdown">
+
+                <a href="../facilities/bookings.html">Bookings</a>
+                <ul class="dropdown-menu">
+                    <li><a href="../facilities/rooms.html">Rooms</a></li>
+                    <li><a href="../facilities/labs.html">Labs</a></li>
+                    <li><a href="../facilities/equipment.html">Equipment</a></li>
+                </ul>
+            </li>
+
+            <li><a href="../pages/contact.html">Contact</a></li>
+
+            
+            <li class="dropdown" id="profileDropdown">
+                <a href="#" id="profileLink">Profile</a>
+                <ul class="dropdown-menu" id="profileMenu"></ul>
+            </li>
         </ul>
     </nav>
 </header>
@@ -31,7 +47,7 @@
 
     <h1 class="title">Manage Resources</h1>
 
-    <button class="btn" id="addResourceBtn">+ Add Resource</button>
+    <button class="btn" id="addResourceBtn">Add Resource</button>
 
     <table class="resource-table">
         <thead>
@@ -86,4 +102,23 @@
 </div>
 
 </body>
+
+
+
+<footer class="contact">
+    <h2>Contact Support</h2>
+
+
+    <p>If you are experiencing issues, contact IT or system administrators.</p>
+
+    <div class="contact-info">
+        <p><strong>Admin Support:</strong> admin@learnspace.com</p>
+    </div>
+
+    <p class="footer-note">2025 Learn Space Admin Panel</p>
+</footer>
+
+
+
+
 </html>

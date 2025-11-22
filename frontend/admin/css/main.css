@@ -63,20 +63,6 @@ margin: 30px;
 
 
 
-
-
-
-
-
-
-
-.title {
-    font-size: 2.2rem;
-    font-weight: 700;
-    margin-bottom: 20px;
-}
-
-
 .btn {
     padding: 10px 18px;
     border: none;
@@ -278,4 +264,24 @@ hr {
     border: none;
     
     border-top: 2px solid #ddd;
+}
+
+
+.analytics-page {
+    padding: 40px;
+}
+
+.analytics-page h2 {
+    margin-bottom: 20px;
+}
+
+.analytics-section {
+    margin-bottom: 40px;
+}
+
+.analytics-box {
+    background: #f5f5f5;
+    padding: 25px;
+    border-radius: 10px;
+    
 }

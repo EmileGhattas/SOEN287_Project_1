@@ -216,7 +216,7 @@ confirmButton.addEventListener('click', () => {
 });
 
 function sendRoomBookingToDB(booking) {
-    fetch('../../backend/php/room_booking.php', {
+    fetch('../../backend/php/bookings.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({            type: "room",

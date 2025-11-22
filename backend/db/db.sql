@@ -27,7 +27,7 @@ created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
 INSERT INTO users(username, email, password, is_admin)
-VALUES('admin','admin@learnspace.com','$2y$12$4uKD/Ss7MK6eolcye3zNjeAdtgEcC/gAk163YEdsSqeyAI2B3bUUm', TRUE);
+VALUES('admin','admin@learnspace.com','admin', TRUE);
 
 
 CREATE TABLE rooms (

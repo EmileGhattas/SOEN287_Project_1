@@ -134,12 +134,15 @@ confirmButton.addEventListener('click', () => {
         return alert("All units are already booked for that day!");
 
     const booking = {
-        type: 'Equipment',
+        type: 'equipment',
         equipment: selectedEquipment,
+        equipmentId: EQUIPMENT_MAP[selectedEquipment],
+        date,
         room: selectedEquipment,
         startTime: 'All day',
         endTime: 'All day',
         user: user.username,
+        userId: user.user_id,
     };
     saveBooking(booking);
     sendEquipmentBookingToDB(booking);
@@ -166,5 +169,8 @@ function sendEquipmentBookingToDB(booking) {
             equipmentId: booking.equipmentId,
             date: booking.date
         })
-    });
+    })
+        .then(res => res.json())
+        .then(data => console.log("Saved:", data))
+        .catch(err => console.error(err));
 }

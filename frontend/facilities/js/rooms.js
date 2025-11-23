@@ -168,14 +168,14 @@ confirmButton.addEventListener('click', () => {
 
     // If not logged in → save booking temporarily & redirect
     if (!user) {
-        localStorage.setItem("pendingBooking", JSON.stringify(booking));
+        localStorage.setItem("pendingBooking", JSON.stringify(pendingBooking));
         alert("Please sign in to complete your booking.");
         window.location.href = "../../auth/signin.html";
         return;
     }
     const booking = {
         ...pendingBooking,
-        userId: user,
+        userId: user.user_id,
         roomId: ROOM_MAP[selectedRoom],
         user: user.username
     };

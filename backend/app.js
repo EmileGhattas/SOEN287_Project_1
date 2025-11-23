@@ -11,7 +11,6 @@ const resourceRoutes = require("./routes/resourceRoutes");
 
 // Middleware to parse JSON
 app.use(express.json());
-
 // Mount authentication routes under /api/auth
 app.use("/api/auth", authRoutes);
 app.use("/api/resources", resourceRoutes);
@@ -22,8 +21,15 @@ app.use(express.static(FRONTEND_DIR));
 // Routes for frontend pages. unsure what pages to .get(). I might delete some later.
 // Landing/Main page
 app.get("/", (req, res) => {
-    res.sendFile(path.join(FRONTEND_DIR, "pages", "landing.html"));
+    const filePath = path.join(FRONTEND_DIR, "pages", "landing.html");
+    console.log("Sending file:", filePath);
 
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error("Error sending landing.html:", err);
+            res.status(err.status || 500).send("Error loading landing page");
+        }
+    });
 });
 
 // Sign up page

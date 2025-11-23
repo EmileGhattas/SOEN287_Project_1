@@ -4,13 +4,18 @@ const { authenticate, requireAdmin } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
+router.use(authenticate);
+
 // Create bookings as a signed-in user
-router.post("/", authenticate, bookingController.createBooking);
+router.post("/", bookingController.createBooking);
 
-// Admin-only management endpoints
-router.use(authenticate, requireAdmin);
+// Logged-in users can see their own bookings
+router.get("/mine", bookingController.getMyBookings);
 
-router.get("/", bookingController.listBookings);
+// Admin-only list of all bookings
+router.get("/", requireAdmin, bookingController.listBookings);
+
+// Updates/deletes enforce ownership rules inside the controller
 router.put("/:id", bookingController.updateBooking);
 router.delete("/:id", bookingController.deleteBooking);
 

@@ -6,17 +6,6 @@ function getBookingsArray() {
   const arr = _readJSON('bookings');
   return Array.isArray(arr) ? arr : [];
 }
-function saveBooking(booking) {
-    if (!booking || typeof booking !== 'object') return;
-
-    const arr = JSON.parse(localStorage.getItem('bookings') || '[]');
-    arr.push(booking);
-    localStorage.setItem('bookings', JSON.stringify(arr));
-
-    localStorage.setItem('booking', JSON.stringify(booking));
-    localStorage.setItem('Booking', JSON.stringify(booking));
-}
-
 const ROOM_MAP = {
     'Room 1': 1,
     'Room 2': 2,
@@ -157,62 +146,24 @@ confirmButton.addEventListener('click', () => {
     // Check login status
     const user = JSON.parse(localStorage.getItem("user"));
 
-    const pendingBooking = {
+    const booking = {
         type: "room",
         room: selectedRoom,
         date: inDate,
         startTime: inStartTime,
         endTime: inEndTime,
+        roomId: ROOM_MAP[selectedRoom],
     };
-
 
     // If not logged in → save booking temporarily & redirect
     if (!user) {
-        localStorage.setItem("pendingBooking", JSON.stringify(pendingBooking));
+        localStorage.setItem("pendingBooking", JSON.stringify(booking));
         alert("Please sign in to complete your booking.");
         window.location.href = "../../auth/signin.html";
         return;
     }
-    const booking = {
-        ...pendingBooking,
-        userId: user.user_id,
-        roomId: ROOM_MAP[selectedRoom],
-        user: user.username
-    };
 
-    // Weekly limit check
-    const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-    const startWeek = new Date(inDate);
-    startWeek.setDate(startWeek.getDate() - startWeek.getDay());
-    const endWeek = new Date(startWeek);
-    endWeek.setDate(startWeek.getDate() + 6);
-
-    const username = user.username || user.email;
-    const userWeeklyBookings = bookings.filter(b =>
-        b.user === username &&
-        new Date(b.date) >= startWeek &&
-        new Date(b.date) <= endWeek
-    );
-
-    if (userWeeklyBookings.length >= 2) {
-        alert("You have reached your limit of 2 bookings per week.");
-        return;
-    }
-
-    booking.user = username;
-    saveBooking(booking);
     sendRoomBookingToDB(booking);
-
-    // Show confirmation
-    datetime.style.display = 'none';
-    document.querySelector('.room-selection').style.display = 'none';
-    confirmation.style.display = 'block';
-    summary.innerHTML = `
-        <strong>Room:</strong> ${booking.room}<br>
-        <strong>Date:</strong> ${booking.date}<br>
-        <strong>Time:</strong> ${booking.startTime} – ${booking.endTime}<br><br>
-        Room successfully booked!
-    `;
 });
 
 function sendRoomBookingToDB(booking) {
@@ -226,17 +177,42 @@ function sendRoomBookingToDB(booking) {
         method: 'POST',
         headers,
         body: JSON.stringify({
-            type: "room",
-            userId: booking.userId,
-            date: booking.date,
+            bookingType: "room",
+            bookingDate: booking.date,
             roomId: booking.roomId,
             startTime: booking.startTime,
             endTime: booking.endTime,
         })
     })
-        .then(res => res.json())
-        .then(data => console.log("Saved:", data))
-        .catch(err => console.error('Room booking failed', err));
+        .then(async (res) => {
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(data.message || 'Room booking failed');
+            }
+
+            const local = getBookingsArray();
+            local.push({
+                room: booking.room,
+                date: booking.date,
+                startTime: booking.startTime,
+                endTime: booking.endTime,
+            });
+            localStorage.setItem('bookings', JSON.stringify(local));
+
+            datetime.style.display = 'none';
+            document.querySelector('.room-selection').style.display = 'none';
+            confirmation.style.display = 'block';
+            summary.innerHTML = `
+                <strong>Room:</strong> ${booking.room}<br>
+                <strong>Date:</strong> ${booking.date}<br>
+                <strong>Time:</strong> ${booking.startTime} – ${booking.endTime}<br><br>
+                Room successfully booked!
+            `;
+        })
+        .catch(err => {
+            console.error('Room booking failed', err);
+            alert(err.message || 'Failed to book room');
+        });
 }
 
 

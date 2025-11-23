@@ -28,14 +28,21 @@ exports.signup = async (req, res) => {
         const user = await User.createUser({ username, email, passwordHash });
 
 
+        const normalizedUser = {
+            user_id: user.user_id,
+            username: user.username,
+            email: user.email,
+            is_admin: Boolean(user.is_admin),
+        };
+
         const token = jwt.sign(
-            { user_id: user.user_id, email: user.email },
+            { user_id: normalizedUser.user_id, email: normalizedUser.email, is_admin: normalizedUser.is_admin },
             JWT_SECRET,
             { expiresIn: "1d" }
         );
 
 
-        res.status(201).json({ user, token });
+        res.status(201).json({ user: normalizedUser, token });
     } catch (err) {
         console.error("Signup error:", err);
         res.status(500).json({ message: "Server error" });
@@ -61,13 +68,21 @@ exports.login = async (req, res) => {
 
 
         const token = jwt.sign(
-            { user_id: user.user_id, email: user.email, admin: user.is_admin },
+            { user_id: user.user_id, email: user.email, is_admin: user.is_admin },
             JWT_SECRET,
             { expiresIn: "1d" }
         );
 
 
-        res.json({ user: { user_id: user.user_id, username: user.username, email: user.email, admin: user.is_admin }, token });
+        res.json({
+            user: {
+                user_id: user.user_id,
+                username: user.username,
+                email: user.email,
+                is_admin: Boolean(user.is_admin),
+            },
+            token,
+        });
     } catch (err) {
         res.status(500).json({ message: "Server error" });
     }

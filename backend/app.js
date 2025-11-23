@@ -4,6 +4,7 @@ const app = express();
 const db = require("./db/db");
 const PORT = 5000;
 const FRONTEND_DIR = path.join(__dirname, "..", "frontend");
+const ASSETS_DIR = path.join(__dirname, "..", "assets");
 
 // Import auth routes
 const authRoutes = require("./routes/authRoutes");
@@ -17,6 +18,7 @@ app.use("/api/resources", resourceRoutes);
 
 // Serve static files from the top-level frontend folder
 app.use(express.static(FRONTEND_DIR));
+app.use("/assets", express.static(ASSETS_DIR));
 
 function sendFrontendFile(res, relativePath) {
     const filePath = path.join(FRONTEND_DIR, relativePath);

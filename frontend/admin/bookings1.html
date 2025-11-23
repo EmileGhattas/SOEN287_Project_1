@@ -3,9 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="../shared/style.css">
-    <link rel="stylesheet" href="css/main.css">
-    <script defer src="js/resources.js"></script>
+    <link rel="stylesheet" href="/shared/style.css">
+    <link rel="stylesheet" href="/admin/css/main.css">
+    <script defer src="/admin/js/resources.js"></script>
     <title>Manage Resources</title>
 </head>
 
@@ -13,30 +13,29 @@
 <header>
     <nav class="navbar">
         <h1 class="logo">
-            <img src="../../assets/image-removebg-preview.png" alt="Website Logo">
+            <img src="/assets/image-removebg-preview.png" alt="Website Logo">
         </h1>
 
         <ul class="navLinks">
-            <li><a href="main.html" class="active">Admin</a></li>
-            <li><a href="../pages/landing.html">Home</a></li>
-            
-            <li><a href="../pages/about.html">About</a></li>
+            <li><a href="/">Home</a></li>
+
+            <li><a href="/about">About</a></li>
 
             <li class="dropdown">
 
-                <a href="../facilities/bookings.html">Bookings</a>
+                <a href="/booking">Bookings</a>
                 <ul class="dropdown-menu">
-                    <li><a href="../facilities/rooms.html">Rooms</a></li>
-                    <li><a href="../facilities/labs.html">Labs</a></li>
-                    <li><a href="../facilities/equipment.html">Equipment</a></li>
+                    <li><a href="/rooms">Rooms</a></li>
+                    <li><a href="/labs">Labs</a></li>
+                    <li><a href="/equipment">Equipment</a></li>
                 </ul>
             </li>
 
-            <li><a href="../pages/contact.html">Contact</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li id="adminNavItem"><a href="/admin" class="active">Admin</a></li>
 
-            
             <li class="dropdown" id="profileDropdown">
-                <a href="#" id="profileLink">Profile</a>
+                <a href="/signin" id="profileLink">Profile</a>
                 <ul class="dropdown-menu" id="profileMenu"></ul>
             </li>
         </ul>
@@ -52,26 +51,20 @@
 
     <section class="grid">
 
-        <a href="../facilities/rooms.html" class="card">
+        <a href="/rooms" class="card">
             <h3>Room Bookings</h3>
         </a>
 
-        <a href="../facilities/labs.html" class="card">
+        <a href="/labs" class="card">
             <h3>Lab Bookings</h3>
         </a>
 
-        <a href="../facilities/equipment.html" class="card">
+        <a href="/equipment" class="card">
             <h3>Equipment Bookings</h3>
         </a>
 
     </section>
 </main>
-
-</body>
-
-
-
-
 
 <footer class="contact">
     <h2>Contact Support</h2>
@@ -86,6 +79,8 @@
     <p class="footer-note">2025 Learn Space Admin Panel</p>
 </footer>
 
+<script src="/shared/profile-menu.js"></script>
 
+</body>
 
 </html>

@@ -38,6 +38,44 @@
     return (relativeBase || '') + path;
   }
 
+  function renderAdminNav(isAdmin) {
+    const navList = document.querySelector('.navLinks');
+    if (!navList) return;
+
+    const profileDropdown = document.getElementById('profileDropdown');
+    const contactItem = navList.querySelector('a[href="/contact"]')?.closest('li') || null;
+
+    let adminItem = document.getElementById('adminNavItem');
+
+    if (isAdmin) {
+      if (!adminItem) {
+        adminItem = document.createElement('li');
+        adminItem.id = 'adminNavItem';
+        const adminLink = document.createElement('a');
+        adminLink.href = '/admin';
+        adminLink.textContent = 'Admin';
+        adminItem.appendChild(adminLink);
+      }
+
+      if (adminItem.parentElement !== navList) {
+        adminItem.remove();
+        if (contactItem && contactItem.parentElement === navList) {
+          navList.insertBefore(adminItem, contactItem.nextSibling);
+        } else if (profileDropdown && profileDropdown.parentElement === navList) {
+          navList.insertBefore(adminItem, profileDropdown);
+        } else {
+          navList.appendChild(adminItem);
+        }
+      } else if (contactItem && adminItem.previousElementSibling !== contactItem) {
+        navList.insertBefore(adminItem, contactItem.nextSibling);
+      } else if (!contactItem && profileDropdown && adminItem.nextElementSibling !== profileDropdown) {
+        navList.insertBefore(adminItem, profileDropdown);
+      }
+    } else if (adminItem) {
+      adminItem.remove();
+    }
+  }
+
   function initProfileMenu() {
     const profileLink = document.getElementById('profileLink');
     const profileMenu = document.getElementById('profileMenu');
@@ -47,15 +85,23 @@
 
     function updateMenu() {
       const user = safeParse(localStorage.getItem('user'));
+      const isAdmin = Boolean(user && (user.is_admin ?? user.admin ?? user.isadmin));
 
       if (user) {
+        const normalizedUser = { ...user, is_admin: isAdmin };
+        delete normalizedUser.admin;
+        delete normalizedUser.isadmin;
+        localStorage.setItem('user', JSON.stringify(normalizedUser));
+
         profileLink.textContent = 'Profile';
-        profileLink.setAttribute('href', '#');
+        profileLink.setAttribute('href', '/myprofile');
         profileMenu.innerHTML = `
-          <li><a href="${resolvePath('auth/myprofile.html')}">My Profile</a></li>
-          <li><a href="${resolvePath('facilities/bookings.html')}">My Bookings</a></li>
+          <li><a href="/myprofile">My Profile</a></li>
+          <li><a href="/booking">My Bookings</a></li>
           <li><a href="#" id="logout">Logout</a></li>
         `;
+
+        renderAdminNav(isAdmin);
 
         const logout = document.getElementById('logout');
         if (logout) {
@@ -64,16 +110,17 @@
             localStorage.removeItem('user');
             localStorage.removeItem('pendingBooking');
             updateMenu();
-            window.location.href = resolvePath('auth/signin.html');
+            window.location.href = '/signin';
           });
         }
       } else {
         profileLink.textContent = 'Profile';
-        profileLink.setAttribute('href', resolvePath('auth/signin.html'));
+        profileLink.setAttribute('href', '/signin');
         profileMenu.innerHTML = `
-          <li><a href="${resolvePath('auth/signin.html')}">Sign In</a></li>
-          <li><a href="${resolvePath('auth/signup.html')}">Sign Up</a></li>
+          <li><a href="/signin">Sign In</a></li>
+          <li><a href="/signup">Sign Up</a></li>
         `;
+        renderAdminNav(false);
       }
     }
 

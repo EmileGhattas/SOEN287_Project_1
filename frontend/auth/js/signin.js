@@ -22,14 +22,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Login successful
                 console.log("Logged in!", data);
 
+                const isAdmin = Boolean(data?.user?.is_admin ?? data?.user?.admin ?? data?.user?.isadmin);
+                const normalizedUser = { ...data.user, is_admin: isAdmin };
+                delete normalizedUser.admin;
+                delete normalizedUser.isadmin;
+
                 // Save JWT token for staying logged in
                 localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
+                localStorage.setItem('user', JSON.stringify(normalizedUser));
 
-                if (data.user.admin === true) {
-                    window.location.href = '/admin/main.html'; // Admin main page
+                if (isAdmin) {
+                    window.location.href = '/admin';
                 } else {
-                    window.location.href = '/pages/landing.html'; // Student/main user page
+                    window.location.href = '/';
                 }
             } else {
                 // Login failed

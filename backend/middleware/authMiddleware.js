@@ -21,7 +21,7 @@ function authenticate(req, res, next) {
 }
 
 function requireAdmin(req, res, next) {
-    if (!req.user || !req.user.admin) {
+    if (!req.user || !req.user.is_admin) {
         return res.status(403).json({ message: "Admin access required" });
     }
 

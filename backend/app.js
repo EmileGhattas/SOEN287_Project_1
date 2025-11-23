@@ -7,12 +7,14 @@ const FRONTEND_DIR = path.join(__dirname, "..", "frontend");
 
 // Import auth routes
 const authRoutes = require("./routes/authRoutes");
+const resourceRoutes = require("./routes/resourceRoutes");
 
 // Middleware to parse JSON
 app.use(express.json());
 
 // Mount authentication routes under /api/auth
 app.use("/api/auth", authRoutes);
+app.use("/api/resources", resourceRoutes);
 
 // Serve static files from the top-level frontend folder
 app.use(express.static(FRONTEND_DIR));

@@ -3,30 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Sign In</title>
-    <link rel="stylesheet" href="../shared/style.css"><!-- Path editing? -->
-    <link rel="stylesheet" href="css/signin.css">
+    <link rel="stylesheet" href="/shared/style.css">
+    <link rel="stylesheet" href="/auth/css/signin.css">
 </head>
 <body class="signin-page">
 <header>
     <nav class="navbar">
         <h1 class="logo">
-            <img src="../../assets/image-removebg-preview.png" alt="Website Logo"> <!-- Path editing? -->
+            <img src="/assets/image-removebg-preview.png" alt="Website Logo">
         </h1>
 
         <ul class="navLinks">
-            <li><a href="../pages/landing.html">Home</a></li>
-            <li><a href="../pages/about.html">About</a></li>
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
                 <li class="dropdown">
-                    <a href="../facilities/bookings.html">Bookings</a>
+                    <a href="/booking">Bookings</a>
                     <ul class="dropdown-menu">
-                        <li><a href="../facilities/rooms.html">Rooms</a></li>
-                        <li><a href="../facilities/labs.html">Labs</a></li>
-                        <li><a href="../facilities/equipment.html">Equipment</a></li>
+                        <li><a href="/rooms">Rooms</a></li>
+                        <li><a href="/labs">Labs</a></li>
+                        <li><a href="/equipment">Equipment</a></li>
                 </ul>
             </li>
-            <li><a href="../pages/contact.html">Contact</a></li>
+            <li><a href="/contact">Contact</a></li>
             <li class="dropdown" id="profileDropdown">
-                <a href="#" id="profileLink" class="active">Log In</a>
+                <a href="/admin" id="profileLink" class="active">Log In</a>
                 <ul class="dropdown-menu" id="profileMenu">
                     <!-- Menu items will be added dynamically through js -->
                 </ul>
@@ -72,7 +72,7 @@
     <p class="footer-note">2025 Learn Space</p>
 </footer>
 
-<script src="../shared/profile-menu.js"></script><!-- Path editing? -->
-<script src="js/signin.js"></script>
+<script src="/shared/profile-menu.js"></script>
+<script src="/auth/js/signin.js"></script>
 </body>
 </html>

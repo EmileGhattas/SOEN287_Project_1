@@ -50,10 +50,10 @@
 
       if (user) {
         profileLink.textContent = 'Profile';
-        profileLink.setAttribute('href', '#');
+        profileLink.setAttribute('href', '/myprofile');
         profileMenu.innerHTML = `
-          <li><a href="${resolvePath('auth/myprofile.html')}">My Profile</a></li>
-          <li><a href="${resolvePath('facilities/bookings.html')}">My Bookings</a></li>
+          <li><a href="/myprofile">My Profile</a></li>
+          <li><a href="/booking">My Bookings</a></li>
           <li><a href="#" id="logout">Logout</a></li>
         `;
 
@@ -64,15 +64,15 @@
             localStorage.removeItem('user');
             localStorage.removeItem('pendingBooking');
             updateMenu();
-            window.location.href = resolvePath('auth/signin.html');
+            window.location.href = '/signin';
           });
         }
       } else {
         profileLink.textContent = 'Profile';
-        profileLink.setAttribute('href', resolvePath('auth/signin.html'));
+        profileLink.setAttribute('href', '/signin');
         profileMenu.innerHTML = `
-          <li><a href="${resolvePath('auth/signin.html')}">Sign In</a></li>
-          <li><a href="${resolvePath('auth/signup.html')}">Sign Up</a></li>
+          <li><a href="/signin">Sign In</a></li>
+          <li><a href="/signup">Sign Up</a></li>
         `;
       }
     }

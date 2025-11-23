@@ -137,7 +137,7 @@ function renderResources() {
             <td>
                 <button class="btn edit" data-action="edit" data-id="${resource.resource_id}">Edit</button>
                 <button class="btn delete" data-action="delete" data-id="${resource.resource_id}">Delete</button>
-                <a class="btn" href="schedules.html?resourceId=${resource.resource_id}">Availability</a>
+                <a class="btn" href="/admin/schedules?resourceId=${resource.resource_id}">Availability</a>
             </td>
         `;
 

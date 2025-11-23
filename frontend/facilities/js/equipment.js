@@ -160,9 +160,15 @@ confirmButton.addEventListener('click', () => {
 
 
 function sendEquipmentBookingToDB(booking) {
-    fetch('../../backend/php/bookings.php', {
+    const token = localStorage.getItem('token');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
+
+    fetch('/api/bookings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
             type: "equipment",
             userId: booking.userId,
@@ -172,5 +178,5 @@ function sendEquipmentBookingToDB(booking) {
     })
         .then(res => res.json())
         .then(data => console.log("Saved:", data))
-        .catch(err => console.error(err));
+        .catch(err => console.error('Equipment booking failed', err));
 }

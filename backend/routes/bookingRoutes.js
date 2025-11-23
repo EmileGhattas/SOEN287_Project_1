@@ -4,6 +4,10 @@ const { authenticate, requireAdmin } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
+// Create bookings as a signed-in user
+router.post("/", authenticate, bookingController.createBooking);
+
+// Admin-only management endpoints
 router.use(authenticate, requireAdmin);
 
 router.get("/", bookingController.listBookings);

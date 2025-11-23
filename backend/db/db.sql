@@ -6,6 +6,9 @@ SET FOREIGN_KEY_CHECKS =0;
 DROP TABLE IF EXISTS equipment_bookings;
 DROP TABLE IF EXISTS lab_bookings;
 DROP TABLE IF EXISTS room_bookings;
+DROP TABLE IF EXISTS room_timeslots;
+DROP TABLE IF EXISTS lab_timeslots;
+DROP TABLE IF EXISTS timeslots;
 DROP TABLE IF EXISTS bookings;
 
 DROP TABLE IF EXISTS equipment;
@@ -62,23 +65,42 @@ VALUES('Chemistry Lab'), ('Physics Lab'), ('Computer Lab'), ('Robotics Lab');
 
 
 CREATE TABLE equipment(
-equipment_id    INT AUTO_INCREMENT PRIMARY KEY,
-name            VARCHAR(50) NOT NULL UNIQUE,
-total_quantity  INT NOT NULL DEFAULT 5,
-available_quantity INT NOT NULL DEFAULT 5
+  equipment_id    INT AUTO_INCREMENT PRIMARY KEY,
+  name            VARCHAR(50) NOT NULL UNIQUE,
+  total_quantity  INT NOT NULL DEFAULT 5
 )ENGINE=InnoDB;
-INSERT INTO equipment(name, total_quantity, available_quantity)
-VALUES('Camera',5,5),('Tripod',5,5),
-('Microscope',5,5),('VR Headset',5,5);
+INSERT INTO equipment(name, total_quantity)
+VALUES('Camera',5),('Tripod',5),
+('Microscope',5),('VR Headset',5);
+
+CREATE TABLE timeslots(
+  timeslot_id INT AUTO_INCREMENT PRIMARY KEY,
+  label VARCHAR(50) NOT NULL UNIQUE,
+  start_time TIME NOT NULL,
+  end_time   TIME NOT NULL
+)ENGINE=InnoDB;
+
+INSERT INTO timeslots(label, start_time, end_time)
+VALUES
+('09:00-10:30', '09:00:00', '10:30:00'),
+('10:30-12:00', '10:30:00', '12:00:00'),
+('12:00-13:30', '12:00:00', '13:30:00'),
+('13:30-15:00', '13:30:00', '15:00:00'),
+('15:00-16:30', '15:00:00', '16:30:00'),
+('16:30-18:00', '16:30:00', '18:00:00'),
+('18:00-19:30', '18:00:00', '19:30:00'),
+('19:30-21:00', '19:30:00', '21:00:00'),
+('21:00-22:30', '21:00:00', '22:30:00'),
+('22:30-00:00', '22:30:00', '00:00:00');
 
 
 
 CREATE TABLE bookings(
-booking_id   INT AUTO_INCREMENT PRIMARY KEY,
-user_id      INT NOT NULL,
-booking_type ENUM('room', 'lab', 'equipment'),
-booking_date DATE NOT NULL,
-created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  booking_id   INT AUTO_INCREMENT PRIMARY KEY,
+  user_id      INT NOT NULL,
+  booking_type ENUM('room', 'lab', 'equipment'),
+  booking_date DATE NOT NULL,
+  created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
 CONSTRAINT booking_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 
@@ -89,32 +111,58 @@ CREATE TABLE room_bookings(
       rm_booking_id   INT AUTO_INCREMENT PRIMARY KEY,
       booking_id      INT NOT NULL UNIQUE,
       room_id         INT NOT NULL,
-      start_time      TIME NOT NULL,
-      end_time        TIME NOT NULL,
+      booking_date    DATE NOT NULL,
+      timeslot_id     INT NOT NULL,
 
       FOREIGN KEY (booking_id)REFERENCES bookings(booking_id) ON DELETE CASCADE,
-      FOREIGN KEY (room_id) REFERENCES rooms(room_id)
+      FOREIGN KEY (room_id) REFERENCES rooms(room_id),
+      FOREIGN KEY (timeslot_id) REFERENCES timeslots(timeslot_id)
 )ENGINE=InnoDB;
-CREATE UNIQUE INDEX unique_rm_booking ON room_bookings(room_id, start_time, end_time);
+CREATE UNIQUE INDEX unique_rm_booking ON room_bookings(room_id, booking_date, timeslot_id);
 
 CREATE TABLE lab_bookings(
      id             INT AUTO_INCREMENT PRIMARY KEY,
      booking_id     INT NOT NULL UNIQUE,
      lab_id         INT NOT NULL,
-     time_slot      VARCHAR(20) NOT NULL,
+     booking_date   DATE NOT NULL,
+     timeslot_id    INT NOT NULL,
 
      FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE CASCADE,
-     FOREIGN KEY (lab_id) REFERENCES labs(lab_id)
+     FOREIGN KEY (lab_id) REFERENCES labs(lab_id),
+     FOREIGN KEY (timeslot_id) REFERENCES timeslots(timeslot_id)
 )ENGINE=InnoDB;
-CREATE UNIQUE INDEX unique_lab_booking ON lab_bookings(lab_id, time_slot);
+CREATE UNIQUE INDEX unique_lab_booking ON lab_bookings(lab_id, booking_date, timeslot_id);
 
 
 CREATE TABLE equipment_bookings(
        id               INT AUTO_INCREMENT PRIMARY KEY,
        booking_id       INT NOT NULL UNIQUE,
        equipment_id     INT NOT NULL,
+       booking_date     DATE NOT NULL,
        quantity         INT NOT NULL,
 
        FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE CASCADE,
        FOREIGN KEY (equipment_id) REFERENCES equipment(equipment_id)
 )ENGINE=InnoDB;
+
+CREATE TABLE room_timeslots(
+  room_id INT NOT NULL,
+  timeslot_id INT NOT NULL,
+  PRIMARY KEY(room_id, timeslot_id),
+  FOREIGN KEY (room_id) REFERENCES rooms(room_id) ON DELETE CASCADE,
+  FOREIGN KEY (timeslot_id) REFERENCES timeslots(timeslot_id) ON DELETE CASCADE
+)ENGINE=InnoDB;
+
+CREATE TABLE lab_timeslots(
+  lab_id INT NOT NULL,
+  timeslot_id INT NOT NULL,
+  PRIMARY KEY(lab_id, timeslot_id),
+  FOREIGN KEY (lab_id) REFERENCES labs(lab_id) ON DELETE CASCADE,
+  FOREIGN KEY (timeslot_id) REFERENCES timeslots(timeslot_id) ON DELETE CASCADE
+)ENGINE=InnoDB;
+
+INSERT INTO room_timeslots(room_id, timeslot_id)
+SELECT r.room_id, t.timeslot_id FROM rooms r CROSS JOIN timeslots t;
+
+INSERT INTO lab_timeslots(lab_id, timeslot_id)
+SELECT l.lab_id, t.timeslot_id FROM labs l CROSS JOIN timeslots t;

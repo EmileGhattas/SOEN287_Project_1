@@ -4,14 +4,18 @@ const { authenticate, requireAdmin } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// Availability lookup for room bookings
+// Availability lookup for room and lab bookings
 router.get("/availability/rooms/:id", bookingController.getRoomAvailability);
+router.get("/availability/labs/:id", bookingController.getLabAvailability);
 
 // Create bookings as a signed-in user
 router.post("/", bookingController.createBooking);
 
 // Logged-in users can see their own bookings
 router.get("/mine", bookingController.getMyBookings);
+
+// Logged-in users can see their own bookings
+router.get("/mine", authenticate, bookingController.getMyBookings);
 
 // Logged-in users can see their own bookings
 router.get("/mine", authenticate, bookingController.getMyBookings);

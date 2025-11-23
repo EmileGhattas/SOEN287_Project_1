@@ -24,10 +24,10 @@ function resourceLabel(booking) {
 
 function timeLabel(booking) {
     if (booking.booking_type === 'room' && booking.room) {
-        return `${booking.room.start_time} — ${booking.room.end_time}`;
+        return booking.room.label || `${booking.room.start_time} — ${booking.room.end_time}`;
     }
     if (booking.booking_type === 'lab' && booking.lab) {
-        return booking.lab.time_slot;
+        return booking.lab.label || `${booking.lab.start_time} — ${booking.lab.end_time}`;
     }
     if (booking.booking_type === 'equipment' && booking.equipment) {
         return `Quantity: ${booking.equipment.quantity}`;

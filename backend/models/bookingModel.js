@@ -63,6 +63,51 @@ async function getBookingsForUser(user) {
     return rows.map(mapRow);
 }
 
+async function getRoomAvailability(roomId, date) {
+    if (!roomId || !date) {
+        throw new Error("MISSING_FIELDS");
+    }
+
+    const [roomRows] = await db.execute("SELECT room_id FROM rooms WHERE room_id = ?", [roomId]);
+    if (!roomRows.length) {
+        throw new Error("ROOM_NOT_FOUND");
+    }
+
+    const [bookings] = await db.execute(
+        `SELECT rb.start_time, rb.end_time
+           FROM room_bookings rb
+           JOIN bookings b ON b.booking_id = rb.booking_id
+          WHERE rb.room_id = ? AND b.booking_date = ?
+          ORDER BY rb.start_time`,
+        [roomId, date]
+    );
+
+    const timeOptions = [];
+    for (let h = 7; h <= 23; h++) {
+        timeOptions.push(`${String(h).padStart(2, "0")}:00`);
+        timeOptions.push(`${String(h).padStart(2, "0")}:30`);
+    }
+
+    const blocked = new Set();
+    bookings.forEach(({ start_time, end_time }) => {
+        const start = timeToMinutes(start_time);
+        const end = timeToMinutes(end_time);
+        for (let m = start; m < end; m += 30) {
+            blocked.add(minutesToString(m));
+        }
+    });
+
+    const availableTimes = timeOptions.filter((t) => !blocked.has(t));
+
+    return {
+        availableTimes,
+        booked: bookings.map((b) => ({
+            start_time: b.start_time,
+            end_time: b.end_time,
+        })),
+    };
+}
+
 async function getBookingById(bookingId, connection = null) {
     const executor = connection || db;
     const [rows] = await executor.execute(`${BASE_QUERY} WHERE b.booking_id = ? LIMIT 1`, [bookingId]);
@@ -73,6 +118,18 @@ function normalizeTime(value) {
     if (!value) return value;
     if (value.length === 5) return `${value}:00`;
     return value;
+}
+
+function timeToMinutes(timeValue) {
+    if (!timeValue) return 0;
+    const [hour, minute] = timeValue.split(":");
+    return Number(hour) * 60 + Number(minute || 0);
+}
+
+function minutesToString(totalMinutes) {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${String(hours).padStart(2, "0")}:${minutes === 0 ? "00" : "30"}`;
 }
 
 async function ensureRoomAvailability(connection, roomId, date, startTime, endTime, excludeId = null) {
@@ -476,6 +533,7 @@ async function deleteBookingsForResource(type, resourceId, connection = null) {
 module.exports = {
     getAllBookings,
     getBookingsForUser,
+    getRoomAvailability,
     getBookingById,
     createBooking,
     updateBooking,

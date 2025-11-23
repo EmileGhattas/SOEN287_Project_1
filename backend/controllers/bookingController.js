@@ -46,6 +46,23 @@ async function getMyBookings(req, res) {
     }
 }
 
+async function getRoomAvailability(req, res) {
+    try {
+        const availability = await Booking.getRoomAvailability(req.params.id, req.query.date);
+        return res.json(availability);
+    } catch (err) {
+        if (err.message === "ROOM_NOT_FOUND") {
+            return res.status(404).json({ message: "Room not found" });
+        }
+        if (err.message === "MISSING_FIELDS" || err.message.startsWith("INVALID_")) {
+            return res.status(400).json({ message: "Invalid booking data" });
+        }
+
+        console.error("Failed to load room availability", err);
+        return res.status(500).json({ message: "Failed to load availability" });
+    }
+}
+
 async function updateBooking(req, res) {
     try {
         const updated = await Booking.updateBooking(req.params.id, req.body || {}, req.user);
@@ -89,6 +106,7 @@ module.exports = {
     createBooking,
     listBookings,
     getMyBookings,
+    getRoomAvailability,
     updateBooking,
     deleteBooking,
 };

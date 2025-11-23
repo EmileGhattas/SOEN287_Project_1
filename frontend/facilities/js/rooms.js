@@ -1,11 +1,3 @@
-
-function _readJSON(key) {
-  try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; }
-}
-function getBookingsArray() {
-  const arr = _readJSON('bookings');
-  return Array.isArray(arr) ? arr : [];
-}
 const ROOM_MAP = {
     'Room 1': 1,
     'Room 2': 2,
@@ -32,6 +24,120 @@ const confirmation = document.getElementById('confirmation');
 const summary = document.getElementById('summary');
 
 let selectedRoom = "";
+let availableTimes = [];
+
+function areConsecutive(prev, next) {
+    const [pH, pM] = prev.split(':').map(Number);
+    const [nH, nM] = next.split(':').map(Number);
+    return (nH * 60 + nM) - (pH * 60 + pM) === 30;
+}
+
+function setSelectOptions(select, options) {
+    select.innerHTML = '';
+    options.forEach(({ value, label, disabled = false, selected = false }) => {
+        const opt = document.createElement('option');
+        opt.value = value;
+        opt.textContent = label;
+        opt.disabled = disabled;
+        opt.selected = selected;
+        select.appendChild(opt);
+    });
+}
+
+function setDateBounds() {
+    const today = new Date();
+    const maxdate = new Date();
+    maxdate.setDate(today.getDate() + 10);
+    dateInput.min = today.toISOString().split('T')[0];
+    dateInput.max = maxdate.toISOString().split('T')[0];
+    if (!dateInput.value) {
+        dateInput.value = today.toISOString().split('T')[0];
+    }
+}
+
+function populateStartTimes(times) {
+    if (!times.length) {
+        setSelectOptions(startTime, [{ value: '', label: 'No available times', disabled: true, selected: true }]);
+        startTime.disabled = true;
+        setSelectOptions(endTime, [{ value: '', label: 'Select a start time first', disabled: true, selected: true }]);
+        endTime.disabled = true;
+        return;
+    }
+
+    setSelectOptions(startTime, [
+        { value: '', label: 'Select start time', disabled: true, selected: true },
+        ...times.map((t) => ({ value: t, label: t })),
+    ]);
+    startTime.disabled = false;
+    endTime.disabled = true;
+    setSelectOptions(endTime, [{ value: '', label: 'Select a start time first', disabled: true, selected: true }]);
+}
+
+function populateEndTimes(start) {
+    setSelectOptions(endTime, []);
+    if (!start) {
+        setSelectOptions(endTime, [{ value: '', label: 'Select a start time first', disabled: true, selected: true }]);
+        endTime.disabled = true;
+        return;
+    }
+
+    const startIdx = availableTimes.indexOf(start);
+    const endOptions = [];
+    for (let i = startIdx + 1; i < availableTimes.length; i++) {
+        const prev = availableTimes[i - 1];
+        const curr = availableTimes[i];
+        if (!areConsecutive(prev, curr)) break;
+        if (i - startIdx > 8) break; // limit to 4 hours of 30-minute slots
+        endOptions.push(curr);
+    }
+
+    if (!endOptions.length) {
+        setSelectOptions(endTime, [{ value: '', label: 'No end times available', disabled: true, selected: true }]);
+        endTime.disabled = true;
+        return;
+    }
+
+    setSelectOptions(endTime, [
+        { value: '', label: 'Select end time', disabled: true, selected: true },
+        ...endOptions.map((t) => ({ value: t, label: t })),
+    ]);
+    endTime.disabled = false;
+}
+
+async function updateAvailableTimes() {
+    if (!selectedRoom) {
+        return;
+    }
+    setDateBounds();
+    const inDate = dateInput.value;
+
+    setSelectOptions(startTime, [{ value: '', label: 'Loading times...', disabled: true, selected: true }]);
+    startTime.disabled = true;
+    endTime.disabled = true;
+    setSelectOptions(endTime, [{ value: '', label: 'Select a start time first', disabled: true, selected: true }]);
+
+    try {
+        const headers = { 'Content-Type': 'application/json' };
+        const token = localStorage.getItem('token');
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+
+        const res = await fetch(`/api/bookings/availability/rooms/${ROOM_MAP[selectedRoom]}?date=${encodeURIComponent(inDate)}`, { headers });
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.message || 'Failed to load availability');
+        }
+        const data = await res.json();
+        availableTimes = data.availableTimes || [];
+        populateStartTimes(availableTimes);
+    } catch (err) {
+        console.error('Failed to load availability', err);
+        setSelectOptions(startTime, [{ value: '', label: 'Availability unavailable', disabled: true, selected: true }]);
+        setSelectOptions(endTime, [{ value: '', label: 'Select a start time first', disabled: true, selected: true }]);
+        alert(err.message || 'Could not load available times. Please sign in and try again.');
+    }
+}
 
 // Select a room
 rooms.forEach(room => {
@@ -56,63 +162,13 @@ toDate.addEventListener('click', () => {
     const format = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'};
     document.getElementById('currentDate').textContent = date.toLocaleDateString('en-US', format);
 
-    // Restrict date selection (today to 10 days ahead)
-    const today = new Date();
-    const maxdate = new Date();
-    maxdate.setDate(today.getDate() + 10);
-    dateInput.min = today.toISOString().split('T')[0];
-    dateInput.max = maxdate.toISOString().split('T')[0];
-
+    setDateBounds();
     updateAvailableTimes();
 });
 
-// Update available times based on existing bookings
-function updateAvailableTimes() {
-    const arr = getBookingsArray();
-    const inDate = dateInput.value || new Date().toISOString().split('T')[0];
-
-    // Full list of time options
-    const timeOptions = [];
-    for(let h=7; h<=23; h++) {
-        timeOptions.push(`${String(h).padStart(2,'0')}:00`);
-        timeOptions.push(`${String(h).padStart(2,'0')}:30`);
-    }
-
-    // Filter out already booked times for the selected room and date
-    const booked = arr.filter(b => b.room === selectedRoom && b.date === inDate);
-    const availableTimes = [...timeOptions];
-
-    booked.forEach(b => {
-        const [startHour, startMin] = b.startTime.split(':').map(Number);
-        const [endHour, endMin] = b.endTime.split(':').map(Number);
-        const startTotal = startHour*60 + startMin;
-        const endTotal = endHour*60 + endMin;
-
-        // Remove half-hour increments that fall in booked range
-        for(let i=startTotal; i<endTotal; i+=30) {
-            const h = Math.floor(i/60);
-            const m = i%60;
-            const t = `${String(h).padStart(2,'0')}:${m===0?'00':'30'}`;
-            const index = availableTimes.indexOf(t);
-            if(index !== -1) availableTimes.splice(index, 1);
-        }
-    });
-
-    startTime.innerHTML = '';
-    endTime.innerHTML = '';
-    availableTimes.forEach(t => {
-        const opt1 = document.createElement('option');
-        opt1.value = t;
-        startTime.appendChild(opt1);
-
-        const opt2 = document.createElement('option');
-        opt2.value = t;
-        endTime.appendChild(opt2);
-    });
-}
-
 // Update available times if date changes
 dateInput.addEventListener('change', updateAvailableTimes);
+startTime.addEventListener('change', () => populateEndTimes(startTime.value));
 
 // Confirm booking
 confirmButton.addEventListener('click', () => {
@@ -190,15 +246,6 @@ function sendRoomBookingToDB(booking) {
                 throw new Error(data.message || 'Room booking failed');
             }
 
-            const local = getBookingsArray();
-            local.push({
-                room: booking.room,
-                date: booking.date,
-                startTime: booking.startTime,
-                endTime: booking.endTime,
-            });
-            localStorage.setItem('bookings', JSON.stringify(local));
-
             datetime.style.display = 'none';
             document.querySelector('.room-selection').style.display = 'none';
             confirmation.style.display = 'block';
@@ -214,6 +261,3 @@ function sendRoomBookingToDB(booking) {
             alert(err.message || 'Failed to book room');
         });
 }
-
-
-

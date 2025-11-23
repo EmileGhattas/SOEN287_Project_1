@@ -161,7 +161,7 @@ confirmButton.addEventListener('click', () => {
 
     const booking = {
         ...pending,
-        userId: user.id,
+        userId: user.user_id,
         labId: LAB_MAP[selectedLab],
         user: user.username,
     };

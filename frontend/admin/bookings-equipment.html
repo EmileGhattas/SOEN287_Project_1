@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" data-booking-page>
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/shared/style.css">
+    <link rel="stylesheet" href="/admin/css/main.css">
+    <script defer src="/shared/profile-menu.js"></script>
+    <script defer src="/admin/js/bookings-admin.js"></script>
+    <title>Manage Equipment Bookings</title>
+</head>
+
+<body data-booking-type="equipment">
+<header>
+    <nav class="navbar">
+        <h1 class="logo">
+            <img src="/assets/image-removebg-preview.png" alt="Website Logo">
+        </h1>
+
+        <ul class="navLinks">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li class="dropdown">
+                <a href="/booking">Bookings</a>
+                <ul class="dropdown-menu">
+                    <li><a href="/rooms">Rooms</a></li>
+                    <li><a href="/labs">Labs</a></li>
+                    <li><a href="/equipment">Equipment</a></li>
+                </ul>
+            </li>
+            <li><a href="/contact">Contact</a></li>
+            <li id="adminNavItem"><a href="/admin" class="active">Admin</a></li>
+            <li class="dropdown" id="profileDropdown">
+                <a href="/signin" id="profileLink">Profile</a>
+                <ul class="dropdown-menu" id="profileMenu"></ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<main class="admin-main">
+    <section class="start">
+        <h2>Equipment Booking Manager</h2>
+        <p>Review, reschedule, or cancel equipment reservations.</p>
+        <div class="actions">
+            <button class="btn" id="refreshBookings">Refresh</button>
+        </div>
+    </section>
+
+    <section class="table-wrapper">
+        <table class="resource-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Date</th>
+                <th>Equipment & Quantity</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="bookingRows"></tbody>
+        </table>
+        <div id="bookingEmptyState" style="display:none; text-align:center; padding:20px;">No equipment bookings found.</div>
+    </section>
+</main>
+
+<section class="modal" id="bookingPanel">
+    <div class="panel-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+            <h3 id="bookingPanelTitle" style="margin:0;">Edit Booking</h3>
+            <button id="closeBookingPanel" aria-label="Close">&times;</button>
+        </div>
+        <form id="bookingForm" class="panel__form">
+            <label>
+                Booking Date
+                <input type="date" id="bookingDate" required>
+            </label>
+            <label>
+                Equipment
+                <select id="bookingResource" required></select>
+            </label>
+            <label>
+                Quantity
+                <input type="number" min="1" id="bookingQuantity" required>
+            </label>
+            <button class="btn" type="submit">Save Changes</button>
+        </form>
+    </div>
+</section>
+
+<footer class="contact">
+    <h2>Contact Support</h2>
+    <p>If you are experiencing issues, contact IT or system administrators.</p>
+    <div class="contact-info">
+        <p><strong>Admin Support:</strong> admin@learnspace.com</p>
+    </div>
+    <p class="footer-note">2025 Learn Space Admin Panel</p>
+</footer>
+</body>
+</html>

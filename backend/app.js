@@ -9,12 +9,14 @@ const ASSETS_DIR = path.join(__dirname, "..", "assets");
 // Import auth routes
 const authRoutes = require("./routes/authRoutes");
 const resourceRoutes = require("./routes/resourceRoutes");
+const bookingRoutes = require("./routes/bookingRoutes");
 
 // Middleware to parse JSON
 app.use(express.json());
 // Mount authentication routes under /api/auth
 app.use("/api/auth", authRoutes);
 app.use("/api/resources", resourceRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 // Serve static files from the top-level frontend folder
 app.use(express.static(FRONTEND_DIR));
@@ -104,6 +106,18 @@ app.get("/admin/resources", (req, res) => {
 
 app.get("/admin/bookings", (req, res) => {
     sendFrontendFile(res, path.join("admin", "bookings1.html"));
+});
+
+app.get("/admin/bookings/rooms", (req, res) => {
+    sendFrontendFile(res, path.join("admin", "bookings-rooms.html"));
+});
+
+app.get("/admin/bookings/labs", (req, res) => {
+    sendFrontendFile(res, path.join("admin", "bookings-labs.html"));
+});
+
+app.get("/admin/bookings/equipment", (req, res) => {
+    sendFrontendFile(res, path.join("admin", "bookings-equipment.html"));
 });
 
 app.get("/admin/schedules", (req, res) => {

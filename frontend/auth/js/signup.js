@@ -74,8 +74,13 @@ document.getElementById('signupForm').addEventListener('submit', async function(
 
         if (response.ok) {
             // Signup successful, store JWT token
+            const isAdmin = Boolean(data?.user?.is_admin ?? data?.user?.admin ?? data?.user?.isadmin);
+            const normalizedUser = { ...data.user, is_admin: isAdmin };
+            delete normalizedUser.admin;
+            delete normalizedUser.isadmin;
+
             localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('user', JSON.stringify(normalizedUser));
 
             alert('Account created successfully!');
             window.location.href = '/booking'; // or landing page

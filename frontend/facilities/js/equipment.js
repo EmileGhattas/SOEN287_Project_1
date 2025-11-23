@@ -5,16 +5,6 @@ function getBookingsArray() {
   const arr = _readJSON('bookings');
   return Array.isArray(arr) ? arr : [];
 }
-function saveBooking(booking) {
-  if (!booking) return;
-  const arr = getBookingsArray();
-  arr.push(booking);
-  localStorage.setItem('bookings', JSON.stringify(arr));
-  // Backward compatibility (optional)
-  localStorage.setItem('booking', JSON.stringify(booking));
-  localStorage.setItem('Booking', JSON.stringify(booking));
-}
-
 const EQUIPMENT_MAP = {
     'Camera': 1,
     'Tripod': 2,
@@ -141,21 +131,8 @@ confirmButton.addEventListener('click', () => {
         room: selectedEquipment,
         startTime: 'All day',
         endTime: 'All day',
-        user: user.username,
-        userId: user.user_id,
     };
-    saveBooking(booking);
     sendEquipmentBookingToDB(booking);
-
-    document.querySelector('.equipment-selection').style.display = 'none';
-    datetime.style.display = 'none';
-    confirmation.style.display = 'block';
-    summary.innerHTML = `
-        <strong>Equipment:</strong> ${booking.equipment}<br>
-        <strong>Date:</strong> ${booking.date}<br><br>
-        Booking successfully confirmed for 24 hours!
-    `;
-    updateEquipmentAvailability();
 });
 
 
@@ -170,13 +147,34 @@ function sendEquipmentBookingToDB(booking) {
         method: 'POST',
         headers,
         body: JSON.stringify({
-            type: "equipment",
-            userId: booking.userId,
+            bookingType: "equipment",
             equipmentId: booking.equipmentId,
-            date: booking.date
+            bookingDate: booking.date,
+            quantity: 1
         })
     })
-        .then(res => res.json())
-        .then(data => console.log("Saved:", data))
-        .catch(err => console.error('Equipment booking failed', err));
+        .then(async (res) => {
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(data.message || 'Equipment booking failed');
+            }
+
+            const local = getBookingsArray();
+            local.push({ equipment: booking.equipment, date: booking.date });
+            localStorage.setItem('bookings', JSON.stringify(local));
+
+            document.querySelector('.equipment-selection').style.display = 'none';
+            datetime.style.display = 'none';
+            confirmation.style.display = 'block';
+            summary.innerHTML = `
+                <strong>Equipment:</strong> ${booking.equipment}<br>
+                <strong>Date:</strong> ${booking.date}<br><br>
+                Booking successfully confirmed for 24 hours!
+            `;
+            updateEquipmentAvailability();
+        })
+        .catch(err => {
+            console.error('Equipment booking failed', err);
+            alert(err.message || 'Failed to book equipment');
+        });
 }

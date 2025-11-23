@@ -1,6 +1,6 @@
 const db = require("../db/db");
 
-async function mapRow(row) {
+function mapRow(row) {
     return {
         booking_id: row.booking_id,
         booking_type: row.booking_type,
@@ -10,25 +10,25 @@ async function mapRow(row) {
         user_email: row.email,
         room: row.booking_type === "room"
             ? {
-                id: row.room_id,
-                name: row.room_name,
-                start_time: row.start_time,
-                end_time: row.end_time,
-            }
+                  id: row.room_id,
+                  name: row.room_name,
+                  start_time: row.start_time,
+                  end_time: row.end_time,
+              }
             : null,
         lab: row.booking_type === "lab"
             ? {
-                id: row.lab_id,
-                name: row.lab_name,
-                time_slot: row.time_slot,
-            }
+                  id: row.lab_id,
+                  name: row.lab_name,
+                  time_slot: row.time_slot,
+              }
             : null,
         equipment: row.booking_type === "equipment"
             ? {
-                id: row.equipment_id,
-                name: row.equipment_name,
-                quantity: row.quantity,
-            }
+                  id: row.equipment_id,
+                  name: row.equipment_name,
+                  quantity: row.quantity,
+              }
             : null,
     };
 }
@@ -52,16 +52,152 @@ async function getAllBookings() {
     return rows.map(mapRow);
 }
 
+async function getBookingsForUser(user) {
+    if (!user?.user_id) {
+        return [];
+    }
+    const [rows] = await db.execute(
+        `${BASE_QUERY} WHERE b.user_id = ? ORDER BY b.booking_date DESC, b.booking_id DESC`,
+        [user.user_id]
+    );
+    return rows.map(mapRow);
+}
+
+async function getRoomAvailability(roomId, date) {
+    if (!roomId || !date) {
+        throw new Error("MISSING_FIELDS");
+    }
+
+    const [roomRows] = await db.execute("SELECT room_id FROM rooms WHERE room_id = ?", [roomId]);
+    if (!roomRows.length) {
+        throw new Error("ROOM_NOT_FOUND");
+    }
+
+    const [bookings] = await db.execute(
+        `SELECT rb.start_time, rb.end_time
+           FROM room_bookings rb
+           JOIN bookings b ON b.booking_id = rb.booking_id
+          WHERE rb.room_id = ? AND b.booking_date = ?
+          ORDER BY rb.start_time`,
+        [roomId, date]
+    );
+
+    const timeOptions = [];
+    for (let h = 7; h <= 23; h++) {
+        timeOptions.push(`${String(h).padStart(2, "0")}:00`);
+        timeOptions.push(`${String(h).padStart(2, "0")}:30`);
+    }
+
+    const blocked = new Set();
+    bookings.forEach(({ start_time, end_time }) => {
+        const start = timeToMinutes(start_time);
+        const end = timeToMinutes(end_time);
+        for (let m = start; m < end; m += 30) {
+            blocked.add(minutesToString(m));
+        }
+    });
+
+    const availableTimes = timeOptions.filter((t) => !blocked.has(t));
+
+    return {
+        availableTimes,
+        booked: bookings.map((b) => ({
+            start_time: b.start_time,
+            end_time: b.end_time,
+        })),
+    };
+}
+
 async function getBookingById(bookingId, connection = null) {
     const executor = connection || db;
     const [rows] = await executor.execute(`${BASE_QUERY} WHERE b.booking_id = ? LIMIT 1`, [bookingId]);
     return rows[0] ? mapRow(rows[0]) : null;
 }
 
-async function createBooking(payload) {
-    const type = payload.type;
-    const userId = payload.userId || payload.user_id;
-    const date = payload.date || payload.booking_date;
+function normalizeTime(value) {
+    if (!value) return value;
+    if (value.length === 5) return `${value}:00`;
+    return value;
+}
+
+function timeToMinutes(timeValue) {
+    if (!timeValue) return 0;
+    const [hour, minute] = timeValue.split(":");
+    return Number(hour) * 60 + Number(minute || 0);
+}
+
+function minutesToString(totalMinutes) {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${String(hours).padStart(2, "0")}:${minutes === 0 ? "00" : "30"}`;
+}
+
+async function ensureRoomAvailability(connection, roomId, date, startTime, endTime, excludeId = null) {
+    const params = [roomId, date, startTime, endTime];
+    let query = `SELECT rb.rm_booking_id
+                   FROM room_bookings rb
+                   JOIN bookings b ON b.booking_id = rb.booking_id
+                  WHERE rb.room_id = ? AND b.booking_date = ?
+                    AND NOT (rb.end_time <= ? OR rb.start_time >= ?)`;
+    if (excludeId) {
+        query += " AND b.booking_id <> ?";
+        params.push(excludeId);
+    }
+
+    const [conflict] = await connection.execute(query + " LIMIT 1", params);
+    if (conflict.length) {
+        throw new Error("ROOM_CONFLICT");
+    }
+}
+
+async function ensureLabAvailability(connection, labId, date, timeSlot, excludeId = null) {
+    const params = [labId, timeSlot, date];
+    let query = `SELECT lb.id
+                   FROM lab_bookings lb
+                   JOIN bookings b ON b.booking_id = lb.booking_id
+                  WHERE lb.lab_id = ? AND lb.time_slot = ? AND b.booking_date = ?`;
+    if (excludeId) {
+        query += " AND b.booking_id <> ?";
+        params.push(excludeId);
+    }
+
+    const [conflict] = await connection.execute(query + " LIMIT 1", params);
+    if (conflict.length) {
+        throw new Error("LAB_CONFLICT");
+    }
+}
+
+async function ensureEquipmentAvailability(connection, equipmentId, date, quantity, excludeId = null) {
+    const [equipRows] = await connection.execute(
+        "SELECT equipment_id, total_quantity, available_quantity FROM equipment WHERE equipment_id = ? FOR UPDATE",
+        [equipmentId]
+    );
+
+    if (!equipRows.length) {
+        throw new Error("EQUIPMENT_NOT_FOUND");
+    }
+
+    const equipment = equipRows[0];
+    const [existingBookings] = await connection.execute(
+        `SELECT COALESCE(SUM(eb.quantity), 0) AS total
+           FROM equipment_bookings eb
+           JOIN bookings b ON b.booking_id = eb.booking_id
+          WHERE eb.equipment_id = ? AND b.booking_date = ? ${excludeId ? "AND b.booking_id <> ?" : ""}`,
+        excludeId ? [equipmentId, date, excludeId] : [equipmentId, date]
+    );
+
+    const alreadyBooked = existingBookings[0]?.total || 0;
+    if (alreadyBooked + quantity > equipment.total_quantity) {
+        throw new Error("EQUIPMENT_UNAVAILABLE");
+    }
+
+    return equipment;
+}
+
+async function createBooking(payload, user) {
+    const type = payload.bookingType || payload.booking_type || payload.type;
+    const date = payload.bookingDate || payload.booking_date || payload.date;
+    const userId = user?.user_id;
 
     if (!type || !userId || !date) {
         throw new Error("MISSING_FIELDS");
@@ -90,17 +226,10 @@ async function createBooking(payload) {
 
         if (type === "room") {
             const roomId = payload.roomId || payload.room_id;
-            let startTime = payload.startTime || payload.start_time;
-            let endTime = payload.endTime || payload.end_time;
+            let startTime = normalizeTime(payload.startTime || payload.start_time);
+            let endTime = normalizeTime(payload.endTime || payload.end_time);
 
-            if (!roomId || !startTime || !endTime) {
-                throw new Error("INVALID_ROOM");
-            }
-
-            if (startTime.length === 5) startTime += ":00";
-            if (endTime.length === 5) endTime += ":00";
-
-            if (startTime >= endTime) {
+            if (!roomId || !startTime || !endTime || startTime >= endTime) {
                 throw new Error("INVALID_ROOM");
             }
 
@@ -113,19 +242,7 @@ async function createBooking(payload) {
                 throw new Error("ROOM_NOT_FOUND");
             }
 
-            const [conflict] = await connection.execute(
-                `SELECT rb.rm_booking_id
-                   FROM room_bookings rb
-                   JOIN bookings b ON b.booking_id = rb.booking_id
-                  WHERE rb.room_id = ? AND b.booking_date = ?
-                    AND NOT (rb.end_time <= ? OR rb.start_time >= ?)
-                  LIMIT 1`,
-                [roomId, date, startTime, endTime]
-            );
-
-            if (conflict.length) {
-                throw new Error("ROOM_CONFLICT");
-            }
+            await ensureRoomAvailability(connection, roomId, date, startTime, endTime);
 
             await connection.execute(
                 "INSERT INTO room_bookings (booking_id, room_id, start_time, end_time) VALUES (?, ?, ?, ?)",
@@ -133,7 +250,7 @@ async function createBooking(payload) {
             );
         } else if (type === "lab") {
             const labId = payload.labId || payload.lab_id;
-            const slot = payload.slot || payload.time_slot;
+            const slot = payload.timeSlot || payload.time_slot || payload.slot;
 
             if (!labId || !slot) {
                 throw new Error("INVALID_LAB");
@@ -148,18 +265,7 @@ async function createBooking(payload) {
                 throw new Error("LAB_NOT_FOUND");
             }
 
-            const [conflict] = await connection.execute(
-                `SELECT lb.id
-                   FROM lab_bookings lb
-                   JOIN bookings b ON b.booking_id = lb.booking_id
-                  WHERE lb.lab_id = ? AND lb.time_slot = ? AND b.booking_date = ?
-                  LIMIT 1`,
-                [labId, slot, date]
-            );
-
-            if (conflict.length) {
-                throw new Error("LAB_CONFLICT");
-            }
+            await ensureLabAvailability(connection, labId, date, slot);
 
             await connection.execute(
                 "INSERT INTO lab_bookings (booking_id, lab_id, time_slot) VALUES (?, ?, ?)",
@@ -173,17 +279,9 @@ async function createBooking(payload) {
                 throw new Error("INVALID_EQUIPMENT");
             }
 
-            const [equipmentRows] = await connection.execute(
-                "SELECT available_quantity FROM equipment WHERE equipment_id = ? FOR UPDATE",
-                [equipmentId]
-            );
+            const equipment = await ensureEquipmentAvailability(connection, equipmentId, date, quantity);
 
-            if (!equipmentRows.length) {
-                throw new Error("EQUIPMENT_NOT_FOUND");
-            }
-
-            const available = equipmentRows[0].available_quantity;
-            if (available < quantity) {
+            if (equipment.available_quantity < quantity) {
                 throw new Error("EQUIPMENT_UNAVAILABLE");
             }
 
@@ -210,40 +308,49 @@ async function createBooking(payload) {
     }
 }
 
-async function updateBooking(bookingId, payload) {
+async function updateBooking(bookingId, payload, currentUser) {
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
 
-        const [currentRows] = await connection.execute(`${BASE_QUERY} WHERE b.booking_id = ? LIMIT 1 FOR UPDATE`, [bookingId]);
+        const [currentRows] = await connection.execute(
+            `${BASE_QUERY} WHERE b.booking_id = ? LIMIT 1 FOR UPDATE`,
+            [bookingId]
+        );
         const current = currentRows[0];
         if (!current) {
             throw new Error("NOT_FOUND");
         }
 
-        const bookingDate = payload.booking_date || payload.bookingDate || current.booking_date;
-        const userId = payload.user_id || payload.userId || current.user_id;
-
-        if (!bookingDate || !userId) {
-            throw new Error("INVALID_BOOKING");
+        if (!currentUser?.is_admin && current.user_id !== currentUser?.user_id) {
+            throw new Error("FORBIDDEN");
         }
 
+        const bookingDate = payload.booking_date || payload.bookingDate || current.booking_date;
+
         await connection.execute(
-            "UPDATE bookings SET user_id = ?, booking_date = ? WHERE booking_id = ?",
-            [userId, bookingDate, bookingId]
+            "UPDATE bookings SET booking_date = ? WHERE booking_id = ?",
+            [bookingDate, bookingId]
         );
 
         if (current.booking_type === "room") {
             const roomId = payload.room_id || payload.roomId || current.room_id;
-            let startTime = payload.start_time || payload.startTime || current.start_time;
-            let endTime = payload.end_time || payload.endTime || current.end_time;
-
-            if (startTime && startTime.length === 5) startTime += ":00";
-            if (endTime && endTime.length === 5) endTime += ":00";
+            let startTime = normalizeTime(payload.start_time || payload.startTime || current.start_time);
+            let endTime = normalizeTime(payload.end_time || payload.endTime || current.end_time);
 
             if (!roomId || !startTime || !endTime || startTime >= endTime) {
                 throw new Error("INVALID_ROOM");
             }
+
+            const [roomRows] = await connection.execute(
+                "SELECT room_id FROM rooms WHERE room_id = ? LIMIT 1",
+                [roomId]
+            );
+            if (!roomRows.length) {
+                throw new Error("ROOM_NOT_FOUND");
+            }
+
+            await ensureRoomAvailability(connection, roomId, bookingDate, startTime, endTime, bookingId);
 
             await connection.execute(
                 "UPDATE room_bookings SET room_id = ?, start_time = ?, end_time = ? WHERE booking_id = ?",
@@ -257,21 +364,84 @@ async function updateBooking(bookingId, payload) {
                 throw new Error("INVALID_LAB");
             }
 
+            const [labRows] = await connection.execute(
+                "SELECT lab_id FROM labs WHERE lab_id = ? LIMIT 1",
+                [labId]
+            );
+            if (!labRows.length) {
+                throw new Error("LAB_NOT_FOUND");
+            }
+
+            await ensureLabAvailability(connection, labId, bookingDate, timeSlot, bookingId);
+
             await connection.execute(
                 "UPDATE lab_bookings SET lab_id = ?, time_slot = ? WHERE booking_id = ?",
                 [labId, timeSlot, bookingId]
             );
         } else if (current.booking_type === "equipment") {
-            const equipmentId = payload.equipment_id || payload.equipmentId || current.equipment_id;
-            const quantity = payload.quantity || current.quantity;
+            const newEquipmentId = payload.equipment_id || payload.equipmentId || current.equipment_id;
+            const newQuantityRaw = payload.quantity ?? current.quantity;
+            const newQuantity = Number(newQuantityRaw);
 
-            if (!equipmentId || !quantity || quantity < 1) {
+            if (!newEquipmentId || !newQuantity || newQuantity < 1) {
                 throw new Error("INVALID_EQUIPMENT");
+            }
+
+            const isSameEquipment = Number(newEquipmentId) === Number(current.equipment_id);
+
+            if (isSameEquipment) {
+                const equipment = await ensureEquipmentAvailability(
+                    connection,
+                    newEquipmentId,
+                    bookingDate,
+                    newQuantity,
+                    bookingId
+                );
+
+                const diff = newQuantity - current.quantity;
+                if (diff > 0 && equipment.available_quantity < diff) {
+                    throw new Error("EQUIPMENT_UNAVAILABLE");
+                }
+
+                await connection.execute(
+                    "UPDATE equipment SET available_quantity = available_quantity - ? WHERE equipment_id = ?",
+                    [diff, newEquipmentId]
+                );
+            } else {
+                const oldEquipmentId = current.equipment_id;
+                const [oldRows] = await connection.execute(
+                    "SELECT equipment_id FROM equipment WHERE equipment_id = ? FOR UPDATE",
+                    [oldEquipmentId]
+                );
+                if (!oldRows.length) {
+                    throw new Error("EQUIPMENT_NOT_FOUND");
+                }
+
+                const newEquipment = await ensureEquipmentAvailability(
+                    connection,
+                    newEquipmentId,
+                    bookingDate,
+                    newQuantity,
+                    bookingId
+                );
+
+                if (newEquipment.available_quantity < newQuantity) {
+                    throw new Error("EQUIPMENT_UNAVAILABLE");
+                }
+
+                await connection.execute(
+                    "UPDATE equipment SET available_quantity = available_quantity + ? WHERE equipment_id = ?",
+                    [current.quantity, oldEquipmentId]
+                );
+                await connection.execute(
+                    "UPDATE equipment SET available_quantity = available_quantity - ? WHERE equipment_id = ?",
+                    [newQuantity, newEquipmentId]
+                );
             }
 
             await connection.execute(
                 "UPDATE equipment_bookings SET equipment_id = ?, quantity = ? WHERE booking_id = ?",
-                [equipmentId, quantity, bookingId]
+                [newEquipmentId, newQuantity, bookingId]
             );
         }
 
@@ -285,15 +455,88 @@ async function updateBooking(bookingId, payload) {
     }
 }
 
-async function deleteBooking(bookingId) {
-    const [result] = await db.execute("DELETE FROM bookings WHERE booking_id = ?", [bookingId]);
-    return result.affectedRows > 0;
+async function deleteBooking(bookingId, currentUser) {
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const [currentRows] = await connection.execute(
+            `${BASE_QUERY} WHERE b.booking_id = ? LIMIT 1 FOR UPDATE`,
+            [bookingId]
+        );
+        const current = currentRows[0];
+        if (!current) {
+            return false;
+        }
+
+        if (!currentUser?.is_admin && current.user_id !== currentUser?.user_id) {
+            await connection.rollback();
+            return "FORBIDDEN";
+        }
+
+        if (current.booking_type === "equipment" && current.equipment_id) {
+            await connection.execute(
+                "UPDATE equipment SET available_quantity = available_quantity + ? WHERE equipment_id = ?",
+                [current.quantity, current.equipment_id]
+            );
+        }
+
+        await connection.execute("DELETE FROM bookings WHERE booking_id = ?", [bookingId]);
+
+        await connection.commit();
+        return true;
+    } catch (err) {
+        await connection.rollback();
+        throw err;
+    } finally {
+        connection.release();
+    }
+}
+
+async function deleteBookingsForResource(type, resourceId, connection = null) {
+    if (!resourceId) return;
+    const executor = connection || db;
+    let bookingIds = [];
+
+    if (type === "room") {
+        const [rows] = await executor.execute(
+            "SELECT booking_id FROM room_bookings WHERE room_id = ?",
+            [resourceId]
+        );
+        bookingIds = rows.map((r) => r.booking_id);
+    } else if (type === "lab") {
+        const [rows] = await executor.execute(
+            "SELECT booking_id FROM lab_bookings WHERE lab_id = ?",
+            [resourceId]
+        );
+        bookingIds = rows.map((r) => r.booking_id);
+    } else if (type === "equipment") {
+        const [rows] = await executor.execute(
+            "SELECT booking_id, quantity, equipment_id FROM equipment_bookings WHERE equipment_id = ?",
+            [resourceId]
+        );
+        for (const row of rows) {
+            await executor.execute(
+                "UPDATE equipment SET available_quantity = available_quantity + ? WHERE equipment_id = ?",
+                [row.quantity, row.equipment_id]
+            );
+        }
+        bookingIds = rows.map((r) => r.booking_id);
+    }
+
+    if (bookingIds.length) {
+        const placeholders = bookingIds.map(() => "?").join(", ");
+        await executor.execute(`DELETE FROM bookings WHERE booking_id IN (${placeholders})`, bookingIds);
+    }
 }
 
 module.exports = {
     getAllBookings,
+    getBookingsForUser,
+    getRoomAvailability,
     getBookingById,
     createBooking,
     updateBooking,
     deleteBooking,
+    deleteBookingsForResource,
 };

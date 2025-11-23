@@ -1,120 +1,202 @@
-// Optional: profile menu updates handled globally by profile-menu.js
-// <div id="profileMenu"></div> exists in the header.
+const bookingsGrid = document.getElementById('bookingsGrid');
+const bookingsEmpty = document.getElementById('bookingsEmpty');
+const filterFrom = document.getElementById('filterFrom');
+const filterTo = document.getElementById('filterTo');
+const applyFilters = document.getElementById('applyFilters');
+const clearFiltersBtn = document.getElementById('clearFilters');
+const clearMyBookingsBtn = document.getElementById('clearMyBookings');
 
-function readLocalJSON(key) {
-  try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
+let bookingsCache = [];
+
+function authHeaders() {
+    const token = localStorage.getItem('token');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return headers;
 }
 
-function normalizeBookings(raw) {
-  if (!raw) return [];
-  if (Array.isArray(raw)) return raw;
-  if (typeof raw === 'object') return [raw];
-  return [];
+function resourceLabel(booking) {
+    if (booking.booking_type === 'room' && booking.room) return booking.room.name || `Room ${booking.room.id}`;
+    if (booking.booking_type === 'lab' && booking.lab) return booking.lab.name || `Lab ${booking.lab.id}`;
+    if (booking.booking_type === 'equipment' && booking.equipment) return booking.equipment.name || `Equipment ${booking.equipment.id}`;
+    return booking.booking_type;
 }
 
-function getAllBookings() {
-
-  const b1 = readLocalJSON('Booking');
-  const b2 = readLocalJSON('booking');
-  const b3 = readLocalJSON('bookings');
-  const merged = [...normalizeBookings(b1), ...normalizeBookings(b2), ...normalizeBookings(b3)];
-
-  const seen = new Set();
-  const out = [];
-  for (const b of merged) {
-    if (!b || typeof b !== 'object') continue;
-    const isEquipment = Boolean(b.equipment && !b.room);
-    const room = b.room || b.Room || b.equipment || b.name || 'Room';
-    const date = b.date || b.Date || b.day || '';
-    const start = b.startTime || b.start || b.from || (isEquipment ? 'All day' : '');
-    const end = b.endTime || b.end || b.to || (isEquipment ? 'All day' : '');
-    const type = b.type || (isEquipment ? 'Equipment' : 'Reservation');
-    const key = `${room}__${date}__${start}__${end}`;
-    if (!seen.has(key)) { seen.add(key); out.push({ room, date, startTime: start, endTime: end, type }); }
-  }
-  return out;
+function timeLabel(booking) {
+    if (booking.booking_type === 'room' && booking.room) {
+        return `${booking.room.start_time} — ${booking.room.end_time}`;
+    }
+    if (booking.booking_type === 'lab' && booking.lab) {
+        return booking.lab.time_slot;
+    }
+    if (booking.booking_type === 'equipment' && booking.equipment) {
+        return `Quantity: ${booking.equipment.quantity}`;
+    }
+    return '-';
 }
 
-function filterByDateRange(data, from, to) {
-  if (!from && !to) return data;
-  const fromTs = from ? Date.parse(from) : -Infinity;
-  const toTs = to ? Date.parse(to) : Infinity;
-  return data.filter(b => {
-    const dateTs = Date.parse(b.date);
-    return isFinite(dateTs) ? (dateTs >= fromTs && dateTs <= toTs) : true;
-  });
+function filterBookings(list) {
+    const fromTs = filterFrom.value ? Date.parse(filterFrom.value) : -Infinity;
+    const toTs = filterTo.value ? Date.parse(filterTo.value) : Infinity;
+
+    return list.filter((b) => {
+        const ts = Date.parse(b.booking_date);
+        if (!Number.isFinite(ts)) return true;
+        return ts >= fromTs && ts <= toTs;
+    });
 }
 
 function renderBookings(list) {
-  const grid = document.getElementById('bookingsGrid');
-  const empty = document.getElementById('bookingsEmpty');
-  grid.innerHTML = '';
-  if (!list.length) {
-    empty.style.display = 'block';
-    return;
-  }
-  empty.style.display = 'none';
-  for (const b of list) {
-    const el = document.createElement('article');
-    el.className = 'booking-card';
-    el.innerHTML = `
-      <div class="booking-card__header">
-        <span class="badge">${b.type || 'Reservation'}</span>
-        <h3 class="booking-card__title">${b.room}</h3>
-      </div>
-      <div class="booking-card__body">
-        <div><strong>Date:</strong> ${b.date || '-'}</div>
-        <div><strong>Time:</strong> ${b.startTime || '-'} — ${b.endTime || '-'}</div>
-      </div>
-    `;
-    grid.appendChild(el);
-  }
+    bookingsGrid.innerHTML = '';
+
+    if (!list.length) {
+        bookingsEmpty.style.display = 'block';
+        return;
+    }
+
+    bookingsEmpty.style.display = 'none';
+
+    list.forEach((booking) => {
+        const card = document.createElement('article');
+        card.className = 'booking-card';
+        card.dataset.bookingId = booking.booking_id;
+        card.innerHTML = `
+            <div class="booking-card__header">
+                <span class="badge">${booking.booking_type}</span>
+                <h3 class="booking-card__title">${resourceLabel(booking)}</h3>
+            </div>
+            <div class="booking-card__body">
+                <div><strong>Date:</strong> ${booking.booking_date}</div>
+                <div><strong>Details:</strong> ${timeLabel(booking)}</div>
+            </div>
+            <div class="booking-card__actions">
+                <button class="btn" data-action="reschedule" data-id="${booking.booking_id}">Reschedule</button>
+                <button class="btn delete" data-action="cancel" data-id="${booking.booking_id}">Cancel</button>
+            </div>
+        `;
+        bookingsGrid.appendChild(card);
+    });
 }
 
-function refresh() {
-  const all = getAllBookings();
-  const from = document.getElementById('filterFrom').value || null;
-  const to = document.getElementById('filterTo').value || null;
-  renderBookings(filterByDateRange(all, from, to));
+async function loadBookings() {
+    try {
+        const response = await fetch('/api/bookings/mine', { headers: authHeaders() });
+        if (response.status === 401) {
+            bookingsGrid.innerHTML = '';
+            bookingsEmpty.style.display = 'block';
+            bookingsEmpty.innerHTML = '<strong>Please sign in to view your bookings.</strong>';
+            return;
+        }
+
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to load bookings');
+        }
+
+        bookingsCache = data;
+        renderBookings(filterBookings(bookingsCache));
+    } catch (err) {
+        console.error(err);
+        alert(err.message || 'Failed to load bookings');
+    }
+}
+
+async function cancelBooking(id) {
+    const confirmed = confirm('Cancel this booking?');
+    if (!confirmed) return;
+
+    const response = await fetch(`/api/bookings/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+    });
+
+    if (response.status === 403) {
+        alert('You cannot cancel this booking.');
+        return;
+    }
+
+    if (!response.ok && response.status !== 204) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message || 'Failed to cancel booking');
+    }
+
+    await loadBookings();
+}
+
+async function rescheduleBooking(booking) {
+    const bookingDate = prompt('New date (YYYY-MM-DD):', booking.booking_date);
+    if (!bookingDate) return;
+
+    const payload = { bookingDate };
+
+    if (booking.booking_type === 'room') {
+        const startTime = prompt('New start time (HH:MM):', booking.room?.start_time || '');
+        const endTime = prompt('New end time (HH:MM):', booking.room?.end_time || '');
+        if (!startTime || !endTime) return alert('Start and end time are required.');
+        payload.startTime = startTime;
+        payload.endTime = endTime;
+    } else if (booking.booking_type === 'lab') {
+        const timeSlot = prompt('New time slot:', booking.lab?.time_slot || '');
+        if (!timeSlot) return alert('A time slot is required.');
+        payload.timeSlot = timeSlot;
+    } else if (booking.booking_type === 'equipment') {
+        const quantity = Number(prompt('Quantity:', booking.equipment?.quantity || 1));
+        if (!quantity || quantity < 1) return alert('Quantity must be at least 1.');
+        payload.quantity = quantity;
+    }
+
+    const response = await fetch(`/api/bookings/${booking.booking_id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 403) {
+        alert('You cannot reschedule this booking.');
+        return;
+    }
+    if (!response.ok) {
+        throw new Error(data.message || 'Failed to update booking');
+    }
+
+    await loadBookings();
+}
+
+function handleGridClick(event) {
+    const action = event.target.getAttribute('data-action');
+    const bookingId = event.target.getAttribute('data-id');
+    if (!action || !bookingId) return;
+
+    const booking = bookingsCache.find((b) => `${b.booking_id}` === bookingId);
+    if (!booking) return;
+
+    if (action === 'cancel') {
+        cancelBooking(bookingId).catch((err) => alert(err.message));
+    }
+    if (action === 'reschedule') {
+        rescheduleBooking(booking).catch((err) => alert(err.message));
+    }
+}
+
+function handleClearFilters() {
+    filterFrom.value = '';
+    filterTo.value = '';
+    renderBookings(bookingsCache);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('applyFilters').addEventListener('click', refresh);
-  document.getElementById('clearFilters').addEventListener('click', () => {
-    document.getElementById('filterFrom').value = '';
-    document.getElementById('filterTo').value = '';
-    refresh();
-  });
+    applyFilters.addEventListener('click', () => renderBookings(filterBookings(bookingsCache)));
+    clearFiltersBtn.addEventListener('click', handleClearFilters);
+    bookingsGrid.addEventListener('click', handleGridClick);
 
-  document.getElementById('clearMyBookings').addEventListener('click', () => {
-    if (!confirm('Remove locally stored bookings from this device?')) return;
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (!user || !user.id) {
-          alert("You must be logged in to clear server bookings.");
-      } else {
-          fetch('../../backend/php/delete_booking.php', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userId: user.id })
-          })
-              .then(res => res.json())
-              .then(data => {
-                  console.log("Deleted bookings from DB:", data);
-              })
-              .catch(err => console.error("Delete bookings error:", err));
-      }
+    clearMyBookingsBtn.addEventListener('click', () => {
+        if (!bookingsCache.length) return;
+        const confirmed = confirm('Cancel all of your bookings?');
+        if (!confirmed) return;
 
-      // Always clear local copies too
-      localStorage.removeItem('Booking');
-      localStorage.removeItem('booking');
-      localStorage.removeItem('bookings');
-      localStorage.removeItem('labBookings');
-      localStorage.removeItem('pendingBooking');
-      localStorage.removeItem('pendingLabBooking');
-      localStorage.removeItem('pendingEquipmentBooking');
-      refresh();
-  });
+        Promise.all(bookingsCache.map((b) => cancelBooking(b.booking_id))).catch((err) => alert(err.message));
+    });
 
-
-  refresh();
+    loadBookings();
 });

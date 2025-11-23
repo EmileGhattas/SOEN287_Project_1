@@ -1,4 +1,5 @@
 const db = require("../db/db");
+const Booking = require("./bookingModel");
 
 async function ensureTables() {
     await db.execute(`
@@ -46,7 +47,61 @@ async function updateResource(resourceId, { name, description, location, capacit
 }
 
 async function deleteResource(resourceId) {
-    await db.execute("DELETE FROM resources WHERE resource_id = ?", [resourceId]);
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+        const [rows] = await connection.execute(
+            "SELECT * FROM resources WHERE resource_id = ? FOR UPDATE",
+            [resourceId]
+        );
+
+        const resource = rows[0];
+        if (!resource) {
+            throw new Error("NOT_FOUND");
+        }
+
+        const type = resource.type;
+        if (type === "room") {
+            const [roomRows] = await connection.execute(
+                "SELECT room_id FROM rooms WHERE name = ? LIMIT 1",
+                [resource.name]
+            );
+            if (roomRows.length) {
+                const roomId = roomRows[0].room_id;
+                await Booking.deleteBookingsForResource("room", roomId, connection);
+                await connection.execute("DELETE FROM rooms WHERE room_id = ?", [roomId]);
+            }
+        } else if (type === "lab") {
+            const [labRows] = await connection.execute(
+                "SELECT lab_id FROM labs WHERE name = ? LIMIT 1",
+                [resource.name]
+            );
+            if (labRows.length) {
+                const labId = labRows[0].lab_id;
+                await Booking.deleteBookingsForResource("lab", labId, connection);
+                await connection.execute("DELETE FROM labs WHERE lab_id = ?", [labId]);
+            }
+        } else if (type === "equipment") {
+            const [eqRows] = await connection.execute(
+                "SELECT equipment_id FROM equipment WHERE name = ? LIMIT 1",
+                [resource.name]
+            );
+            if (eqRows.length) {
+                const equipmentId = eqRows[0].equipment_id;
+                await Booking.deleteBookingsForResource("equipment", equipmentId, connection);
+                await connection.execute("DELETE FROM equipment WHERE equipment_id = ?", [equipmentId]);
+            }
+        }
+
+        await connection.execute("DELETE FROM resources WHERE resource_id = ?", [resourceId]);
+
+        await connection.commit();
+    } catch (err) {
+        await connection.rollback();
+        throw err;
+    } finally {
+        connection.release();
+    }
 }
 
 async function bookingsTableExists() {

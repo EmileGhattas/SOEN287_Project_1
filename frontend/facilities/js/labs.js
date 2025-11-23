@@ -11,12 +11,6 @@ function getBookingsArray() {
     return Array.isArray(arr) ? arr : [];
 }
 
-function saveBooking(booking) {
-    const arr = getBookingsArray();
-    arr.push(booking);
-    localStorage.setItem('labBookings', JSON.stringify(arr));
-}
-
 const LAB_MAP = {
     'Chemistry Lab': 1,
     'Physics Lab': 2,
@@ -161,25 +155,10 @@ confirmButton.addEventListener('click', () => {
 
     const booking = {
         ...pending,
-        userId: user.user_id,
         labId: LAB_MAP[selectedLab],
-        user: user.username,
     };
 
-    saveBooking(booking);
     sendLabBookingToDB(booking);
-
-    document.querySelector('.lab-selection').style.display = 'none';
-    datetime.style.display = 'none';
-    confirmation.style.display = 'block';
-    summary.innerHTML = `
-    <strong>Lab:</strong> ${booking.lab}<br>
-    <strong>Date:</strong> ${booking.date}<br>
-    <strong>Slot:</strong> ${booking.slot}<br><br>
-    Booking successfully confirmed!
-  `;
-
-    updateLabAvailability();
 });
 
 
@@ -194,14 +173,36 @@ function sendLabBookingToDB(booking) {
         method: 'POST',
         headers,
         body: JSON.stringify({
-            type: "lab",
-            userId: booking.userId,
-            labId: LAB_MAP[selectedLab],
-            date: booking.date,
-            slot: booking.slot
+            bookingType: "lab",
+            labId: booking.labId,
+            bookingDate: booking.date,
+            timeSlot: booking.slot
         })
     })
-        .then(res => res.json())
-        .then(data => console.log("Saved:", data))
-        .catch(err => console.error('Lab booking failed', err));
+        .then(async (res) => {
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(data.message || 'Lab booking failed');
+            }
+
+            const local = getBookingsArray();
+            local.push({ lab: booking.lab, date: booking.date, slot: booking.slot });
+            localStorage.setItem('labBookings', JSON.stringify(local));
+
+            document.querySelector('.lab-selection').style.display = 'none';
+            datetime.style.display = 'none';
+            confirmation.style.display = 'block';
+            summary.innerHTML = `
+            <strong>Lab:</strong> ${booking.lab}<br>
+            <strong>Date:</strong> ${booking.date}<br>
+            <strong>Slot:</strong> ${booking.slot}<br><br>
+            Booking successfully confirmed!
+          `;
+
+            updateLabAvailability();
+        })
+        .catch(err => {
+            console.error('Lab booking failed', err);
+            alert(err.message || 'Failed to book lab');
+        });
 }

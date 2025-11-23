@@ -134,12 +134,15 @@ confirmButton.addEventListener('click', () => {
         return alert("All units are already booked for that day!");
 
     const booking = {
-        type: 'Equipment',
+        type: 'equipment',
         equipment: selectedEquipment,
+        equipmentId: EQUIPMENT_MAP[selectedEquipment],
+        date,
         room: selectedEquipment,
         startTime: 'All day',
         endTime: 'All day',
         user: user.username,
+        userId: user.user_id,
     };
     saveBooking(booking);
     sendEquipmentBookingToDB(booking);
@@ -157,14 +160,23 @@ confirmButton.addEventListener('click', () => {
 
 
 function sendEquipmentBookingToDB(booking) {
-    fetch('../../backend/php/bookings.php', {
+    const token = localStorage.getItem('token');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
+
+    fetch('/api/bookings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
             type: "equipment",
             userId: booking.userId,
             equipmentId: booking.equipmentId,
             date: booking.date
         })
-    });
+    })
+        .then(res => res.json())
+        .then(data => console.log("Saved:", data))
+        .catch(err => console.error('Equipment booking failed', err));
 }

@@ -161,7 +161,7 @@ confirmButton.addEventListener('click', () => {
 
     const booking = {
         ...pending,
-        userId: user.id,
+        userId: user.user_id,
         labId: LAB_MAP[selectedLab],
         user: user.username,
     };
@@ -184,9 +184,15 @@ confirmButton.addEventListener('click', () => {
 
 
 function sendLabBookingToDB(booking) {
-    fetch('../../backend/php/bookings.php', {
+    const token = localStorage.getItem('token');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
+
+    fetch('/api/bookings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
             type: "lab",
             userId: booking.userId,
@@ -194,5 +200,8 @@ function sendLabBookingToDB(booking) {
             date: booking.date,
             slot: booking.slot
         })
-    });
+    })
+        .then(res => res.json())
+        .then(data => console.log("Saved:", data))
+        .catch(err => console.error('Lab booking failed', err));
 }

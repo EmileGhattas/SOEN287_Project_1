@@ -168,14 +168,14 @@ confirmButton.addEventListener('click', () => {
 
     // If not logged in → save booking temporarily & redirect
     if (!user) {
-        localStorage.setItem("pendingBooking", JSON.stringify(booking));
+        localStorage.setItem("pendingBooking", JSON.stringify(pendingBooking));
         alert("Please sign in to complete your booking.");
         window.location.href = "../../auth/signin.html";
         return;
     }
     const booking = {
         ...pendingBooking,
-        userId: user,
+        userId: user.user_id,
         roomId: ROOM_MAP[selectedRoom],
         user: user.username
     };
@@ -216,19 +216,27 @@ confirmButton.addEventListener('click', () => {
 });
 
 function sendRoomBookingToDB(booking) {
-    fetch('../../backend/php/bookings.php', {
+    const token = localStorage.getItem('token');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
+
+    fetch('/api/bookings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({            type: "room",
+        headers,
+        body: JSON.stringify({
+            type: "room",
             userId: booking.userId,
             date: booking.date,
             roomId: booking.roomId,
             startTime: booking.startTime,
-            endTime: booking.endTime})
+            endTime: booking.endTime,
+        })
     })
         .then(res => res.json())
         .then(data => console.log("Saved:", data))
-        .catch(err => console.error(err));
+        .catch(err => console.error('Room booking failed', err));
 }
 
 

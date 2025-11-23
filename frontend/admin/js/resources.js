@@ -1,12 +1,3 @@
-function loadResources() {
-    return JSON.parse(localStorage.getItem("resources")) || [];
-}
-
-function saveResources(resources) {
-    localStorage.setItem("resources", JSON.stringify(resources));
-}
-
-
 const addResourceBtn = document.getElementById("addResourceBtn");
 const resourcePanel = document.getElementById("resourcePanel");
 const closeResourcePanel = document.getElementById("closeResourcePanel");
@@ -21,85 +12,132 @@ const resCapacity = document.getElementById("resCapacity");
 const resType = document.getElementById("resType");
 const resImage = document.getElementById("resImage");
 
+let editingResourceId = null;
+const isResourcePage = Boolean(resourceList);
 
-let editingIndex = null;
+const resourceAPI = {
+    cache: [],
+    async authFetch(url, options = {}) {
+        const token = localStorage.getItem("token");
+        const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
 
+        const response = await fetch(url, { ...options, headers });
 
+        if (response.status === 401 || response.status === 403) {
+            alert("Admin access required. Please sign in again.");
+            window.location.href = "/auth/adminsignin.html";
+            throw new Error("Unauthorized");
+        }
 
+        return response;
+    },
+    async loadResources() {
+        const response = await this.authFetch("/api/resources");
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.message || "Failed to load resources");
+        }
 
-function openPanel(index = null) {
-    editingIndex = index;
+        this.cache = await response.json();
+        renderResources();
+        return this.cache;
+    },
+    async saveResource(payload, resourceId = null) {
+        const method = resourceId ? "PUT" : "POST";
+        const url = resourceId ? `/api/resources/${resourceId}` : "/api/resources";
+        const response = await this.authFetch(url, {
+            method,
+            body: JSON.stringify(payload),
+        });
 
-    if (index === null) {
-        
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(data.message || "Unable to save resource");
+        }
 
+        return data;
+    },
+    async deleteResource(resourceId) {
+        const response = await this.authFetch(`/api/resources/${resourceId}`, { method: "DELETE" });
+        if (!response.ok && response.status !== 204) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.message || "Unable to delete resource");
+        }
+    },
+};
 
+window.resourceAPI = resourceAPI;
+
+function openPanel(resource = null) {
+    if (!resourcePanel) return;
+
+    editingResourceId = resource ? resource.resource_id : null;
+
+    if (resource) {
+        panelTitle.textContent = "Edit Resource";
+        saveResourceBtn.textContent = "Update";
+        resName.value = resource.name || "";
+        resDescription.value = resource.description || "";
+        resLocation.value = resource.location || "";
+        resCapacity.value = resource.capacity || "";
+        resType.value = resource.type || "room";
+        resImage.value = resource.image_url || "";
+    } else {
         panelTitle.textContent = "Add Resource";
         saveResourceBtn.textContent = "Add";
-
-
         resName.value = "";
         resDescription.value = "";
         resLocation.value = "";
         resCapacity.value = "";
         resType.value = "room";
         resImage.value = "";
-
-    } 
-    
-    else {
-        
-        panelTitle.textContent = "Edit Resource";
-        saveResourceBtn.textContent = "Update";
-
-        const r = loadResources()[index];
-
-        resName.value = r.name;
-        resDescription.value = r.description;
-        resLocation.value = r.location;
-        resCapacity.value = r.capacity;
-        resType.value = r.type;
-        resImage.value = r.image;
     }
 
-    resourcePanel.style.display = "flex"; 
+    resourcePanel.style.display = "flex";
 }
 
 function closePanel() {
-    resourcePanel.style.display = "none";
+    if (resourcePanel) {
+        resourcePanel.style.display = "none";
+    }
 }
 
-
-
-
 function renderResources() {
-    const resources = loadResources();
-    resourceList.innerHTML = ""; 
+    if (!resourceList) return;
 
+    const resources = resourceAPI.cache || [];
+    resourceList.innerHTML = "";
 
-
-    if (resources.length === 0) {
+    if (!resources.length) {
         resourceList.innerHTML = `
-            <tr><td colspan="5" style="text-align:center; padding:20px; color:#666;">
+            <tr><td colspan="6" style="text-align:center; padding:20px; color:#666;">
                 No resources added yet.
             </td></tr>`;
-
-
         return;
     }
 
-    resources.forEach((r, i) => {
+    resources.forEach((resource) => {
         const row = document.createElement("tr");
-
+        const usage = resource.usage || {};
+        const availability = resource.availability;
         row.innerHTML = `
-            <td>${r.name}</td>
-            <td>${r.location}</td>
-            <td>${r.capacity}</td>
-            <td>${r.type}</td>
+            <td>${resource.name}</td>
+            <td>${resource.location || "-"}</td>
+            <td>${resource.capacity ?? "-"}</td>
+            <td>${resource.type || "-"}</td>
             <td>
-                <button class="btn edit" onclick="editResource(${i})">Edit</button>
-                <button class="btn delete" onclick="deleteResource(${i})">Delete</button>
-
+                <div>Bookings: ${usage.bookings || 0}</div>
+                <div>Exceptions: ${usage.exceptions || 0}</div>
+                <div>Blackouts: ${usage.blackoutDays || 0}</div>
+                ${availability ? `<div>Hours: ${availability.open_time} - ${availability.close_time}</div>` : ""}
+            </td>
+            <td>
+                <button class="btn edit" data-action="edit" data-id="${resource.resource_id}">Edit</button>
+                <button class="btn delete" data-action="delete" data-id="${resource.resource_id}">Delete</button>
+                <a class="btn" href="schedules.html?resourceId=${resource.resource_id}">Availability</a>
             </td>
         `;
 
@@ -107,66 +145,79 @@ function renderResources() {
     });
 }
 
-
-
-
-saveResourceBtn.addEventListener("click", () => {
-    const resources = loadResources();
-
-    const newResource = {
+async function handleSaveResource() {
+    const payload = {
         name: resName.value.trim(),
         description: resDescription.value.trim(),
         location: resLocation.value.trim(),
-        capacity: resCapacity.value.trim(),
+        capacity: resCapacity.value ? Number(resCapacity.value) : null,
         type: resType.value,
-        image: resImage.value.trim()
+        image_url: resImage.value.trim(),
     };
 
-
-
-    if (!newResource.name) {
+    if (!payload.name) {
         alert("Resource must have a name.");
         return;
     }
 
-    if (editingIndex === null) {
-    
+    try {
+        const saved = await resourceAPI.saveResource(payload, editingResourceId);
+        if (editingResourceId) {
+            resourceAPI.cache = resourceAPI.cache.map((r) => (r.resource_id === editingResourceId ? saved : r));
+        } else {
+            resourceAPI.cache.push(saved);
+        }
 
+        renderResources();
+        closePanel();
+    } catch (err) {
+        alert(err.message);
+    }
+}
 
-        resources.push(newResource);
-    } else {
-    
+async function handleResourceListClick(event) {
+    const action = event.target.getAttribute("data-action");
+    const resourceId = event.target.getAttribute("data-id");
 
-        resources[editingIndex] = newResource;
+    if (!action || !resourceId) return;
+
+    const resource = resourceAPI.cache.find((r) => `${r.resource_id}` === resourceId);
+    if (action === "edit") {
+        openPanel(resource);
     }
 
-    saveResources(resources);
-    renderResources();
-    closePanel();
+    if (action === "delete") {
+        const confirmDelete = confirm("Delete this resource? This will also remove its schedule.");
+        if (!confirmDelete) return;
+
+        try {
+            await resourceAPI.deleteResource(resourceId);
+            resourceAPI.cache = resourceAPI.cache.filter((r) => `${r.resource_id}` !== resourceId);
+            renderResources();
+        } catch (err) {
+            alert(err.message);
+        }
+    }
+}
+
+if (addResourceBtn) {
+    addResourceBtn.addEventListener("click", () => openPanel(null));
+}
+
+if (closeResourcePanel) {
+    closeResourcePanel.addEventListener("click", closePanel);
+}
+
+if (saveResourceBtn) {
+    saveResourceBtn.addEventListener("click", handleSaveResource);
+}
+
+if (resourceList) {
+    resourceList.addEventListener("click", handleResourceListClick);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (isResourcePage) {
+        resourceAPI.loadResources().catch((err) => alert(err.message));
+    }
 });
-
-
-
-function editResource(index) {
-    openPanel(index);
-}
-
-
-
-
-function deleteResource(index) {
-
-    const resources = loadResources();
-    resources.splice(index, 1);
-    saveResources(resources);
-    renderResources();
-}
-
-
-addResourceBtn.addEventListener("click", () => openPanel(null));
-closeResourcePanel.addEventListener("click", closePanel);
-
-renderResources();
-
-window.editResource = editResource;
-window.deleteResource = deleteResource;

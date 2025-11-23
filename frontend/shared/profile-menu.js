@@ -42,25 +42,37 @@
     const navList = document.querySelector('.navLinks');
     if (!navList) return;
 
-    const existing = document.getElementById('adminNavItem');
+    const profileDropdown = document.getElementById('profileDropdown');
+    const contactItem = navList.querySelector('a[href="/contact"]')?.closest('li') || null;
+
+    let adminItem = document.getElementById('adminNavItem');
+
     if (isAdmin) {
-      if (!existing) {
-        const adminItem = document.createElement('li');
+      if (!adminItem) {
+        adminItem = document.createElement('li');
         adminItem.id = 'adminNavItem';
         const adminLink = document.createElement('a');
         adminLink.href = '/admin';
         adminLink.textContent = 'Admin';
         adminItem.appendChild(adminLink);
+      }
 
-        const profileDropdown = document.getElementById('profileDropdown');
-        if (profileDropdown && profileDropdown.parentElement === navList) {
+      if (adminItem.parentElement !== navList) {
+        adminItem.remove();
+        if (contactItem && contactItem.parentElement === navList) {
+          navList.insertBefore(adminItem, contactItem.nextSibling);
+        } else if (profileDropdown && profileDropdown.parentElement === navList) {
           navList.insertBefore(adminItem, profileDropdown);
         } else {
           navList.appendChild(adminItem);
         }
+      } else if (contactItem && adminItem.previousElementSibling !== contactItem) {
+        navList.insertBefore(adminItem, contactItem.nextSibling);
+      } else if (!contactItem && profileDropdown && adminItem.nextElementSibling !== profileDropdown) {
+        navList.insertBefore(adminItem, profileDropdown);
       }
-    } else if (existing) {
-      existing.remove();
+    } else if (adminItem) {
+      adminItem.remove();
     }
   }
 

@@ -1,39 +1,18 @@
-const express = require("express");
-const bookingController = require("../controllers/bookingController");
-const { authenticate, requireAdmin } = require("../middleware/authMiddleware");
+const express = require('express');
+const bookingController = require('../controllers/bookingController');
+const { authenticate, requireAdmin } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// Availability lookup for room and lab bookings
-router.get("/availability/rooms/:id", bookingController.getRoomAvailability);
-router.get("/availability/labs/:id", bookingController.getLabAvailability);
-router.get("/availability/equipment/:id", bookingController.getEquipmentAvailability);
+router.get('/availability/:id', bookingController.getAvailability);
+router.get('/rooms', bookingController.listRooms);
+router.get('/labs', bookingController.listLabs);
+router.get('/equipment', bookingController.listEquipment);
 
-// Public resource catalogs for booking UIs
-router.get("/rooms", bookingController.listRooms);
-router.get("/labs", bookingController.listLabs);
-router.get("/equipment", bookingController.listEquipment);
-
-// Create bookings as a signed-in user
-router.post("/", bookingController.createBooking);
-
-// Logged-in users can see their own bookings
-router.get("/mine", bookingController.getMyBookings);
-
-// Logged-in users can see their own bookings
-router.get("/mine", authenticate, bookingController.getMyBookings);
-
-// Logged-in users can see their own bookings
-router.get("/mine", authenticate, bookingController.getMyBookings);
-
-// Logged-in users can see their own bookings
-router.get("/mine", authenticate, bookingController.getMyBookings);
-
-// Updates/deletes enforce ownership rules inside the controller
-router.put("/:id", authenticate, bookingController.updateBooking);
-router.delete("/:id", authenticate, bookingController.deleteBooking);
-
-// Admin-only list of all bookings
-router.get("/", authenticate, requireAdmin, bookingController.listBookings);
+router.post('/', authenticate, bookingController.createBooking);
+router.get('/mine', authenticate, bookingController.getMyBookings);
+router.put('/:id', authenticate, bookingController.updateBooking);
+router.delete('/:id', authenticate, bookingController.deleteBooking);
+router.get('/', authenticate, requireAdmin, bookingController.listBookings);
 
 module.exports = router;

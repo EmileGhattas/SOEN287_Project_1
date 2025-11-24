@@ -129,16 +129,10 @@ async function rescheduleBooking(booking) {
 
     const payload = { bookingDate };
 
-    if (booking.booking_type === 'room') {
-        const startTime = prompt('New start time (HH:MM):', booking.room?.start_time || '');
-        const endTime = prompt('New end time (HH:MM):', booking.room?.end_time || '');
-        if (!startTime || !endTime) return alert('Start and end time are required.');
-        payload.startTime = startTime;
-        payload.endTime = endTime;
-    } else if (booking.booking_type === 'lab') {
-        const timeSlot = prompt('New time slot:', booking.lab?.time_slot || '');
-        if (!timeSlot) return alert('A time slot is required.');
-        payload.timeSlot = timeSlot;
+    if (booking.booking_type === 'room' || booking.booking_type === 'lab') {
+        const timeslotId = prompt('New timeslot id (see availability page):', booking.room?.timeslot_id || booking.lab?.timeslot_id || '');
+        if (!timeslotId) return alert('A timeslot id is required.');
+        payload.timeslotId = timeslotId;
     } else if (booking.booking_type === 'equipment') {
         const quantity = Number(prompt('Quantity:', booking.equipment?.quantity || 1));
         if (!quantity || quantity < 1) return alert('Quantity must be at least 1.');

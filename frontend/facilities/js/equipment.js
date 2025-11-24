@@ -7,28 +7,28 @@ const confirmation = document.getElementById('confirmation');
 const toDate = document.getElementById('Next');
 const quantityInput = document.getElementById('quantity');
 
-let selectedEquipment = "";
+let selectedEquipment = '';
 let selectedEquipmentId = null;
 let totalQuantity = 0;
 let equipmentCatalog = [];
 
 function renderEquipment() {
-    equipmentList.innerHTML = "";
+    equipmentList.innerHTML = '';
     equipmentCatalog.forEach((item) => {
         const card = document.createElement('div');
         card.className = 'equipment';
-        card.dataset.id = item.equipment_id;
+        card.dataset.id = item.id;
         card.dataset.name = item.name;
         card.innerHTML = `
             <div class="equipment-name">${item.name}</div>
-            <div class="equipment-info">${item.total_quantity} total</div>
+            <div class="equipment-info">${item.quantity || item.total_quantity} total</div>
         `;
         card.addEventListener('click', () => {
             document.querySelectorAll('.equipment').forEach((e) => e.classList.remove('selected'));
             card.classList.add('selected');
             selectedEquipment = item.name;
-            selectedEquipmentId = item.equipment_id;
-            totalQuantity = item.total_quantity;
+            selectedEquipmentId = item.id;
+            totalQuantity = item.quantity || item.total_quantity || 0;
             toDate.disabled = false;
         });
         equipmentList.appendChild(card);
@@ -40,7 +40,7 @@ async function loadEquipment() {
         const res = await fetch('/api/bookings/equipment');
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || 'Failed to load equipment');
-        equipmentCatalog = Array.isArray(data) ? data : [];
+        equipmentCatalog = Array.isArray(data) ? data.map((eq) => ({ ...eq, id: eq.id || eq.equipment_id })) : [];
         renderEquipment();
     } catch (err) {
         console.error('Failed to load equipment', err);
@@ -51,10 +51,10 @@ async function loadEquipment() {
 async function refreshAvailability() {
     if (!selectedEquipmentId || !dateInput.value) return;
     try {
-        const res = await fetch(`/api/bookings/availability/equipment/${selectedEquipmentId}?date=${encodeURIComponent(dateInput.value)}`);
+        const res = await fetch(`/api/bookings/availability/${selectedEquipmentId}?date=${encodeURIComponent(dateInput.value)}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || 'Availability unavailable');
-        const available = data.available_quantity ?? data.availableQuantity ?? totalQuantity;
+        const available = data.remainingQuantity ?? data.available_quantity ?? totalQuantity;
         const infoEl = document.querySelector('.equipment.selected .equipment-info');
         if (infoEl) {
             infoEl.textContent = `${available} available on ${dateInput.value}`;
@@ -68,7 +68,6 @@ async function refreshAvailability() {
     }
 }
 
-// 🔹 Proceed to date selection
 toDate.addEventListener('click', () => {
     if (!selectedEquipment) return alert("Select an equipment first!");
     datetime.style.display = 'block';
@@ -86,7 +85,6 @@ toDate.addEventListener('click', () => {
 
 dateInput.addEventListener('change', refreshAvailability);
 
-// 🔹 Confirm booking
 confirmButton.addEventListener('click', () => {
     const date = dateInput.value;
     const quantity = Number(quantityInput.value) || 1;
@@ -114,7 +112,6 @@ confirmButton.addEventListener('click', () => {
     sendEquipmentBookingToDB(booking);
 });
 
-
 function sendEquipmentBookingToDB(booking) {
     const token = localStorage.getItem('token');
     const headers = { 'Content-Type': 'application/json' };
@@ -126,8 +123,7 @@ function sendEquipmentBookingToDB(booking) {
         method: 'POST',
         headers,
         body: JSON.stringify({
-            bookingType: "equipment",
-            equipmentId: booking.equipmentId,
+            resourceId: booking.equipmentId,
             bookingDate: booking.date,
             quantity: booking.quantity
         })

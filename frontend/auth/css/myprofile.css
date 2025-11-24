@@ -1,1 +1,74 @@
-/* Placeholder styles for the My Profile page. */
+body {
+  background-color: #36393F;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-page {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.profile-card {
+  background-color: #3d5d60;
+  color: #fff;
+  padding: 32px;
+  border-radius: 10px;
+  box-shadow: 0 10px 12px rgba(0, 0, 0, 0.4);
+  width: 100%;
+  max-width: 520px;
+}
+
+.profile-card h1 { margin-top: 0; }
+
+.profile-card label {
+  display: block;
+  margin-top: 14px;
+  font-weight: 600;
+}
+
+.profile-card input {
+  width: 100%;
+  border-radius: 6px;
+  border: none;
+  padding: 10px 12px;
+  margin-top: 6px;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  background-color: #5865F2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 14px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn.primary { background-color: #2f7d2f; }
+.btn:hover { opacity: 0.9; }
+
+.muted { color: #d7e6e6; margin-top: -6px; margin-bottom: 10px; }
+
+.form-message {
+  background-color: rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #fff;
+  display: none;
+  margin-bottom: 12px;
+}
+
+.form-message.error { background-color: #8b1e1e; }
+.form-message.success { background-color: #2f7d2f; }

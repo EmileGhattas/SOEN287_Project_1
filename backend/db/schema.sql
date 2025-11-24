@@ -2,7 +2,7 @@ DROP DATABASE IF EXISTS campus_resources;
 CREATE DATABASE campus_resources;
 USE campus_resources;
 
--- Core reference tables
+-- Core reference tables.
 CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(100) NOT NULL,

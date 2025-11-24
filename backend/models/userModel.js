@@ -1,7 +1,7 @@
 const db = require('../db/db');
 
 async function findByEmail(email) {
-  const [rows] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
+  const [rows] = await db.execute('SELECT * FROM users WHERE LOWER(email) = LOWER(?)', [email]);
   return rows[0] || null;
 }
 
@@ -13,7 +13,7 @@ async function findById(id) {
 async function createUser({ username, email, passwordHash, role = 'user' }) {
   const [result] = await db.execute(
     'INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)',
-    [username, email, passwordHash, role]
+    [username, email.toLowerCase(), passwordHash, role]
   );
   return findById(result.insertId);
 }

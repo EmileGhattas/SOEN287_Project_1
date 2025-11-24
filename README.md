@@ -36,6 +36,8 @@ Refactored SOEN 287 project implementing a full stack Node.js + MySQL system for
 - Admin: `admin@learnspace.com` / `Admin@123`
 - Demo user: `demo@learnspace.com` / `Password@123`
 
+> The server auto-seeds these accounts on startup so you can always log in even if the database was initialized without running the full seed script.
+
 ## Key capabilities
 - User registration/login, profile update, JWT session handling
 - Admin CRUD for resources plus blackout management and usage stats endpoints

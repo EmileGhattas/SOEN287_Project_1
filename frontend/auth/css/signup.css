@@ -79,6 +79,17 @@ label {
     color: white;
 }
 
+.form-message {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 10px 12px;
+    color: #fff;
+    display: none;
+}
+
+.form-message.error { background-color: #8b1e1e; }
+.form-message.success { background-color: #2f7d2f; }
+
 .terms-label input {
     margin-top: 4px;
 }

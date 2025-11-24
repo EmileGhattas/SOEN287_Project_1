@@ -1,116 +1,96 @@
-function _readJSON(key) {
-  try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; }
-}
-function getBookingsArray() {
-  const arr = _readJSON('bookings');
-  return Array.isArray(arr) ? arr : [];
-}
-function saveBooking(booking) {
-  if (!booking) return;
-  const arr = getBookingsArray();
-  arr.push(booking);
-  localStorage.setItem('bookings', JSON.stringify(arr));
-  // Backward compatibility (optional)
-  localStorage.setItem('booking', JSON.stringify(booking));
-  localStorage.setItem('Booking', JSON.stringify(booking));
-}
-
-const EQUIPMENT_MAP = {
-    'Camera': 1,
-    'Tripod': 2,
-    'Microscope': 3,
-    'VR Headset': 4,
-};
-// Selection handling
-const items = document.querySelectorAll('.equip');
-let selectedName = null;
-items.forEach((el) => {
-  el.addEventListener('click', () => {
-    items.forEach(x => x.classList.remove('selected'));
-    el.classList.add('selected');
-    selectedName = el.getAttribute('data-name') || el.textContent.trim();
-  });
-});
-
-// Confirm booking
-const equipments = document.querySelectorAll('.equipment');
+const equipmentList = document.getElementById('equipment-list');
 const dateInput = document.getElementById('date');
 const datetime = document.getElementById('datetime');
 const confirmButton = document.getElementById('confirm');
 const summary = document.getElementById('summary');
 const confirmation = document.getElementById('confirmation');
 const toDate = document.getElementById('Next');
+const quantityInput = document.getElementById('quantity');
 
 let selectedEquipment = "";
+let selectedEquipmentId = null;
+let totalQuantity = 0;
+let equipmentCatalog = [];
 
-// Constants
-const MAX_PER_DAY = 5;
-
-// 🔹 Update equipment info tooltips + disable when full
-function updateEquipmentAvailability() {
-    const bookings = getBookingsArray();
-    const today = dateInput.value || new Date().toISOString().split('T')[0];
-
-    equipments.forEach(eq => {
-        const eqName = eq.dataset.equipment;
-        const bookedCount = bookings.filter(b => {
-            const bookedName = b?.equipment || b?.room || b?.name;
-            return bookedName === eqName && b?.date === today;
-        }).length;
-        const remaining = Math.max(0, MAX_PER_DAY - bookedCount);
-
-        const info = eq.querySelector('.equipment-info');
-        if (remaining > 0) {
-            info.textContent = `${remaining} available today`;
-        } else {
-            info.textContent = "Fully booked today";
-        }
-
-        if (remaining === 0) {
-            eq.classList.add('disabled');
-            eq.style.pointerEvents = 'none';
-            eq.style.opacity = '0.5';
-        } else {
-            eq.classList.remove('disabled');
-            eq.style.pointerEvents = 'auto';
-            eq.style.opacity = '1';
-        }
+function renderEquipment() {
+    equipmentList.innerHTML = "";
+    equipmentCatalog.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = 'equipment';
+        card.dataset.id = item.equipment_id;
+        card.dataset.name = item.name;
+        card.innerHTML = `
+            <div class="equipment-name">${item.name}</div>
+            <div class="equipment-info">${item.total_quantity} total</div>
+        `;
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.equipment').forEach((e) => e.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedEquipment = item.name;
+            selectedEquipmentId = item.equipment_id;
+            totalQuantity = item.total_quantity;
+            toDate.disabled = false;
+        });
+        equipmentList.appendChild(card);
     });
 }
 
-// 🔹 Hover shows available quantity
-equipments.forEach(eq => {
-    eq.addEventListener('mouseenter', () => updateEquipmentAvailability());
-});
+async function loadEquipment() {
+    try {
+        const res = await fetch('/api/bookings/equipment');
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to load equipment');
+        equipmentCatalog = Array.isArray(data) ? data : [];
+        renderEquipment();
+    } catch (err) {
+        console.error('Failed to load equipment', err);
+        equipmentList.innerHTML = '<p>Unable to load equipment.</p>';
+    }
+}
 
-// 🔹 Select an equipment
-equipments.forEach(eq => {
-    eq.addEventListener('click', () => {
-        if (eq.classList.contains('disabled')) return;
-        equipments.forEach(e => e.classList.remove('selected'));
-        eq.classList.add('selected');
-        selectedEquipment = eq.dataset.equipment;
-        toDate.disabled = false;
-    });
-});
+async function refreshAvailability() {
+    if (!selectedEquipmentId || !dateInput.value) return;
+    try {
+        const res = await fetch(`/api/bookings/availability/equipment/${selectedEquipmentId}?date=${encodeURIComponent(dateInput.value)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Availability unavailable');
+        const available = data.available_quantity ?? data.availableQuantity ?? totalQuantity;
+        const infoEl = document.querySelector('.equipment.selected .equipment-info');
+        if (infoEl) {
+            infoEl.textContent = `${available} available on ${dateInput.value}`;
+        }
+        quantityInput.max = Math.max(1, available);
+        if (Number(quantityInput.value) > available) {
+            quantityInput.value = available || 1;
+        }
+    } catch (err) {
+        console.error('Failed to load equipment availability', err);
+    }
+}
 
 // 🔹 Proceed to date selection
 toDate.addEventListener('click', () => {
     if (!selectedEquipment) return alert("Select an equipment first!");
     datetime.style.display = 'block';
-    updateEquipmentAvailability();
 
     const today = new Date();
     const max = new Date();
     max.setDate(today.getDate() + 14);
     dateInput.min = today.toISOString().split('T')[0];
     dateInput.max = max.toISOString().split('T')[0];
+    if (!dateInput.value) {
+        dateInput.value = today.toISOString().split('T')[0];
+    }
+    refreshAvailability();
 });
+
+dateInput.addEventListener('change', refreshAvailability);
 
 // 🔹 Confirm booking
 confirmButton.addEventListener('click', () => {
     const date = dateInput.value;
-    if (!date || !selectedEquipment)
+    const quantity = Number(quantityInput.value) || 1;
+    if (!date || !selectedEquipmentId)
         return alert("Please select an equipment and date.");
 
     const user = JSON.parse(localStorage.getItem('user'));
@@ -124,38 +104,14 @@ confirmButton.addEventListener('click', () => {
         return;
     }
 
-    const bookings = getBookingsArray();
-    const bookedCount = bookings.filter(b => {
-        const bookedName = b?.equipment || b?.room || b?.name;
-        return bookedName === selectedEquipment && b?.date === date;
-    }).length;
-
-    if (bookedCount >= MAX_PER_DAY)
-        return alert("All units are already booked for that day!");
-
     const booking = {
         type: 'equipment',
         equipment: selectedEquipment,
-        equipmentId: EQUIPMENT_MAP[selectedEquipment],
+        equipmentId: selectedEquipmentId,
         date,
-        room: selectedEquipment,
-        startTime: 'All day',
-        endTime: 'All day',
-        user: user.username,
-        userId: user.user_id,
+        quantity,
     };
-    saveBooking(booking);
     sendEquipmentBookingToDB(booking);
-
-    document.querySelector('.equipment-selection').style.display = 'none';
-    datetime.style.display = 'none';
-    confirmation.style.display = 'block';
-    summary.innerHTML = `
-        <strong>Equipment:</strong> ${booking.equipment}<br>
-        <strong>Date:</strong> ${booking.date}<br><br>
-        Booking successfully confirmed for 24 hours!
-    `;
-    updateEquipmentAvailability();
 });
 
 
@@ -170,13 +126,32 @@ function sendEquipmentBookingToDB(booking) {
         method: 'POST',
         headers,
         body: JSON.stringify({
-            type: "equipment",
-            userId: booking.userId,
+            bookingType: "equipment",
             equipmentId: booking.equipmentId,
-            date: booking.date
+            bookingDate: booking.date,
+            quantity: booking.quantity
         })
     })
-        .then(res => res.json())
-        .then(data => console.log("Saved:", data))
-        .catch(err => console.error('Equipment booking failed', err));
+        .then(async (res) => {
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(data.message || 'Equipment booking failed');
+            }
+            document.querySelector('.equipment-selection').style.display = 'none';
+            datetime.style.display = 'none';
+            confirmation.style.display = 'block';
+            summary.innerHTML = `
+                <strong>Equipment:</strong> ${booking.equipment}<br>
+                <strong>Date:</strong> ${booking.date}<br>
+                <strong>Quantity:</strong> ${booking.quantity}<br><br>
+                Booking successfully confirmed for 24 hours!
+            `;
+            refreshAvailability();
+        })
+        .catch(err => {
+            console.error('Equipment booking failed', err);
+            alert(err.message || 'Failed to book equipment');
+        });
 }
+
+loadEquipment();

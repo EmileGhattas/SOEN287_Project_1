@@ -2,7 +2,7 @@ const Booking = require("../models/bookingModel");
 
 async function createBooking(req, res) {
     try {
-        const created = await Booking.createBooking(req.body || {});
+        const created = await Booking.createBooking(req.body || {}, req.user);
         return res.status(201).json(created);
     } catch (err) {
         if (err.message === "MISSING_FIELDS") {
@@ -36,16 +36,116 @@ async function listBookings(req, res) {
     }
 }
 
+async function getMyBookings(req, res) {
+    try {
+        const bookings = await Booking.getBookingsForUser(req.user);
+        return res.json(bookings);
+    } catch (err) {
+        console.error("Failed to load user bookings", err);
+        return res.status(500).json({ message: "Failed to load bookings" });
+    }
+}
+
+async function getRoomAvailability(req, res) {
+    try {
+        const availability = await Booking.getRoomAvailability(
+            req.params.id,
+            req.query.date,
+            req.query.name
+        );
+        return res.json(availability);
+    } catch (err) {
+        if (err.message === "ROOM_NOT_FOUND") {
+            return res.status(404).json({ message: "Room not found" });
+        }
+        if (err.message === "MISSING_FIELDS" || err.message.startsWith("INVALID_")) {
+            return res.status(400).json({ message: "Invalid booking data" });
+        }
+
+        console.error("Failed to load room availability", err);
+        return res.status(500).json({ message: "Failed to load availability" });
+    }
+}
+
+async function getLabAvailability(req, res) {
+    try {
+        const availability = await Booking.getLabAvailability(req.params.id, req.query.date, req.query.name);
+        return res.json(availability);
+    } catch (err) {
+        if (err.message === "LAB_NOT_FOUND") {
+            return res.status(404).json({ message: "Lab not found" });
+        }
+        if (err.message === "MISSING_FIELDS" || err.message.startsWith("INVALID_")) {
+            return res.status(400).json({ message: "Invalid booking data" });
+        }
+
+        console.error("Failed to load lab availability", err);
+        return res.status(500).json({ message: "Failed to load availability" });
+    }
+}
+
+async function listRooms(req, res) {
+    try {
+        const rooms = await Booking.listRooms();
+        return res.json(rooms);
+    } catch (err) {
+        console.error("Failed to load rooms", err);
+        return res.status(500).json({ message: "Failed to load rooms" });
+    }
+}
+
+async function listLabs(req, res) {
+    try {
+        const labs = await Booking.listLabs();
+        return res.json(labs);
+    } catch (err) {
+        console.error("Failed to load labs", err);
+        return res.status(500).json({ message: "Failed to load labs" });
+    }
+}
+
+async function listEquipment(req, res) {
+    try {
+        const equipment = await Booking.listEquipment();
+        return res.json(equipment);
+    } catch (err) {
+        console.error("Failed to load equipment", err);
+        return res.status(500).json({ message: "Failed to load equipment" });
+    }
+}
+
+async function getEquipmentAvailability(req, res) {
+    try {
+        const availability = await Booking.getEquipmentAvailability(req.params.id, req.query.date);
+        return res.json(availability);
+    } catch (err) {
+        if (err.message === "MISSING_FIELDS") {
+            return res.status(400).json({ message: "Invalid equipment lookup" });
+        }
+        if (err.message === "EQUIPMENT_NOT_FOUND") {
+            return res.status(404).json({ message: "Equipment not found" });
+        }
+        console.error("Failed to load equipment availability", err);
+        return res.status(500).json({ message: "Failed to load equipment availability" });
+    }
+}
+
 async function updateBooking(req, res) {
     try {
-        const updated = await Booking.updateBooking(req.params.id, req.body || {});
+        const updated = await Booking.updateBooking(req.params.id, req.body || {}, req.user);
         return res.json(updated);
     } catch (err) {
         if (err.message === "NOT_FOUND") {
             return res.status(404).json({ message: "Booking not found" });
         }
+        if (err.message === "FORBIDDEN") {
+            return res.status(403).json({ message: "Not allowed to modify this booking" });
+        }
         if (err.message && err.message.startsWith("INVALID_")) {
             return res.status(400).json({ message: "Invalid booking data" });
+        }
+        if (err.message === "ROOM_CONFLICT" || err.message === "LAB_CONFLICT" || err.message === "EQUIPMENT_UNAVAILABLE") {
+            return res.status(409).json({ message: "Requested time or quantity is not available" });
         }
 
         console.error("Failed to update booking", err);
@@ -55,9 +155,12 @@ async function updateBooking(req, res) {
 
 async function deleteBooking(req, res) {
     try {
-        const removed = await Booking.deleteBooking(req.params.id);
+        const removed = await Booking.deleteBooking(req.params.id, req.user);
         if (!removed) {
             return res.status(404).json({ message: "Booking not found" });
+        }
+        if (removed === "FORBIDDEN") {
+            return res.status(403).json({ message: "Not allowed to cancel this booking" });
         }
         return res.status(204).send();
     } catch (err) {
@@ -69,6 +172,13 @@ async function deleteBooking(req, res) {
 module.exports = {
     createBooking,
     listBookings,
+    getMyBookings,
+    getRoomAvailability,
+    getLabAvailability,
     updateBooking,
     deleteBooking,
+    listRooms,
+    listLabs,
+    listEquipment,
+    getEquipmentAvailability,
 };

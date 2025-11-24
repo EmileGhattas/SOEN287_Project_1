@@ -56,20 +56,7 @@
 
     <section class="lab-selection">
         <h2>Select a Lab</h2>
-        <div class="lab-blocks">
-            <div class="lab" data-lab="Chemistry Lab">Chemistry Lab
-                <div class="lab-info"></div>
-            </div>
-            <div class="lab" data-lab="Physics Lab">Physics Lab
-                <div class="lab-info"></div>
-            </div>
-            <div class="lab" data-lab="Computer Lab">Computer Lab
-                <div class="lab-info"></div>
-            </div>
-            <div class="lab" data-lab="Robotics Lab">Robotics Lab
-                <div class="lab-info"></div>
-            </div>
-        </div>
+        <div class="lab-blocks" id="lab-list"></div>
         <button id="toDate" disabled>Next</button>
     </section>
 
@@ -82,10 +69,7 @@
 
         <label for="slot">Available Slot</label>
         <select id="slot" required>
-            <option value="">Select</option>
-            <option value="8:00-11:30">8:00 – 11:30</option>
-            <option value="12:00-15:30">12:00 – 15:30</option>
-            <option value="16:00-19:30">16:00 – 19:30</option>
+            <option value="" disabled selected>Loading slots...</option>
         </select>
 
         <button id="confirm">Confirm Booking</button>

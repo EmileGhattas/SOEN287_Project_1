@@ -15,6 +15,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!loginForm) return;
 
+    const clearStoredAuth = () => {
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+    };
+
+    const persistAuth = (token, user) => {
+        clearStoredAuth();
+        if (token) sessionStorage.setItem('token', token);
+        if (user) sessionStorage.setItem('user', JSON.stringify(user));
+    };
+
     loginForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         showMessage('', 'success');
@@ -44,14 +57,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 delete normalizedUser.admin;
                 delete normalizedUser.isadmin;
 
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(normalizedUser));
+                persistAuth(data.token, normalizedUser);
 
                 const adminPage = window.location.pathname.includes('adminsignin');
                 if (adminPage && !isAdmin) {
                     showMessage('Admin access required for this area.', 'error');
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
+                    clearStoredAuth();
                     submitBtn.disabled = false;
                     return;
                 }

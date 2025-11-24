@@ -4,6 +4,20 @@
   const emailInput = document.getElementById('email');
   const messageBox = document.getElementById('profileMessage');
 
+  function getAuthToken() {
+    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+    if (token && !sessionStorage.getItem('token')) {
+      sessionStorage.setItem('token', token);
+      localStorage.removeItem('token');
+    }
+    return token;
+  }
+
+  function persistUser(user) {
+    sessionStorage.setItem('user', JSON.stringify(user));
+    localStorage.removeItem('user');
+  }
+
   function showMessage(text, type = 'error') {
     if (!messageBox) return alert(text);
     messageBox.textContent = text;
@@ -13,7 +27,7 @@
   }
 
   function authHeaders() {
-    const token = localStorage.getItem('token');
+    const token = getAuthToken();
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers.Authorization = `Bearer ${token}`;
     return headers;
@@ -55,7 +69,7 @@
       if (!res.ok) throw new Error(data.message || 'Failed to save profile');
 
       const user = { ...data.user };
-      localStorage.setItem('user', JSON.stringify(user));
+      persistUser(user);
       showMessage('Profile updated successfully.', 'success');
     } catch (err) {
       console.error(err);

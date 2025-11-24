@@ -28,6 +28,31 @@
     }
   }
 
+  function clearStoredAuth() {
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+  }
+
+  function getStoredUser() {
+    const raw = sessionStorage.getItem('user') || localStorage.getItem('user');
+    if (raw && !sessionStorage.getItem('user')) {
+      sessionStorage.setItem('user', raw);
+      localStorage.removeItem('user');
+    }
+    if (localStorage.getItem('token') && !sessionStorage.getItem('token')) {
+      sessionStorage.setItem('token', localStorage.getItem('token'));
+      localStorage.removeItem('token');
+    }
+    return safeParse(raw);
+  }
+
+  function persistUser(user) {
+    sessionStorage.setItem('user', JSON.stringify(user));
+    localStorage.removeItem('user');
+  }
+
   function resolvePath(path) {
     if (!path) {
       return '#';
@@ -84,14 +109,14 @@
     }
 
     function updateMenu() {
-      const user = safeParse(localStorage.getItem('user'));
+      const user = getStoredUser();
       const isAdmin = Boolean(user && (user.is_admin ?? user.admin ?? user.isadmin));
 
       if (user) {
         const normalizedUser = { ...user, is_admin: isAdmin };
         delete normalizedUser.admin;
         delete normalizedUser.isadmin;
-        localStorage.setItem('user', JSON.stringify(normalizedUser));
+        persistUser(normalizedUser);
 
         profileLink.textContent = 'Profile';
         profileLink.setAttribute('href', '/myprofile');
@@ -107,8 +132,7 @@
         if (logout) {
           logout.addEventListener('click', (event) => {
             event.preventDefault();
-            localStorage.removeItem('user');
-            localStorage.removeItem('token');
+            clearStoredAuth();
             localStorage.removeItem('pendingBooking');
             updateMenu();
             window.location.href = '/signin';

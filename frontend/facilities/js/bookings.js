@@ -8,8 +8,17 @@ const clearMyBookingsBtn = document.getElementById('clearMyBookings');
 
 let bookingsCache = [];
 
+function getAuthToken() {
+    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+    if (token && !sessionStorage.getItem('token')) {
+        sessionStorage.setItem('token', token);
+        localStorage.removeItem('token');
+    }
+    return token;
+}
+
 function authHeaders() {
-    const token = localStorage.getItem('token');
+    const token = getAuthToken();
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers.Authorization = `Bearer ${token}`;
     return headers;

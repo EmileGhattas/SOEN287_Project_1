@@ -6,6 +6,19 @@ const messageBox = document.getElementById('formMessage');
 const form = document.getElementById('signupForm');
 const submitBtn = document.getElementById('submitbtn');
 
+function clearStoredAuth() {
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('user');
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+}
+
+function persistAuth(token, user) {
+  clearStoredAuth();
+  if (token) sessionStorage.setItem('token', token);
+  if (user) sessionStorage.setItem('user', JSON.stringify(user));
+}
+
 function showMessage(text, type = 'error') {
   if (!messageBox) return alert(text);
   messageBox.textContent = text;
@@ -96,8 +109,7 @@ if (form) {
         delete normalizedUser.admin;
         delete normalizedUser.isadmin;
 
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(normalizedUser));
+        persistAuth(data.token, normalizedUser);
 
         showMessage('Account created! Redirecting to bookings...', 'success');
         setTimeout(() => {

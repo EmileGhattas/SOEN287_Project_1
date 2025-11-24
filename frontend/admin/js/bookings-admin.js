@@ -17,10 +17,33 @@
     let editingId = null;
     let resourcesCache = [];
 
+    function getAuthToken() {
+        const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+        if (token && !sessionStorage.getItem("token")) {
+            sessionStorage.setItem("token", token);
+            localStorage.removeItem("token");
+        }
+        return token;
+    }
+
+    function getStoredUser() {
+        const raw = sessionStorage.getItem("user") || localStorage.getItem("user");
+        if (raw && !sessionStorage.getItem("user")) {
+            sessionStorage.setItem("user", raw);
+            localStorage.removeItem("user");
+        }
+        try {
+            return raw ? JSON.parse(raw) : null;
+        } catch (err) {
+            console.warn("Unable to parse user", err);
+            return null;
+        }
+    }
+
     const bookingsAPI = {
         cache: [],
         async authFetch(url, options = {}) {
-            const token = localStorage.getItem("token");
+            const token = getAuthToken();
             if (!token) {
                 window.location.href = "/auth/adminsignin.html";
                 throw new Error("Missing token");
@@ -64,7 +87,7 @@
     };
 
     async function ensureAdmin() {
-        const userRaw = localStorage.getItem("user");
+        const userRaw = sessionStorage.getItem("user") || localStorage.getItem("user");
         if (!userRaw) {
             window.location.href = "/adminsignin";
             return false;

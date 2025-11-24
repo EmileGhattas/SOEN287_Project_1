@@ -11,6 +11,29 @@ let selectedRoom = null;
 let availableTimeslots = [];
 let roomsCatalog = [];
 
+function getAuthToken() {
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    if (token && !sessionStorage.getItem("token")) {
+        sessionStorage.setItem("token", token);
+        localStorage.removeItem("token");
+    }
+    return token;
+}
+
+function getStoredUser() {
+    const raw = sessionStorage.getItem("user") || localStorage.getItem("user");
+    if (raw && !sessionStorage.getItem("user")) {
+        sessionStorage.setItem("user", raw);
+        localStorage.removeItem("user");
+    }
+    try {
+        return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+        console.warn("Unable to parse stored user", err);
+        return null;
+    }
+}
+
 function setDateBounds() {
     const today = new Date();
     const maxdate = new Date();
@@ -45,7 +68,7 @@ async function updateAvailableTimeslots() {
 
     try {
         const headers = { "Content-Type": "application/json" };
-        const token = localStorage.getItem("token");
+        const token = getAuthToken();
         if (token) headers.Authorization = `Bearer ${token}`;
 
         const res = await fetch(
@@ -140,7 +163,7 @@ confirmButton.addEventListener("click", () => {
         return;
     }
 
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = getStoredUser();
     const booking = {
         type: "room",
         room: selectedRoom.name,
@@ -156,7 +179,7 @@ confirmButton.addEventListener("click", () => {
         return;
     }
 
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     const headers = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
 

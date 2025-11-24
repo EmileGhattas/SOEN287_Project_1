@@ -11,6 +11,15 @@ let selectedLab = null;
 let availableSlots = [];
 let labsCatalog = [];
 
+function getAuthToken() {
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    if (token && !sessionStorage.getItem("token")) {
+        sessionStorage.setItem("token", token);
+        localStorage.removeItem("token");
+    }
+    return token;
+}
+
 function setSelectOptions(select, options) {
     select.innerHTML = "";
     options.forEach(({ value, label, disabled = false, selected = false }) => {
@@ -43,7 +52,7 @@ async function loadAvailability() {
 
     try {
         const headers = { "Content-Type": "application/json" };
-        const token = localStorage.getItem("token");
+        const token = getAuthToken();
         if (token) headers.Authorization = `Bearer ${token}`;
 
         const res = await fetch(
@@ -123,7 +132,7 @@ confirmBtn.addEventListener("click", () => {
         return;
     }
 
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     const headers = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
 

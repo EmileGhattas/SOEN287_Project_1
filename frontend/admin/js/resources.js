@@ -15,9 +15,32 @@ const resImage = document.getElementById("resImage");
 let editingResourceId = null;
 const isResourcePage = Boolean(resourceList);
 
+function getAuthToken() {
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    if (token && !sessionStorage.getItem("token")) {
+        sessionStorage.setItem("token", token);
+        localStorage.removeItem("token");
+    }
+    return token;
+}
+
+function getStoredUser() {
+    const raw = sessionStorage.getItem("user") || localStorage.getItem("user");
+    if (raw && !sessionStorage.getItem("user")) {
+        sessionStorage.setItem("user", raw);
+        localStorage.removeItem("user");
+    }
+    try {
+        return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+        console.warn("Unable to parse user", err);
+        return null;
+    }
+}
+
 function ensureAdmin() {
     try {
-        const user = JSON.parse(localStorage.getItem("user"));
+        const user = getStoredUser();
         if (!user?.is_admin) {
             window.location.href = "/adminsignin";
             return false;
@@ -32,7 +55,7 @@ function ensureAdmin() {
 const resourceAPI = {
     cache: [],
     async authFetch(url, options = {}) {
-        const token = localStorage.getItem("token");
+        const token = getAuthToken();
         const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
         if (token) {
             headers.Authorization = `Bearer ${token}`;

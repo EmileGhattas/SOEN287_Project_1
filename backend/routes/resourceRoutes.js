@@ -1,27 +1,20 @@
-const express = require("express");
-const resourceController = require("../controllers/resourceController");
-const scheduleController = require("../controllers/scheduleController");
-const blackoutController = require("../controllers/blackoutController");
-const { authenticate, requireAdmin } = require("../middleware/authMiddleware");
+const express = require('express');
+const resourceController = require('../controllers/resourceController');
+const { authenticate, requireAdmin } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-router.use(authenticate, requireAdmin);
+router.get('/usage/summary', authenticate, requireAdmin, resourceController.getUsage);
+router.get('/', resourceController.getResources);
+router.get('/:id', resourceController.getResource);
+router.get('/:id/availability', resourceController.getAvailability);
+router.get('/:id/blackouts', authenticate, requireAdmin, resourceController.listBlackouts);
+router.post('/:id/blackouts', authenticate, requireAdmin, resourceController.addBlackout);
+router.delete('/:id/blackouts/:blackoutId', authenticate, requireAdmin, resourceController.deleteBlackout);
 
-router.get("/", resourceController.getResources);
-router.post("/", resourceController.createResource);
-router.get("/:id", resourceController.getResource);
-router.put("/:id", resourceController.updateResource);
-router.delete("/:id", resourceController.deleteResource);
-router.get("/:id/usage", resourceController.getUsage);
-
-router.get("/:id/schedule", scheduleController.getSchedule);
-router.put("/:id/schedule", scheduleController.updateHours);
-router.post("/:id/schedule/exceptions", scheduleController.addException);
-router.delete("/:id/schedule/exceptions/:exceptionId", scheduleController.deleteException);
-
-router.get("/:id/blackouts", blackoutController.listBlackouts);
-router.post("/:id/blackouts", blackoutController.addBlackout);
-router.delete("/:id/blackouts/:blackoutId", blackoutController.deleteBlackout);
+router.post('/', authenticate, requireAdmin, resourceController.createResource);
+router.put('/:id', authenticate, requireAdmin, resourceController.updateResource);
+router.delete('/:id', authenticate, requireAdmin, resourceController.deleteResource);
+router.get('/:id/usage', authenticate, requireAdmin, resourceController.getUsage);
 
 module.exports = router;

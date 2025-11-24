@@ -108,6 +108,7 @@
           logout.addEventListener('click', (event) => {
             event.preventDefault();
             localStorage.removeItem('user');
+            localStorage.removeItem('token');
             localStorage.removeItem('pendingBooking');
             updateMenu();
             window.location.href = '/signin';

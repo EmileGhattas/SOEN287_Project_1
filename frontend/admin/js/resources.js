@@ -15,6 +15,20 @@ const resImage = document.getElementById("resImage");
 let editingResourceId = null;
 const isResourcePage = Boolean(resourceList);
 
+function ensureAdmin() {
+    try {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user?.is_admin) {
+            window.location.href = "/adminsignin";
+            return false;
+        }
+        return true;
+    } catch (err) {
+        window.location.href = "/adminsignin";
+        return false;
+    }
+}
+
 const resourceAPI = {
     cache: [],
     async authFetch(url, options = {}) {
@@ -28,7 +42,7 @@ const resourceAPI = {
 
         if (response.status === 401 || response.status === 403) {
             alert("Admin access required. Please sign in again.");
-            window.location.href = "/auth/adminsignin.html";
+            window.location.href = "/adminsignin";
             throw new Error("Unauthorized");
         }
 
@@ -36,12 +50,12 @@ const resourceAPI = {
     },
     async loadResources() {
         const response = await this.authFetch("/api/resources");
+        const data = await response.json().catch(() => []);
         if (!response.ok) {
-            const data = await response.json().catch(() => ({}));
             throw new Error(data.message || "Failed to load resources");
         }
 
-        this.cache = await response.json();
+        this.cache = data;
         renderResources();
         return this.cache;
     },
@@ -74,7 +88,7 @@ window.resourceAPI = resourceAPI;
 function openPanel(resource = null) {
     if (!resourcePanel) return;
 
-    editingResourceId = resource ? resource.resource_id : null;
+    editingResourceId = resource ? (resource.id || resource.resource_id) : null;
 
     if (resource) {
         panelTitle.textContent = "Edit Resource";
@@ -84,7 +98,7 @@ function openPanel(resource = null) {
         resLocation.value = resource.location || "";
         resCapacity.value = resource.capacity || "";
         resType.value = resource.type || "room";
-        resImage.value = resource.image_url || "";
+        resImage.value = resource.image_url || resource.image_path || "";
     } else {
         panelTitle.textContent = "Add Resource";
         saveResourceBtn.textContent = "Add";
@@ -122,7 +136,6 @@ function renderResources() {
     resources.forEach((resource) => {
         const row = document.createElement("tr");
         const usage = resource.usage || {};
-        const availability = resource.availability;
         row.innerHTML = `
             <td>${resource.name}</td>
             <td>${resource.location || "-"}</td>
@@ -130,14 +143,12 @@ function renderResources() {
             <td>${resource.type || "-"}</td>
             <td>
                 <div>Bookings: ${usage.bookings || 0}</div>
-                <div>Exceptions: ${usage.exceptions || 0}</div>
-                <div>Blackouts: ${usage.blackoutDays || 0}</div>
-                ${availability ? `<div>Hours: ${availability.open_time} - ${availability.close_time}</div>` : ""}
+                <div>Blackouts: ${usage.blackoutDays || usage.blackouts || 0}</div>
             </td>
             <td>
-                <button class="btn edit" data-action="edit" data-id="${resource.resource_id}">Edit</button>
-                <button class="btn delete" data-action="delete" data-id="${resource.resource_id}">Delete</button>
-                <a class="btn" href="/admin/schedules?resourceId=${resource.resource_id}">Availability</a>
+                <button class="btn edit" data-action="edit" data-id="${resource.id || resource.resource_id}">Edit</button>
+                <button class="btn delete" data-action="delete" data-id="${resource.id || resource.resource_id}">Delete</button>
+                <a class="btn" href="/admin/schedules?resourceId=${resource.id || resource.resource_id}">Availability</a>
             </td>
         `;
 
@@ -163,7 +174,7 @@ async function handleSaveResource() {
     try {
         const saved = await resourceAPI.saveResource(payload, editingResourceId);
         if (editingResourceId) {
-            resourceAPI.cache = resourceAPI.cache.map((r) => (r.resource_id === editingResourceId ? saved : r));
+            resourceAPI.cache = resourceAPI.cache.map((r) => ((r.id || r.resource_id) === editingResourceId ? saved : r));
         } else {
             resourceAPI.cache.push(saved);
         }
@@ -181,7 +192,7 @@ async function handleResourceListClick(event) {
 
     if (!action || !resourceId) return;
 
-    const resource = resourceAPI.cache.find((r) => `${r.resource_id}` === resourceId);
+    const resource = resourceAPI.cache.find((r) => `${r.id || r.resource_id}` === resourceId);
     if (action === "edit") {
         openPanel(resource);
     }
@@ -192,7 +203,7 @@ async function handleResourceListClick(event) {
 
         try {
             await resourceAPI.deleteResource(resourceId);
-            resourceAPI.cache = resourceAPI.cache.filter((r) => `${r.resource_id}` !== resourceId);
+            resourceAPI.cache = resourceAPI.cache.filter((r) => `${r.id || r.resource_id}` !== resourceId);
             renderResources();
         } catch (err) {
             alert(err.message);
@@ -217,7 +228,7 @@ if (resourceList) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    if (isResourcePage) {
+    if (isResourcePage && ensureAdmin()) {
         resourceAPI.loadResources().catch((err) => alert(err.message));
     }
 });

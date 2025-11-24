@@ -47,14 +47,14 @@ async function loadAvailability() {
         if (token) headers.Authorization = `Bearer ${token}`;
 
         const res = await fetch(
-            `/api/bookings/availability/labs/${selectedLab.lab_id}?date=${encodeURIComponent(inDate)}&name=${encodeURIComponent(selectedLab.name)}`,
+            `/api/bookings/availability/${selectedLab.id}?date=${encodeURIComponent(inDate)}`,
             { headers }
         );
         const data = await res.json();
         if (!res.ok) {
             throw new Error(data.message || "Failed to load availability");
         }
-        availableSlots = data.availableTimeslots || [];
+        availableSlots = data.available || [];
         if (!availableSlots.length) {
             setSelectOptions(labSlots, [
                 { value: "", label: "No slots available", disabled: true, selected: true },
@@ -64,7 +64,7 @@ async function loadAvailability() {
         }
         setSelectOptions(labSlots, [
             { value: "", label: "Select a slot", disabled: true, selected: true },
-            ...availableSlots.map((slot) => ({ value: slot.timeslot_id, label: slot.label })),
+            ...availableSlots.map((slot) => ({ value: slot.id, label: slot.label })),
         ]);
         labSlots.disabled = false;
     } catch (err) {
@@ -79,7 +79,7 @@ function renderLabs() {
     labsCatalog.forEach((lab) => {
         const card = document.createElement("div");
         card.className = "lab";
-        card.dataset.id = lab.lab_id;
+        card.dataset.id = lab.id;
         card.innerHTML = `<h3>${lab.name}</h3>`;
         card.addEventListener("click", () => {
             document.querySelectorAll(".lab").forEach((l) => l.classList.remove("selected"));
@@ -96,7 +96,7 @@ async function loadLabs() {
         const res = await fetch("/api/bookings/labs");
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to load labs");
-        labsCatalog = Array.isArray(data) ? data : [];
+        labsCatalog = Array.isArray(data) ? data.map((l) => ({ ...l, id: l.id || l.lab_id })) : [];
         renderLabs();
     } catch (err) {
         console.error("Failed to load labs", err);
@@ -131,9 +131,8 @@ confirmBtn.addEventListener("click", () => {
         method: "POST",
         headers,
         body: JSON.stringify({
-            bookingType: "lab",
+            resourceId: selectedLab.id,
             bookingDate: inDate,
-            labId: selectedLab.lab_id,
             timeslotId,
         }),
     })
@@ -147,7 +146,7 @@ confirmBtn.addEventListener("click", () => {
             summary.innerHTML = `
                 <strong>Lab:</strong> ${selectedLab.name}<br>
                 <strong>Date:</strong> ${inDate}<br>
-                <strong>Slot:</strong> ${availableSlots.find((s) => `${s.timeslot_id}` === `${timeslotId}`)?.label || ""}<br><br>
+                <strong>Slot:</strong> ${availableSlots.find((s) => `${s.id}` === `${timeslotId}`)?.label || ""}<br><br>
                 Lab successfully booked!
             `;
         })

@@ -7,12 +7,21 @@ const router = express.Router();
 // Availability lookup for room and lab bookings
 router.get("/availability/rooms/:id", bookingController.getRoomAvailability);
 router.get("/availability/labs/:id", bookingController.getLabAvailability);
+router.get("/availability/equipment/:id", bookingController.getEquipmentAvailability);
+
+// Public resource catalogs for booking UIs
+router.get("/rooms", bookingController.listRooms);
+router.get("/labs", bookingController.listLabs);
+router.get("/equipment", bookingController.listEquipment);
 
 // Create bookings as a signed-in user
 router.post("/", bookingController.createBooking);
 
 // Logged-in users can see their own bookings
 router.get("/mine", bookingController.getMyBookings);
+
+// Logged-in users can see their own bookings
+router.get("/mine", authenticate, bookingController.getMyBookings);
 
 // Logged-in users can see their own bookings
 router.get("/mine", authenticate, bookingController.getMyBookings);

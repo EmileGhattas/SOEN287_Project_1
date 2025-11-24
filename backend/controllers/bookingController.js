@@ -84,6 +84,52 @@ async function getLabAvailability(req, res) {
     }
 }
 
+async function listRooms(req, res) {
+    try {
+        const rooms = await Booking.listRooms();
+        return res.json(rooms);
+    } catch (err) {
+        console.error("Failed to load rooms", err);
+        return res.status(500).json({ message: "Failed to load rooms" });
+    }
+}
+
+async function listLabs(req, res) {
+    try {
+        const labs = await Booking.listLabs();
+        return res.json(labs);
+    } catch (err) {
+        console.error("Failed to load labs", err);
+        return res.status(500).json({ message: "Failed to load labs" });
+    }
+}
+
+async function listEquipment(req, res) {
+    try {
+        const equipment = await Booking.listEquipment();
+        return res.json(equipment);
+    } catch (err) {
+        console.error("Failed to load equipment", err);
+        return res.status(500).json({ message: "Failed to load equipment" });
+    }
+}
+
+async function getEquipmentAvailability(req, res) {
+    try {
+        const availability = await Booking.getEquipmentAvailability(req.params.id, req.query.date);
+        return res.json(availability);
+    } catch (err) {
+        if (err.message === "MISSING_FIELDS") {
+            return res.status(400).json({ message: "Invalid equipment lookup" });
+        }
+        if (err.message === "EQUIPMENT_NOT_FOUND") {
+            return res.status(404).json({ message: "Equipment not found" });
+        }
+        console.error("Failed to load equipment availability", err);
+        return res.status(500).json({ message: "Failed to load equipment availability" });
+    }
+}
+
 async function updateBooking(req, res) {
     try {
         const updated = await Booking.updateBooking(req.params.id, req.body || {}, req.user);
@@ -131,4 +177,8 @@ module.exports = {
     getLabAvailability,
     updateBooking,
     deleteBooking,
+    listRooms,
+    listLabs,
+    listEquipment,
+    getEquipmentAvailability,
 };

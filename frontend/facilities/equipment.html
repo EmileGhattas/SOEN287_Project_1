@@ -53,24 +53,7 @@
 
     <section class="equipment-selection">
         <h2>Select Equipment</h2>
-        <div class="equipment-blocks">
-            <div class="equipment" data-equipment="Camera">
-                Camera
-                <div class="equipment-info">5 available today</div>
-            </div>
-            <div class="equipment" data-equipment="Tripod">
-                Tripod
-                <div class="equipment-info">5 available today</div>
-            </div>
-            <div class="equipment" data-equipment="Microscope">
-                Microscope
-                <div class="equipment-info">5 available today</div>
-            </div>
-            <div class="equipment" data-equipment="VR Headset">
-                VR Headset
-                <div class="equipment-info">5 available today</div>
-            </div>
-        </div>
+        <div class="equipment-blocks" id="equipment-list"></div>
         <button id="Next" disabled>Next</button>
     </section>
 
@@ -78,6 +61,8 @@
         <h2>Select a Date</h2>
         <label for="date">Date</label>
         <input type="date" id="date" required>
+        <label for="quantity">Quantity</label>
+        <input type="number" id="quantity" min="1" value="1">
         <button id="confirm">Confirm Booking</button>
     </section>
 

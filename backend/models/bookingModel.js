@@ -13,6 +13,23 @@ const DEFAULT_TIMESLOTS = [
     { label: "22:30-00:00", start: "22:30:00", end: "00:00:00" },
 ];
 
+async function listRooms() {
+    const [rows] = await db.execute("SELECT room_id, name, capacity FROM rooms ORDER BY name");
+    return rows;
+}
+
+async function listLabs() {
+    const [rows] = await db.execute("SELECT lab_id, name FROM labs ORDER BY name");
+    return rows;
+}
+
+async function listEquipment() {
+    const [rows] = await db.execute(
+        "SELECT equipment_id, name, total_quantity FROM equipment ORDER BY name"
+    );
+    return rows;
+}
+
 const BASE_QUERY = `
     SELECT b.booking_id, b.booking_type, b.booking_date, b.user_id, u.username, u.email,
            rb.room_id, rb.timeslot_id AS room_timeslot_id, r.name AS room_name, rts.start_time AS room_start, rts.end_time AS room_end, rts.label AS room_label,
@@ -241,6 +258,41 @@ async function ensureEquipmentAvailability(connection, equipmentId, bookingDate,
         throw new Error("EQUIPMENT_UNAVAILABLE");
     }
     return equipment;
+}
+
+async function getEquipmentAvailability(equipmentId, bookingDate) {
+    if (!equipmentId || !bookingDate) {
+        throw new Error("MISSING_FIELDS");
+    }
+
+    const connection = await db.getConnection();
+    try {
+        const [equipmentRows] = await connection.execute(
+            "SELECT equipment_id, name, total_quantity FROM equipment WHERE equipment_id = ?",
+            [equipmentId]
+        );
+        const equipment = equipmentRows[0];
+        if (!equipment) {
+            throw new Error("EQUIPMENT_NOT_FOUND");
+        }
+
+        const [usedRows] = await connection.execute(
+            `SELECT COALESCE(SUM(eb.quantity), 0) AS used
+             FROM equipment_bookings eb
+             JOIN bookings b ON b.booking_id = eb.booking_id
+             WHERE eb.equipment_id = ? AND eb.booking_date = ?`,
+            [equipmentId, bookingDate]
+        );
+        const used = usedRows[0]?.used || 0;
+        return {
+            equipment_id: equipment.equipment_id,
+            name: equipment.name,
+            total_quantity: equipment.total_quantity,
+            available_quantity: Math.max(0, equipment.total_quantity - used),
+        };
+    } finally {
+        connection.release();
+    }
 }
 
 async function ensureResourceTimeslot(connection, resourceType, resourceId, timeslotId) {
@@ -545,4 +597,8 @@ module.exports = {
     attachTimeslot,
     detachTimeslot,
     getResourceTimeslots,
+    listRooms,
+    listLabs,
+    listEquipment,
+    getEquipmentAvailability,
 };

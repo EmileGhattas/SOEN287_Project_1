@@ -1,19 +1,4 @@
-const ROOM_MAP = {
-    "Room 1": 1,
-    "Room 2": 2,
-    "Room 3": 3,
-    "Room 4": 4,
-    "Room 5": 5,
-    "Room 6": 6,
-    "Room 7": 7,
-    "Room 8": 8,
-    "Room 9": 9,
-    "Room 10": 10,
-    "Conference Room A": 11,
-    "Conference Room B": 12,
-};
-
-const rooms = document.querySelectorAll(".room");
+const roomList = document.getElementById("room-list");
 const dateInput = document.getElementById("date");
 const toDate = document.getElementById("toDate");
 const datetime = document.getElementById("datetime");
@@ -22,8 +7,9 @@ const timeslotSelect = document.getElementById("timeslot");
 const confirmation = document.getElementById("confirmation");
 const summary = document.getElementById("summary");
 
-let selectedRoom = "";
+let selectedRoom = null;
 let availableTimeslots = [];
+let roomsCatalog = [];
 
 function setDateBounds() {
     const today = new Date();
@@ -52,7 +38,7 @@ async function updateAvailableTimeslots() {
     if (!selectedRoom) return;
     setDateBounds();
     const inDate = dateInput.value;
-    const roomId = ROOM_MAP[selectedRoom] || selectedRoom;
+    const roomId = selectedRoom.room_id;
 
     setSelectOptions(timeslotSelect, [{ value: "", label: "Loading times...", disabled: true, selected: true }]);
     timeslotSelect.disabled = true;
@@ -63,7 +49,7 @@ async function updateAvailableTimeslots() {
         if (token) headers.Authorization = `Bearer ${token}`;
 
         const res = await fetch(
-            `/api/bookings/availability/rooms/${roomId}?date=${encodeURIComponent(inDate)}&name=${encodeURIComponent(selectedRoom)}`,
+            `/api/bookings/availability/rooms/${roomId}?date=${encodeURIComponent(inDate)}&name=${encodeURIComponent(selectedRoom.name)}`,
             { headers }
         );
         const data = await res.json();
@@ -93,14 +79,40 @@ async function updateAvailableTimeslots() {
     }
 }
 
-rooms.forEach((room) => {
-    room.addEventListener("click", () => {
-        rooms.forEach((r) => r.classList.remove("selected"));
-        room.classList.add("selected");
-        selectedRoom = room.textContent.trim();
-        toDate.disabled = false;
+function renderRooms() {
+    roomList.innerHTML = "";
+    roomsCatalog.forEach((room) => {
+        const card = document.createElement("div");
+        card.className = "room";
+        card.dataset.id = room.room_id;
+        card.innerHTML = `
+            <h3>${room.name}</h3>
+            <div class="room-info">
+                Capacity: ${room.capacity ?? "N/A"}
+            </div>
+        `;
+        card.addEventListener("click", () => {
+            document.querySelectorAll(".room").forEach((r) => r.classList.remove("selected"));
+            card.classList.add("selected");
+            selectedRoom = room;
+            toDate.disabled = false;
+        });
+        roomList.appendChild(card);
     });
-});
+}
+
+async function loadRooms() {
+    try {
+        const res = await fetch("/api/bookings/rooms");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to load rooms");
+        roomsCatalog = Array.isArray(data) ? data : [];
+        renderRooms();
+    } catch (err) {
+        console.error("Failed to load rooms", err);
+        roomList.innerHTML = "<p>Unable to load rooms.</p>";
+    }
+}
 
 toDate.addEventListener("click", () => {
     if (!selectedRoom) {
@@ -123,7 +135,7 @@ confirmButton.addEventListener("click", () => {
     const inDate = dateInput.value;
     const timeslotId = timeslotSelect.value;
 
-    if (!inDate || !timeslotId) {
+    if (!inDate || !timeslotId || !selectedRoom) {
         alert("Please select a date and timeslot.");
         return;
     }
@@ -131,10 +143,10 @@ confirmButton.addEventListener("click", () => {
     const user = JSON.parse(localStorage.getItem("user"));
     const booking = {
         type: "room",
-        room: selectedRoom,
+        room: selectedRoom.name,
         date: inDate,
         timeslotId,
-        roomId: ROOM_MAP[selectedRoom] || null,
+        roomId: selectedRoom.room_id,
     };
 
     if (!user) {
@@ -179,3 +191,6 @@ confirmButton.addEventListener("click", () => {
             alert(err.message || "Failed to book room");
         });
 });
+
+loadRooms();
+setDateBounds();

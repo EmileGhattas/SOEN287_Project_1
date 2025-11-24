@@ -17,10 +17,33 @@
     let editingId = null;
     let resourcesCache = [];
 
+    function getAuthToken() {
+        const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+        if (token && !sessionStorage.getItem("token")) {
+            sessionStorage.setItem("token", token);
+            localStorage.removeItem("token");
+        }
+        return token;
+    }
+
+    function getStoredUser() {
+        const raw = sessionStorage.getItem("user") || localStorage.getItem("user");
+        if (raw && !sessionStorage.getItem("user")) {
+            sessionStorage.setItem("user", raw);
+            localStorage.removeItem("user");
+        }
+        try {
+            return raw ? JSON.parse(raw) : null;
+        } catch (err) {
+            console.warn("Unable to parse user", err);
+            return null;
+        }
+    }
+
     const bookingsAPI = {
         cache: [],
         async authFetch(url, options = {}) {
-            const token = localStorage.getItem("token");
+            const token = getAuthToken();
             if (!token) {
                 window.location.href = "/auth/adminsignin.html";
                 throw new Error("Missing token");
@@ -32,7 +55,7 @@
             const response = await fetch(url, { ...options, headers });
             if (response.status === 401 || response.status === 403) {
                 alert("Admin access required. Please sign in again.");
-                window.location.href = "/auth/adminsignin.html";
+                window.location.href = "/adminsignin";
                 throw new Error("Unauthorized");
             }
             return response;
@@ -64,20 +87,20 @@
     };
 
     async function ensureAdmin() {
-        const userRaw = localStorage.getItem("user");
+        const userRaw = sessionStorage.getItem("user") || localStorage.getItem("user");
         if (!userRaw) {
-            window.location.href = "/auth/adminsignin.html";
+            window.location.href = "/adminsignin";
             return false;
         }
         try {
             const user = JSON.parse(userRaw);
             if (!user || !user.is_admin) {
-                window.location.href = "/auth/adminsignin.html";
+                window.location.href = "/adminsignin";
                 return false;
             }
         } catch (err) {
             console.warn("Unable to parse user", err);
-            window.location.href = "/auth/adminsignin.html";
+            window.location.href = "/adminsignin";
             return false;
         }
         return true;
@@ -90,10 +113,10 @@
 
     function formatDetails(booking) {
         if (booking.booking_type === "room" && booking.room) {
-            return `${booking.room.name || "Room"} – ${booking.room.start_time} to ${booking.room.end_time}`;
+            return `${booking.room.name || "Room"} – ${booking.room.label || `${booking.room.start_time} to ${booking.room.end_time}`}`;
         }
         if (booking.booking_type === "lab" && booking.lab) {
-            return `${booking.lab.name || "Lab"} – ${booking.lab.time_slot}`;
+            return `${booking.lab.name || "Lab"} – ${booking.lab.label || `${booking.lab.start_time} to ${booking.lab.end_time}`}`;
         }
         if (booking.booking_type === "equipment" && booking.equipment) {
             return `${booking.equipment.name || "Equipment"} (Qty: ${booking.equipment.quantity})`;
@@ -148,13 +171,9 @@
             }
         }
 
-        if (startInput && endInput && booking.room) {
-            startInput.value = booking.room.start_time || "";
-            endInput.value = booking.room.end_time || "";
-        }
-
-        if (slotInput && booking.lab) {
-            slotInput.value = booking.lab.time_slot || "";
+        if (slotInput && (booking.room || booking.lab)) {
+            const slotId = booking.room?.timeslot_id || booking.lab?.timeslot_id;
+            loadTimeslotOptions(resourceSelect?.value, booking.booking_date, slotId);
         }
 
         if (quantityInput && booking.equipment) {
@@ -173,21 +192,47 @@
 
     function buildPayload() {
         const payload = {
-            booking_date: dateInput?.value,
+            bookingDate: dateInput?.value,
         };
 
-        if (pageType === "room") {
-            payload.room_id = resourceSelect?.value;
-            payload.start_time = startInput?.value;
-            payload.end_time = endInput?.value;
-        } else if (pageType === "lab") {
-            payload.lab_id = resourceSelect?.value;
-            payload.time_slot = slotInput?.value;
+        if (pageType === "room" || pageType === "lab") {
+            payload.timeslotId = slotInput?.value;
         } else if (pageType === "equipment") {
-            payload.equipment_id = resourceSelect?.value;
             payload.quantity = Number(quantityInput?.value || 1);
         }
         return payload;
+    }
+
+    function slotLabel(slot) {
+        if (!slot) return "Timeslot";
+        return slot.label || `${slot.start_time} - ${slot.end_time}`;
+    }
+
+    async function loadTimeslotOptions(resourceId, bookingDate, currentSlotId = null) {
+        if (!slotInput || pageType === "equipment" || !resourceId || !bookingDate) return;
+        slotInput.innerHTML = '<option value="">Loading slots...</option>';
+        try {
+            const res = await fetch(`/api/resources/${resourceId}/availability?date=${encodeURIComponent(bookingDate)}`);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Unable to load availability");
+            const combined = [...(data.available || []), ...(data.booked || [])];
+            if (!combined.length) {
+                slotInput.innerHTML = '<option value="" disabled>No slots for this date</option>';
+                return;
+            }
+            slotInput.innerHTML = combined
+                .map((slot) => {
+                    const disabled = slot.is_active === false || (data.booked || []).some((b) => b.id === slot.id);
+                    return `<option value="${slot.id}" ${disabled && slot.id !== Number(currentSlotId) ? "disabled" : ""}>${slotLabel(slot)}${disabled && slot.id !== Number(currentSlotId) ? " (booked)" : ""}</option>`;
+                })
+                .join("");
+            if (currentSlotId) {
+                slotInput.value = String(currentSlotId);
+            }
+        } catch (err) {
+            console.error(err);
+            slotInput.innerHTML = '<option value="" disabled>Availability unavailable</option>';
+        }
     }
 
     async function loadResources() {
@@ -199,7 +244,7 @@
             const typeMap = { room: "room", lab: "lab", equipment: "equipment" };
             const filtered = resourcesCache.filter((r) => r.type === typeMap[pageType]);
             resourceSelect.innerHTML = filtered
-                .map((r) => `<option value="${r.resource_id}">${r.name}</option>`)
+                .map((r) => `<option value="${r.id || r.resource_id}">${r.name}</option>`)
                 .join("");
         } catch (err) {
             console.error("Failed to load resources", err);
@@ -252,6 +297,12 @@
 
         if (refreshBtn) refreshBtn.addEventListener("click", refresh);
         if (closePanelBtn) closePanelBtn.addEventListener("click", closePanel);
+
+        if (pageType !== "equipment") {
+            const reload = () => loadTimeslotOptions(resourceSelect?.value, dateInput?.value);
+            if (dateInput) dateInput.addEventListener("change", reload);
+            if (resourceSelect) resourceSelect.addEventListener("change", reload);
+        }
 
         if (form) {
             form.addEventListener("submit", async (event) => {

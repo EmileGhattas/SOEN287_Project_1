@@ -1,177 +1,109 @@
-const db = require("../db/db");
-const Booking = require("./bookingModel");
+const db = require('../db/db');
 
-async function ensureTables() {
-    await db.execute(`
-        CREATE TABLE IF NOT EXISTS resources (
-            resource_id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            description TEXT,
-            location VARCHAR(255),
-            capacity INT,
-            type VARCHAR(100),
-            image_url VARCHAR(500),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-}
-
-async function getAllResources() {
-    const [rows] = await db.execute("SELECT * FROM resources ORDER BY name");
-    return rows;
-}
-
-async function getResourceById(resourceId) {
-    const [rows] = await db.execute("SELECT * FROM resources WHERE resource_id = ?", [resourceId]);
-    return rows[0];
-}
-
-async function createResource({ name, description, location, capacity, type, image_url }) {
-    const [result] = await db.execute(
-        "INSERT INTO resources (name, description, location, capacity, type, image_url) VALUES (?, ?, ?, ?, ?, ?)",
-        [name, description || null, location || null, capacity || null, type || null, image_url || null]
+async function ensureResourceTimeslots(resourceId, type, connection = db) {
+  if (type === 'equipment') return;
+  const [count] = await connection.execute(
+    'SELECT COUNT(*) AS total FROM resource_timeslots WHERE resource_id = ?',
+    [resourceId]
+  );
+  if ((count[0]?.total || 0) === 0) {
+    await connection.execute(
+      'INSERT INTO resource_timeslots (resource_id, timeslot_id) SELECT ?, id FROM timeslots',
+      [resourceId]
     );
-
-    return getResourceById(result.insertId);
+  }
 }
 
-async function updateResource(resourceId, { name, description, location, capacity, type, image_url }) {
-    await db.execute(
-        `UPDATE resources
-         SET name = ?, description = ?, location = ?, capacity = ?, type = ?, image_url = ?
-         WHERE resource_id = ?`,
-        [name, description || null, location || null, capacity || null, type || null, image_url || null, resourceId]
-    );
-
-    return getResourceById(resourceId);
+async function listResources() {
+  const [rows] = await db.execute('SELECT * FROM resources ORDER BY name');
+  return rows;
 }
 
-async function deleteResource(resourceId) {
-    const connection = await db.getConnection();
-    try {
-        await connection.beginTransaction();
-        const [rows] = await connection.execute(
-            "SELECT * FROM resources WHERE resource_id = ? FOR UPDATE",
-            [resourceId]
-        );
-
-        const resource = rows[0];
-        if (!resource) {
-            throw new Error("NOT_FOUND");
-        }
-
-        const type = resource.type;
-        if (type === "room") {
-            const [roomRows] = await connection.execute(
-                "SELECT room_id FROM rooms WHERE name = ? LIMIT 1",
-                [resource.name]
-            );
-            if (roomRows.length) {
-                const roomId = roomRows[0].room_id;
-                await Booking.deleteBookingsForResource("room", roomId, connection);
-                await connection.execute("DELETE FROM rooms WHERE room_id = ?", [roomId]);
-            }
-        } else if (type === "lab") {
-            const [labRows] = await connection.execute(
-                "SELECT lab_id FROM labs WHERE name = ? LIMIT 1",
-                [resource.name]
-            );
-            if (labRows.length) {
-                const labId = labRows[0].lab_id;
-                await Booking.deleteBookingsForResource("lab", labId, connection);
-                await connection.execute("DELETE FROM labs WHERE lab_id = ?", [labId]);
-            }
-        } else if (type === "equipment") {
-            const [eqRows] = await connection.execute(
-                "SELECT equipment_id FROM equipment WHERE name = ? LIMIT 1",
-                [resource.name]
-            );
-            if (eqRows.length) {
-                const equipmentId = eqRows[0].equipment_id;
-                await Booking.deleteBookingsForResource("equipment", equipmentId, connection);
-                await connection.execute("DELETE FROM equipment WHERE equipment_id = ?", [equipmentId]);
-            }
-        }
-
-        await connection.execute("DELETE FROM resources WHERE resource_id = ?", [resourceId]);
-
-        await connection.commit();
-    } catch (err) {
-        await connection.rollback();
-        throw err;
-    } finally {
-        connection.release();
-    }
+async function getResourceById(id, connection = db) {
+  const [rows] = await connection.execute('SELECT * FROM resources WHERE id = ?', [id]);
+  return rows[0] || null;
 }
 
-async function bookingsTableExists() {
-    const [rows] = await db.execute(
-        `SELECT COUNT(*) AS total
-         FROM information_schema.TABLES
-         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'bookings'`
-    );
-
-    return rows[0]?.total > 0;
+async function createResource(payload) {
+  const { name, type, description, location, capacity, quantity, image_path } = payload;
+  const [result] = await db.execute(
+    `INSERT INTO resources (name, type, description, location, capacity, quantity, image_path)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [name, type, description || null, location || null, capacity || null, quantity || null, image_path || null]
+  );
+  const resource = await getResourceById(result.insertId);
+  await ensureResourceTimeslots(resource.id, resource.type);
+  return resource;
 }
 
-async function hasBookingResourceColumn() {
-    const [rows] = await db.execute(
-        `SELECT COUNT(*) AS total
-         FROM information_schema.COLUMNS
-         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'bookings' AND COLUMN_NAME = 'resource_id'`
-    );
-
-    return rows[0]?.total > 0;
+async function updateResource(id, payload) {
+  const existing = await getResourceById(id);
+  if (!existing) throw new Error('NOT_FOUND');
+  const fields = {
+    name: payload.name ?? existing.name,
+    type: payload.type ?? existing.type,
+    description: payload.description ?? existing.description,
+    location: payload.location ?? existing.location,
+    capacity: payload.capacity ?? existing.capacity,
+    quantity: payload.quantity ?? existing.quantity,
+    image_path: payload.image_path ?? existing.image_path,
+  };
+  await db.execute(
+    `UPDATE resources SET name = ?, type = ?, description = ?, location = ?, capacity = ?, quantity = ?, image_path = ?
+     WHERE id = ?`,
+    [fields.name, fields.type, fields.description, fields.location, fields.capacity, fields.quantity, fields.image_path, id]
+  );
+  await ensureResourceTimeslots(id, fields.type);
+  return getResourceById(id);
 }
 
-async function getUsageStats(resource) {
-    const [blackouts] = await db.execute(
-        "SELECT COUNT(*) AS total FROM blackout_periods WHERE resource_id = ?",
-        [resource.resource_id]
-    );
-
-    const [exceptions] = await db.execute(
-        "SELECT COUNT(*) AS total FROM resource_exceptions WHERE resource_id = ?",
-        [resource.resource_id]
-    );
-
-    let bookingCount = 0;
-    const tableExists = await bookingsTableExists();
-
-    if (tableExists) {
-        const bookingHasColumn = await hasBookingResourceColumn();
-
-        if (bookingHasColumn) {
-            const [byResource] = await db.execute(
-                "SELECT COUNT(*) AS total FROM bookings WHERE resource_id = ?",
-                [resource.resource_id]
-            );
-            bookingCount = byResource[0]?.total || 0;
-        } else {
-            const [byName] = await db.execute(
-                "SELECT COUNT(*) AS total FROM bookings WHERE booking_type = ?",
-                [resource.name]
-            );
-            bookingCount = byName[0]?.total || 0;
-        }
-    }
-
-    return {
-        bookings: bookingCount,
-        blackoutDays: blackouts[0]?.total || 0,
-        exceptions: exceptions[0]?.total || 0,
-    };
+async function deleteResource(id) {
+  await db.execute('DELETE FROM resources WHERE id = ?', [id]);
 }
 
-ensureTables().catch((err) => {
-    console.error("Failed to ensure resources table exists", err);
-});
+async function listBlackouts(resourceId) {
+  const [rows] = await db.execute(
+    'SELECT id, blackout_date, reason FROM resource_blackouts WHERE resource_id = ? ORDER BY blackout_date',
+    [resourceId]
+  );
+  return rows;
+}
+
+async function addBlackout(resourceId, blackoutDate, reason) {
+  await db.execute(
+    `INSERT INTO resource_blackouts (resource_id, blackout_date, reason)
+     VALUES (?, ?, ?)
+     ON DUPLICATE KEY UPDATE reason = VALUES(reason)`,
+    [resourceId, blackoutDate, reason || null]
+  );
+  return listBlackouts(resourceId);
+}
+
+async function deleteBlackout(resourceId, blackoutId) {
+  await db.execute('DELETE FROM resource_blackouts WHERE id = ? AND resource_id = ?', [blackoutId, resourceId]);
+  return listBlackouts(resourceId);
+}
+
+async function resourceStats() {
+  const [rows] = await db.execute(
+    `SELECT r.id, r.name, r.type, COUNT(b.id) AS bookings
+       FROM resources r
+       LEFT JOIN bookings b ON b.resource_id = r.id AND b.status = 'active'
+      GROUP BY r.id
+      ORDER BY bookings DESC`
+  );
+  return rows;
+}
 
 module.exports = {
-    getAllResources,
-    getResourceById,
-    createResource,
-    updateResource,
-    deleteResource,
-    getUsageStats,
+  listResources,
+  getResourceById,
+  createResource,
+  updateResource,
+  deleteResource,
+  ensureResourceTimeslots,
+  listBlackouts,
+  addBlackout,
+  deleteBlackout,
+  resourceStats,
 };

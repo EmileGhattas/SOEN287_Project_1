@@ -11,6 +11,29 @@ let selectedRoom = null;
 let availableTimeslots = [];
 let roomsCatalog = [];
 
+function getAuthToken() {
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    if (token && !sessionStorage.getItem("token")) {
+        sessionStorage.setItem("token", token);
+        localStorage.removeItem("token");
+    }
+    return token;
+}
+
+function getStoredUser() {
+    const raw = sessionStorage.getItem("user") || localStorage.getItem("user");
+    if (raw && !sessionStorage.getItem("user")) {
+        sessionStorage.setItem("user", raw);
+        localStorage.removeItem("user");
+    }
+    try {
+        return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+        console.warn("Unable to parse stored user", err);
+        return null;
+    }
+}
+
 function setDateBounds() {
     const today = new Date();
     const maxdate = new Date();
@@ -38,25 +61,25 @@ async function updateAvailableTimeslots() {
     if (!selectedRoom) return;
     setDateBounds();
     const inDate = dateInput.value;
-    const roomId = selectedRoom.room_id;
+    const roomId = selectedRoom.id;
 
     setSelectOptions(timeslotSelect, [{ value: "", label: "Loading times...", disabled: true, selected: true }]);
     timeslotSelect.disabled = true;
 
     try {
         const headers = { "Content-Type": "application/json" };
-        const token = localStorage.getItem("token");
+        const token = getAuthToken();
         if (token) headers.Authorization = `Bearer ${token}`;
 
         const res = await fetch(
-            `/api/bookings/availability/rooms/${roomId}?date=${encodeURIComponent(inDate)}&name=${encodeURIComponent(selectedRoom.name)}`,
+            `/api/bookings/availability/${roomId}?date=${encodeURIComponent(inDate)}`,
             { headers }
         );
         const data = await res.json();
         if (!res.ok) {
             throw new Error(data.message || "Failed to load availability");
         }
-        availableTimeslots = data.availableTimeslots || [];
+        availableTimeslots = data.available || [];
         if (!availableTimeslots.length) {
             setSelectOptions(timeslotSelect, [
                 { value: "", label: "No timeslots available", disabled: true, selected: true },
@@ -66,7 +89,7 @@ async function updateAvailableTimeslots() {
         }
         setSelectOptions(timeslotSelect, [
             { value: "", label: "Select a timeslot", disabled: true, selected: true },
-            ...availableTimeslots.map((slot) => ({ value: slot.timeslot_id, label: slot.label })),
+            ...availableTimeslots.map((slot) => ({ value: slot.id, label: slot.label })),
         ]);
         timeslotSelect.disabled = false;
     } catch (err) {
@@ -84,7 +107,7 @@ function renderRooms() {
     roomsCatalog.forEach((room) => {
         const card = document.createElement("div");
         card.className = "room";
-        card.dataset.id = room.room_id;
+        card.dataset.id = room.id;
         card.innerHTML = `
             <h3>${room.name}</h3>
             <div class="room-info">
@@ -106,7 +129,7 @@ async function loadRooms() {
         const res = await fetch("/api/bookings/rooms");
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to load rooms");
-        roomsCatalog = Array.isArray(data) ? data : [];
+        roomsCatalog = Array.isArray(data) ? data.map((r) => ({ ...r, id: r.id || r.room_id })) : [];
         renderRooms();
     } catch (err) {
         console.error("Failed to load rooms", err);
@@ -140,13 +163,13 @@ confirmButton.addEventListener("click", () => {
         return;
     }
 
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = getStoredUser();
     const booking = {
         type: "room",
         room: selectedRoom.name,
         date: inDate,
         timeslotId,
-        roomId: selectedRoom.room_id,
+        roomId: selectedRoom.id,
     };
 
     if (!user) {
@@ -156,7 +179,7 @@ confirmButton.addEventListener("click", () => {
         return;
     }
 
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     const headers = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -164,10 +187,8 @@ confirmButton.addEventListener("click", () => {
         method: "POST",
         headers,
         body: JSON.stringify({
-            bookingType: "room",
+            resourceId: booking.roomId,
             bookingDate: booking.date,
-            roomId: booking.roomId,
-            roomName: booking.room,
             timeslotId: booking.timeslotId,
         }),
     })
@@ -182,7 +203,7 @@ confirmButton.addEventListener("click", () => {
             summary.innerHTML = `
                 <strong>Room:</strong> ${booking.room}<br>
                 <strong>Date:</strong> ${booking.date}<br>
-                <strong>Time:</strong> ${availableTimeslots.find((t) => `${t.timeslot_id}` === `${timeslotId}`)?.label || ""}<br><br>
+                <strong>Time:</strong> ${availableTimeslots.find((t) => `${t.id}` === `${timeslotId}`)?.label || ""}<br><br>
                 Room successfully booked!
             `;
         })

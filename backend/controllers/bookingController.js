@@ -1,184 +1,99 @@
-const Booking = require("../models/bookingModel");
+const Booking = require('../models/bookingModel');
+const Resource = require('../models/resourceModel');
 
-async function createBooking(req, res) {
-    try {
-        const created = await Booking.createBooking(req.body || {}, req.user);
-        return res.status(201).json(created);
-    } catch (err) {
-        if (err.message === "MISSING_FIELDS") {
-            return res.status(400).json({ message: "Missing required fields" });
-        }
-        if (err.message === "USER_NOT_FOUND") {
-            return res.status(404).json({ message: "User not found" });
-        }
-        if (err.message === "ROOM_NOT_FOUND" || err.message === "LAB_NOT_FOUND" || err.message === "EQUIPMENT_NOT_FOUND") {
-            return res.status(404).json({ message: "Selected resource not found" });
-        }
-        if (err.message === "ROOM_CONFLICT" || err.message === "LAB_CONFLICT" || err.message === "EQUIPMENT_UNAVAILABLE") {
-            return res.status(409).json({ message: "Requested time or quantity is not available" });
-        }
-        if (err.message.startsWith("INVALID_")) {
-            return res.status(400).json({ message: "Invalid booking data" });
-        }
+exports.createBooking = async (req, res) => {
+  try {
+    const created = await Booking.createBooking(req.body || {}, req.user);
+    return res.status(201).json(created);
+  } catch (err) {
+    const map = {
+      MISSING_FIELDS: 400,
+      USER_NOT_FOUND: 404,
+      RESOURCE_NOT_FOUND: 404,
+      RESOURCE_BLACKED_OUT: 409,
+      ROOM_CONFLICT: 409,
+      LAB_CONFLICT: 409,
+      EQUIPMENT_UNAVAILABLE: 409,
+      INVALID_TIMESLOT: 400,
+    };
+    const status = map[err.message] || 500;
+    return res.status(status).json({ message: 'Failed to create booking' });
+  }
+};
 
-        console.error("Failed to create booking", err);
-        return res.status(500).json({ message: "Failed to create booking" });
-    }
-}
+exports.listBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.listAll();
+    res.json(bookings);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to load bookings' });
+  }
+};
 
-async function listBookings(req, res) {
-    try {
-        const bookings = await Booking.getAllBookings();
-        return res.json(bookings);
-    } catch (err) {
-        console.error("Failed to load bookings", err);
-        return res.status(500).json({ message: "Failed to load bookings" });
-    }
-}
+exports.getMyBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.listForUser(req.user.id);
+    res.json(bookings);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to load bookings' });
+  }
+};
 
-async function getMyBookings(req, res) {
-    try {
-        const bookings = await Booking.getBookingsForUser(req.user);
-        return res.json(bookings);
-    } catch (err) {
-        console.error("Failed to load user bookings", err);
-        return res.status(500).json({ message: "Failed to load bookings" });
-    }
-}
+exports.getAvailability = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { date } = req.query;
+    const availability = await Booking.getAvailability(id, date);
+    res.json(availability);
+  } catch (err) {
+    const map = {
+      MISSING_FIELDS: 400,
+      RESOURCE_NOT_FOUND: 404,
+    };
+    res.status(map[err.message] || 500).json({ message: 'Failed to load availability' });
+  }
+};
 
-async function getRoomAvailability(req, res) {
-    try {
-        const availability = await Booking.getRoomAvailability(
-            req.params.id,
-            req.query.date,
-            req.query.name
-        );
-        return res.json(availability);
-    } catch (err) {
-        if (err.message === "ROOM_NOT_FOUND") {
-            return res.status(404).json({ message: "Room not found" });
-        }
-        if (err.message === "MISSING_FIELDS" || err.message.startsWith("INVALID_")) {
-            return res.status(400).json({ message: "Invalid booking data" });
-        }
+exports.updateBooking = async (req, res) => {
+  try {
+    const updated = await Booking.updateBooking(req.params.id, req.body || {}, req.user);
+    res.json(updated);
+  } catch (err) {
+    const map = {
+      NOT_FOUND: 404,
+      FORBIDDEN: 403,
+      RESOURCE_NOT_FOUND: 404,
+      ROOM_CONFLICT: 409,
+      LAB_CONFLICT: 409,
+      EQUIPMENT_UNAVAILABLE: 409,
+      INVALID_TIMESLOT: 400,
+    };
+    res.status(map[err.message] || 500).json({ message: 'Failed to update booking' });
+  }
+};
 
-        console.error("Failed to load room availability", err);
-        return res.status(500).json({ message: "Failed to load availability" });
-    }
-}
+exports.deleteBooking = async (req, res) => {
+  try {
+    const removed = await Booking.deleteBooking(req.params.id, req.user);
+    if (!removed) return res.status(404).json({ message: 'Booking not found' });
+    if (removed === 'FORBIDDEN') return res.status(403).json({ message: 'Not allowed' });
+    return res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete booking' });
+  }
+};
 
-async function getLabAvailability(req, res) {
-    try {
-        const availability = await Booking.getLabAvailability(req.params.id, req.query.date, req.query.name);
-        return res.json(availability);
-    } catch (err) {
-        if (err.message === "LAB_NOT_FOUND") {
-            return res.status(404).json({ message: "Lab not found" });
-        }
-        if (err.message === "MISSING_FIELDS" || err.message.startsWith("INVALID_")) {
-            return res.status(400).json({ message: "Invalid booking data" });
-        }
+exports.listRooms = async (_req, res) => {
+  const all = await Resource.listResources();
+  res.json(all.filter((r) => r.type === 'room'));
+};
 
-        console.error("Failed to load lab availability", err);
-        return res.status(500).json({ message: "Failed to load availability" });
-    }
-}
+exports.listLabs = async (_req, res) => {
+  const all = await Resource.listResources();
+  res.json(all.filter((r) => r.type === 'lab'));
+};
 
-async function listRooms(req, res) {
-    try {
-        const rooms = await Booking.listRooms();
-        return res.json(rooms);
-    } catch (err) {
-        console.error("Failed to load rooms", err);
-        return res.status(500).json({ message: "Failed to load rooms" });
-    }
-}
-
-async function listLabs(req, res) {
-    try {
-        const labs = await Booking.listLabs();
-        return res.json(labs);
-    } catch (err) {
-        console.error("Failed to load labs", err);
-        return res.status(500).json({ message: "Failed to load labs" });
-    }
-}
-
-async function listEquipment(req, res) {
-    try {
-        const equipment = await Booking.listEquipment();
-        return res.json(equipment);
-    } catch (err) {
-        console.error("Failed to load equipment", err);
-        return res.status(500).json({ message: "Failed to load equipment" });
-    }
-}
-
-async function getEquipmentAvailability(req, res) {
-    try {
-        const availability = await Booking.getEquipmentAvailability(req.params.id, req.query.date);
-        return res.json(availability);
-    } catch (err) {
-        if (err.message === "MISSING_FIELDS") {
-            return res.status(400).json({ message: "Invalid equipment lookup" });
-        }
-        if (err.message === "EQUIPMENT_NOT_FOUND") {
-            return res.status(404).json({ message: "Equipment not found" });
-        }
-        console.error("Failed to load equipment availability", err);
-        return res.status(500).json({ message: "Failed to load equipment availability" });
-    }
-}
-
-async function updateBooking(req, res) {
-    try {
-        const updated = await Booking.updateBooking(req.params.id, req.body || {}, req.user);
-        return res.json(updated);
-    } catch (err) {
-        if (err.message === "NOT_FOUND") {
-            return res.status(404).json({ message: "Booking not found" });
-        }
-        if (err.message === "FORBIDDEN") {
-            return res.status(403).json({ message: "Not allowed to modify this booking" });
-        }
-        if (err.message && err.message.startsWith("INVALID_")) {
-            return res.status(400).json({ message: "Invalid booking data" });
-        }
-        if (err.message === "ROOM_CONFLICT" || err.message === "LAB_CONFLICT" || err.message === "EQUIPMENT_UNAVAILABLE") {
-            return res.status(409).json({ message: "Requested time or quantity is not available" });
-        }
-
-        console.error("Failed to update booking", err);
-        return res.status(500).json({ message: "Failed to update booking" });
-    }
-}
-
-async function deleteBooking(req, res) {
-    try {
-        const removed = await Booking.deleteBooking(req.params.id, req.user);
-        if (!removed) {
-            return res.status(404).json({ message: "Booking not found" });
-        }
-        if (removed === "FORBIDDEN") {
-            return res.status(403).json({ message: "Not allowed to cancel this booking" });
-        }
-        return res.status(204).send();
-    } catch (err) {
-        console.error("Failed to delete booking", err);
-        return res.status(500).json({ message: "Failed to delete booking" });
-    }
-}
-
-module.exports = {
-    createBooking,
-    listBookings,
-    getMyBookings,
-    getRoomAvailability,
-    getLabAvailability,
-    updateBooking,
-    deleteBooking,
-    listRooms,
-    listLabs,
-    listEquipment,
-    getEquipmentAvailability,
+exports.listEquipment = async (_req, res) => {
+  const all = await Resource.listResources();
+  res.json(all.filter((r) => r.type === 'equipment'));
 };

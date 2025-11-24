@@ -8,7 +8,7 @@ const resourceRoutes = require('./routes/resourceRoutes');
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 const FRONTEND_DIR = path.join(__dirname, '..', 'frontend');
 const ASSETS_DIR = path.join(__dirname, '..', 'assets');
 

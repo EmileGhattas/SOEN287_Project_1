@@ -10,7 +10,7 @@ Refactored SOEN 287 project implementing a full stack Node.js + MySQL system for
 
 ## Project structure
 - `backend/` – Express app, routes, controllers, models, database config
-- `backend/db/schema.sql` – Database schema & seeds (admin + demo users, resources, timeslots)
+- `backend/db/schema.sql` – Database schema & seeds (admin + demo users, resources, timeslots). This is the single authoritative SQL file (older `db.sql` has been removed).
 - `frontend/` – Existing static pages and booking flows
 - `assets/` – Shared images/styles
 
@@ -23,14 +23,14 @@ Refactored SOEN 287 project implementing a full stack Node.js + MySQL system for
    DB_PASSWORD=yourpassword
    DB_NAME=campus_resources
    JWT_SECRET=changeme
-   PORT=5000
+   PORT=5001
    ```
 3. Install dependencies and start the server:
    ```bash
    npm install
    npm start
    ```
-4. Access the UI at `http://localhost:5000/`.
+4. Access the UI at `http://localhost:5001/`.
 
 ### Default accounts
 - Admin: `admin@learnspace.com` / `Admin@123`

@@ -12,6 +12,7 @@ router.get('/equipment', bookingController.listEquipment);
 router.post('/', authenticate, bookingController.createBooking);
 router.get('/mine', authenticate, bookingController.getMyBookings);
 router.post('/:id/reschedule', authenticate, bookingController.rescheduleBooking);
+router.put('/:id/reschedule', authenticate, bookingController.rescheduleBooking);
 router.put('/:id', authenticate, bookingController.updateBooking);
 router.post('/:id/cancel', authenticate, bookingController.cancelBooking);
 router.delete('/:id', authenticate, bookingController.cancelBooking);

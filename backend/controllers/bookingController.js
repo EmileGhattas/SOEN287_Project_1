@@ -87,6 +87,7 @@ exports.rescheduleBooking = async (req, res) => {
       INVALID_TIMESLOT: 400,
       INVALID_STATUS: 400,
       RESOURCE_BLACKED_OUT: 409,
+      MISSING_FIELDS: 400,
     };
     res.status(map[err.message] || 500).json({ message: 'Failed to reschedule booking' });
   }

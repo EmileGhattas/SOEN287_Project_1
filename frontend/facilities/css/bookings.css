@@ -95,6 +95,77 @@ main.page-wrap {
     color: #000;
 }
 
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal.is-open {
+    display: flex;
+}
+
+.panel-content {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    width: min(480px, 90vw);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.panel-header h3 {
+    margin: 0;
+}
+
+.panel-header button {
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.panel__form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.panel__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: 600;
+}
+
+.panel__field input,
+.panel__field select {
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-weight: 400;
+}
+
+.panel__value {
+    font-weight: 400;
+}
+
+.panel__actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
 @media (min-width: 720px) {
     .bookings-grid {
         grid-template-columns: repeat(2, 300px);

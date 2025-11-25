@@ -7,8 +7,19 @@ const filterTo = document.getElementById('filterTo');
 const applyFilters = document.getElementById('applyFilters');
 const clearFiltersBtn = document.getElementById('clearFilters');
 const clearMyBookingsBtn = document.getElementById('clearMyBookings');
+const rescheduleModal = document.getElementById('rescheduleModal');
+const rescheduleForm = document.getElementById('rescheduleForm');
+const rescheduleDate = document.getElementById('rescheduleDate');
+const rescheduleTimeslot = document.getElementById('rescheduleTimeslot');
+const rescheduleQuantity = document.getElementById('rescheduleQuantity');
+const rescheduleResource = document.getElementById('rescheduleResource');
+const rescheduleTitle = document.getElementById('rescheduleTitle');
+const closeReschedule = document.getElementById('closeReschedule');
+const timeslotField = document.getElementById('timeslotField');
+const quantityField = document.getElementById('quantityField');
 
 let bookingsCache = [];
+let activeBooking = null;
 
 function hasStoredAuth() {
     const user = sessionStorage.getItem('user') || localStorage.getItem('user');
@@ -82,6 +93,11 @@ function statusLabel(status) {
     return map[status] || status || 'Unknown';
 }
 
+function slotLabel(slot) {
+    if (!slot) return 'Timeslot';
+    return slot.label || `${slot.start_time} - ${slot.end_time}`;
+}
+
 function splitBookings(list) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -123,6 +139,105 @@ function filterBookings(list) {
         if (!Number.isFinite(ts)) return true;
         return ts >= fromTs && ts <= toTs;
     });
+}
+
+function closeRescheduleModal() {
+    if (rescheduleModal) {
+        rescheduleModal.classList.remove('is-open');
+        rescheduleModal.setAttribute('aria-hidden', 'true');
+    }
+    activeBooking = null;
+    if (rescheduleForm) rescheduleForm.reset();
+    if (rescheduleTimeslot) rescheduleTimeslot.innerHTML = '<option value="">Select a timeslot</option>';
+    if (quantityField) quantityField.style.display = 'none';
+    if (timeslotField) timeslotField.style.display = 'none';
+}
+
+async function loadTimeslotAvailability(resourceId, bookingDate, currentSlotId = null) {
+    if (!rescheduleTimeslot) return;
+    rescheduleTimeslot.innerHTML = '<option value="">Select a timeslot</option>';
+    if (!resourceId || !bookingDate) return;
+
+    try {
+        const res = await fetch(`/api/resources/${resourceId}/availability?date=${encodeURIComponent(bookingDate)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to load availability');
+
+        const bookedIds = new Set((data.booked || []).map((slot) => slot.id));
+        const combined = [...(data.available || []), ...(data.booked || [])];
+        if (!combined.length) {
+            rescheduleTimeslot.innerHTML = '<option value="" disabled>No timeslots for this date</option>';
+            return;
+        }
+
+        const options = ['<option value="">Select a timeslot</option>'];
+        combined.forEach((slot) => {
+            const isCurrent = currentSlotId && Number(slot.id) === Number(currentSlotId);
+            const disabled = bookedIds.has(slot.id) && !isCurrent;
+            options.push(
+                `<option value="${slot.id}" ${disabled ? 'disabled' : ''}>${slotLabel(slot)}${
+                    disabled ? ' (booked)' : ''
+                }</option>`
+            );
+        });
+        rescheduleTimeslot.innerHTML = options.join('');
+        rescheduleTimeslot.value = '';
+    } catch (err) {
+        console.error(err);
+        rescheduleTimeslot.innerHTML = '<option value="" disabled>Availability unavailable</option>';
+    }
+}
+
+async function loadEquipmentAvailability(resourceId, bookingDate, currentQuantity = 1) {
+    if (!rescheduleQuantity) return;
+    rescheduleQuantity.value = currentQuantity || 1;
+    rescheduleQuantity.min = 1;
+    rescheduleQuantity.removeAttribute('max');
+    if (!resourceId || !bookingDate) return;
+
+    try {
+        const res = await fetch(`/api/resources/${resourceId}/availability?date=${encodeURIComponent(bookingDate)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to load availability');
+        const remaining = Number(data.remainingQuantity ?? 0);
+        const max = Math.max(remaining + Number(currentQuantity || 1), 1);
+        rescheduleQuantity.max = max;
+        if (Number(rescheduleQuantity.value) > max) {
+            rescheduleQuantity.value = max;
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function openRescheduleModal(booking) {
+    activeBooking = booking;
+    if (!booking || !rescheduleModal) return;
+
+    rescheduleTitle.textContent = `Reschedule Booking #${booking.booking_id}`;
+    rescheduleResource.textContent = resourceLabel(booking);
+    rescheduleDate.value = booking.booking_date || '';
+
+    const type = booking.booking_type;
+    const resourceId = booking.resource?.id || booking.room?.id || booking.lab?.id || booking.equipment?.id;
+
+    if (type === 'equipment') {
+        if (timeslotField) timeslotField.style.display = 'none';
+        if (quantityField) quantityField.style.display = 'flex';
+        loadEquipmentAvailability(resourceId, rescheduleDate.value, booking.equipment?.quantity || 1);
+    } else {
+        if (timeslotField) timeslotField.style.display = 'flex';
+        if (quantityField) quantityField.style.display = 'none';
+        rescheduleTimeslot.innerHTML = '<option value="">Select a timeslot</option>';
+        loadTimeslotAvailability(
+            resourceId,
+            rescheduleDate.value,
+            booking.room?.timeslot_id || booking.lab?.timeslot_id || null
+        );
+    }
+
+    rescheduleModal.classList.add('is-open');
+    rescheduleModal.setAttribute('aria-hidden', 'false');
 }
 
 function renderBookingList(list, grid, emptyEl, { showActions = false } = {}) {
@@ -217,23 +332,34 @@ async function cancelBooking(id) {
     await loadBookings();
 }
 
-async function rescheduleBooking(booking) {
-    const bookingDate = prompt('New date (YYYY-MM-DD):', booking.booking_date);
-    if (!bookingDate) return;
+async function submitReschedule(event) {
+    if (event) event.preventDefault();
+    if (!activeBooking) return;
 
-    const payload = { bookingDate };
-
-    if (booking.booking_type === 'room' || booking.booking_type === 'lab') {
-        const timeslotId = prompt('New timeslot id (see availability page):', booking.room?.timeslot_id || booking.lab?.timeslot_id || '');
-        if (!timeslotId) return alert('A timeslot id is required.');
-        payload.timeslotId = timeslotId;
-    } else if (booking.booking_type === 'equipment') {
-        const quantity = Number(prompt('Quantity:', booking.equipment?.quantity || 1));
-        if (!quantity || quantity < 1) return alert('Quantity must be at least 1.');
-        payload.quantity = quantity;
+    const bookingDate = rescheduleDate?.value;
+    if (!bookingDate) {
+        alert('Please select a new date.');
+        return;
     }
 
-    const response = await fetch(`/api/bookings/${booking.booking_id}/reschedule`, {
+    const payload = { bookingDate };
+    if (activeBooking.booking_type === 'equipment') {
+        const quantity = Number(rescheduleQuantity?.value || activeBooking.equipment?.quantity || 1);
+        if (!quantity || quantity < 1) {
+            alert('Quantity must be at least 1.');
+            return;
+        }
+        payload.quantity = quantity;
+    } else {
+        const timeslotId = rescheduleTimeslot?.value;
+        if (!timeslotId) {
+            alert('Please choose a timeslot.');
+            return;
+        }
+        payload.timeslotId = timeslotId;
+    }
+
+    const response = await fetch(`/api/bookings/${activeBooking.booking_id}/reschedule`, {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify(payload),
@@ -248,6 +374,7 @@ async function rescheduleBooking(booking) {
         throw new Error(data.message || 'Failed to update booking');
     }
 
+    closeRescheduleModal();
     await loadBookings();
 }
 
@@ -263,7 +390,7 @@ function handleGridClick(event) {
         cancelBooking(bookingId).catch((err) => alert(err.message));
     }
     if (action === 'reschedule') {
-        rescheduleBooking(booking).catch((err) => alert(err.message));
+        openRescheduleModal(booking);
     }
 }
 
@@ -279,6 +406,37 @@ document.addEventListener('DOMContentLoaded', () => {
     applyFilters.addEventListener('click', () => renderSections(bookingsCache));
     clearFiltersBtn.addEventListener('click', handleClearFilters);
     upcomingGrid.addEventListener('click', handleGridClick);
+
+    if (closeReschedule) closeReschedule.addEventListener('click', closeRescheduleModal);
+    if (rescheduleModal) {
+        rescheduleModal.addEventListener('click', (event) => {
+            if (event.target === rescheduleModal) closeRescheduleModal();
+        });
+    }
+    if (rescheduleDate) {
+        rescheduleDate.addEventListener('change', () => {
+            if (!activeBooking) return;
+            const resourceId =
+                activeBooking.resource?.id ||
+                activeBooking.room?.id ||
+                activeBooking.lab?.id ||
+                activeBooking.equipment?.id;
+            if (activeBooking.booking_type === 'equipment') {
+                loadEquipmentAvailability(resourceId, rescheduleDate.value, activeBooking.equipment?.quantity || 1);
+            } else {
+                loadTimeslotAvailability(
+                    resourceId,
+                    rescheduleDate.value,
+                    activeBooking.room?.timeslot_id || activeBooking.lab?.timeslot_id || null
+                );
+            }
+        });
+    }
+    if (rescheduleForm) {
+        rescheduleForm.addEventListener('submit', (event) => {
+            submitReschedule(event).catch((err) => alert(err.message));
+        });
+    }
 
     clearMyBookingsBtn.addEventListener('click', () => {
         const { upcoming } = splitBookings(bookingsCache);

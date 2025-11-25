@@ -13,8 +13,10 @@
     const slotInput = document.getElementById("bookingSlot");
     const quantityInput = document.getElementById("bookingQuantity");
     const panelTitle = document.getElementById("bookingPanelTitle");
+    const submitBtn = form?.querySelector('button[type="submit"]');
 
     let editingId = null;
+    let editingBooking = null;
     let resourcesCache = [];
 
     function normalizeStatus(booking) {
@@ -229,6 +231,7 @@
     function openPanel(booking) {
         if (!editPanel || !booking) return;
         editingId = booking.booking_id;
+        editingBooking = booking;
         panelTitle.textContent = `Edit Booking #${booking.booking_id}`;
         dateInput.value = formatDate(booking.booking_date) || "";
 
@@ -261,6 +264,7 @@
             editPanel.style.display = "none";
         }
         editingId = null;
+        editingBooking = null;
     }
 
     function buildPayload() {
@@ -269,7 +273,26 @@
         };
 
         if (pageType === "room" || pageType === "lab") {
-            payload.timeslotId = slotInput?.value;
+            const chosenSlot = slotInput?.value;
+            const originalSlot = editingBooking?.room?.timeslot_id || editingBooking?.lab?.timeslot_id || null;
+            const originalDate = formatDate(editingBooking?.booking_date);
+            const originalResourceId =
+                (editingBooking?.room && editingBooking.room.id) ||
+                (editingBooking?.lab && editingBooking.lab.id) ||
+                null;
+            const dateUnchanged = payload.bookingDate && originalDate === payload.bookingDate;
+            const resourceUnchanged =
+                originalResourceId && resourceSelect?.value
+                    ? String(originalResourceId) === String(resourceSelect.value)
+                    : false;
+
+            if (chosenSlot) {
+                payload.timeslotId = Number(chosenSlot);
+            } else if (dateUnchanged && resourceUnchanged && originalSlot) {
+                payload.timeslotId = Number(originalSlot);
+            } else {
+                payload.timeslotId = null;
+            }
         } else if (pageType === "equipment") {
             payload.quantity = Number(quantityInput?.value || 1);
         }
@@ -282,8 +305,14 @@
     }
 
     async function loadTimeslotOptions(resourceId, bookingDate, currentSlotId = null) {
-        if (!slotInput || pageType === "equipment" || !resourceId || !bookingDate) return;
+        if (!slotInput || pageType === "equipment") return;
+        slotInput.disabled = true;
+        if (submitBtn) submitBtn.disabled = true;
         slotInput.innerHTML = '<option value="">Loading slots...</option>';
+        if (!resourceId || !bookingDate) {
+            slotInput.innerHTML = '<option value="" disabled>Select a date and resource</option>';
+            return;
+        }
         try {
             const res = await fetch(`/api/resources/${resourceId}/availability?date=${encodeURIComponent(bookingDate)}`);
             const data = await res.json();
@@ -301,10 +330,13 @@
                 })
                 .join("");
             slotInput.innerHTML = options.join("") + slotInput.innerHTML;
-            slotInput.value = "";
+            slotInput.value = currentSlotId ? String(currentSlotId) : "";
+            slotInput.disabled = false;
+            if (submitBtn) submitBtn.disabled = false;
         } catch (err) {
             console.error(err);
             slotInput.innerHTML = '<option value="" disabled>Availability unavailable</option>';
+            slotInput.disabled = true;
         }
     }
 
@@ -373,7 +405,22 @@
         if (closePanelBtn) closePanelBtn.addEventListener("click", closePanel);
 
         if (pageType !== "equipment") {
-            const reload = () => loadTimeslotOptions(resourceSelect?.value, dateInput?.value);
+            const reload = () => {
+                const originalDate = formatDate(editingBooking?.booking_date);
+                const originalResourceId =
+                    (editingBooking?.room && editingBooking.room.id) ||
+                    (editingBooking?.lab && editingBooking.lab.id) ||
+                    null;
+                const resourceUnchanged =
+                    originalResourceId && resourceSelect?.value
+                        ? String(originalResourceId) === String(resourceSelect.value)
+                        : false;
+                const slotId =
+                    dateInput?.value === originalDate && resourceUnchanged
+                        ? editingBooking?.room?.timeslot_id || editingBooking?.lab?.timeslot_id || null
+                        : null;
+                loadTimeslotOptions(resourceSelect?.value, dateInput?.value, slotId);
+            };
             if (dateInput) dateInput.addEventListener("change", reload);
             if (resourceSelect) resourceSelect.addEventListener("change", reload);
         }
@@ -384,6 +431,14 @@
                 if (!editingId) return;
                 try {
                     const payload = buildPayload();
+                    if ((pageType === "room" || pageType === "lab") && slotInput?.disabled) {
+                        alert("Please wait for timeslots to finish loading.");
+                        return;
+                    }
+                    if ((pageType === "room" || pageType === "lab") && !payload.timeslotId) {
+                        alert("Please select a valid timeslot for the chosen date.");
+                        return;
+                    }
                     await bookingsAPI.rescheduleBooking(editingId, payload);
                     closePanel();
                     await refresh();

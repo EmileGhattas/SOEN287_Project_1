@@ -17,6 +17,28 @@
     let editingId = null;
     let resourcesCache = [];
 
+    function normalizeStatus(booking) {
+        const status = booking.status || "active";
+        const date = booking.booking_date ? new Date(`${booking.booking_date}T00:00:00`) : null;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (status === "active" && date && !Number.isNaN(date.getTime()) && date < today) {
+            return "completed";
+        }
+        return status;
+    }
+
+    function statusLabel(status) {
+        const map = {
+            active: "Active",
+            cancelled: "Cancelled",
+            rescheduled: "Rescheduled",
+            completed: "Completed",
+        };
+        return map[status] || status || "Unknown";
+    }
+
     function getAuthToken() {
         const token = sessionStorage.getItem("token") || localStorage.getItem("token");
         if (token && !sessionStorage.getItem("token")) {
@@ -63,7 +85,11 @@
         async loadBookings() {
             const res = await this.authFetch("/api/bookings");
             if (!res.ok) throw new Error("Unable to load bookings");
-            this.cache = await res.json();
+            const data = await res.json();
+            this.cache = data.map((booking) => ({
+                ...booking,
+                computed_status: normalizeStatus(booking),
+            }));
             return this.cache;
         },
         async updateBooking(id, payload) {
@@ -179,15 +205,21 @@
         if (emptyState) emptyState.style.display = "none";
 
         filtered.forEach((booking) => {
+            const status = booking.computed_status || booking.status || "active";
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td>${booking.booking_id}</td>
                 <td>${formatUserLabel(booking)}</td>
                 <td>${formatDate(booking.booking_date)}</td>
+                <td>${statusLabel(status)}</td>
                 <td>${formatDetails(booking)}</td>
                 <td>
-                    <button class="btn" data-action="edit" data-id="${booking.booking_id}">Edit / Reschedule</button>
-                    <button class="btn btn-danger" data-action="delete" data-id="${booking.booking_id}">Cancel</button>
+                    <button class="btn" data-action="edit" data-id="${booking.booking_id}" ${
+                        status !== "active" ? "disabled" : ""
+                    }>Edit / Reschedule</button>
+                    <button class="btn btn-danger" data-action="delete" data-id="${booking.booking_id}" ${
+                        status !== "active" ? "disabled" : ""
+                    }>Cancel</button>
                 </td>
             `;
             bookingRows.appendChild(tr);
@@ -261,15 +293,15 @@
                 slotInput.innerHTML = '<option value="" disabled>No slots for this date</option>';
                 return;
             }
+            const options = ['<option value="">Select a timeslot</option>'];
             slotInput.innerHTML = combined
                 .map((slot) => {
                     const disabled = slot.is_active === false || (data.booked || []).some((b) => b.id === slot.id);
                     return `<option value="${slot.id}" ${disabled && slot.id !== Number(currentSlotId) ? "disabled" : ""}>${slotLabel(slot)}${disabled && slot.id !== Number(currentSlotId) ? " (booked)" : ""}</option>`;
                 })
                 .join("");
-            if (currentSlotId) {
-                slotInput.value = String(currentSlotId);
-            }
+            slotInput.innerHTML = options.join("") + slotInput.innerHTML;
+            slotInput.value = "";
         } catch (err) {
             console.error(err);
             slotInput.innerHTML = '<option value="" disabled>Availability unavailable</option>';
@@ -307,6 +339,7 @@
         bookingRows.addEventListener("click", async (event) => {
             const target = event.target;
             if (!(target instanceof HTMLElement)) return;
+            if (target.disabled) return;
             const action = target.dataset.action;
             const id = target.dataset.id;
             if (!action || !id) return;

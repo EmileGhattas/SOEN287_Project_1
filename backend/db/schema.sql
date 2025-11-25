@@ -56,7 +56,7 @@ CREATE TABLE bookings (
   booking_date DATE NOT NULL,
   timeslot_id INT NULL,
   quantity INT DEFAULT 1,
-  status ENUM('active','cancelled') DEFAULT 'active',
+  status ENUM('active','cancelled','rescheduled','completed') DEFAULT 'active',
   purpose VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

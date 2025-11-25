@@ -72,14 +72,34 @@ exports.updateBooking = async (req, res) => {
   }
 };
 
-exports.deleteBooking = async (req, res) => {
+exports.rescheduleBooking = async (req, res) => {
   try {
-    const removed = await Booking.deleteBooking(req.params.id, req.user);
-    if (!removed) return res.status(404).json({ message: 'Booking not found' });
-    if (removed === 'FORBIDDEN') return res.status(403).json({ message: 'Not allowed' });
-    return res.status(204).send();
+    const updated = await Booking.rescheduleBooking(req.params.id, req.body || {}, req.user);
+    res.json(updated);
   } catch (err) {
-    res.status(500).json({ message: 'Failed to delete booking' });
+    const map = {
+      NOT_FOUND: 404,
+      FORBIDDEN: 403,
+      RESOURCE_NOT_FOUND: 404,
+      ROOM_CONFLICT: 409,
+      LAB_CONFLICT: 409,
+      EQUIPMENT_UNAVAILABLE: 409,
+      INVALID_TIMESLOT: 400,
+      INVALID_STATUS: 400,
+      RESOURCE_BLACKED_OUT: 409,
+    };
+    res.status(map[err.message] || 500).json({ message: 'Failed to reschedule booking' });
+  }
+};
+
+exports.cancelBooking = async (req, res) => {
+  try {
+    const cancelled = await Booking.cancelBooking(req.params.id, req.user);
+    if (!cancelled) return res.status(404).json({ message: 'Booking not found' });
+    if (cancelled === 'FORBIDDEN') return res.status(403).json({ message: 'Not allowed' });
+    return res.json(cancelled);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to cancel booking' });
   }
 };
 

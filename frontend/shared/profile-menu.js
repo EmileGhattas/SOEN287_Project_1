@@ -53,6 +53,24 @@
     localStorage.removeItem('user');
   }
 
+  function hasAuth() {
+    const user = sessionStorage.getItem('user') || localStorage.getItem('user');
+    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+    return Boolean(user && token);
+  }
+
+  function guardBookingLinks() {
+    const bookingLinks = document.querySelectorAll('a[href="/booking"]');
+    bookingLinks.forEach((link) => {
+      link.addEventListener('click', (event) => {
+        if (!hasAuth()) {
+          event.preventDefault();
+          window.location.href = '/auth/signin.html';
+        }
+      });
+    });
+  }
+
   function resolvePath(path) {
     if (!path) {
       return '#';
@@ -147,6 +165,8 @@
         `;
         renderAdminNav(false);
       }
+
+      guardBookingLinks();
     }
 
     updateMenu();

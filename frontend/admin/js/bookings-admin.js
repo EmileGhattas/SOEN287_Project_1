@@ -77,8 +77,19 @@
             }
             return res.json();
         },
+        async rescheduleBooking(id, payload) {
+            const res = await this.authFetch(`/api/bookings/${id}/reschedule`, {
+                method: "POST",
+                body: JSON.stringify(payload),
+            });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.message || "Failed to update booking");
+            }
+            return res.json();
+        },
         async deleteBooking(id) {
-            const res = await this.authFetch(`/api/bookings/${id}`, { method: "DELETE" });
+            const res = await this.authFetch(`/api/bookings/${id}/cancel`, { method: "POST" });
             if (!res.ok && res.status !== 204) {
                 const data = await res.json().catch(() => ({}));
                 throw new Error(data.message || "Failed to delete booking");
@@ -111,12 +122,42 @@
         return bookings.filter((b) => b.booking_type === pageType);
     }
 
+    function formatDate(value) {
+        if (!value) return "-";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return value;
+        return date.toISOString().slice(0, 10);
+    }
+
+    function formatTime(value) {
+        if (!value) return "";
+        if (typeof value === "string") {
+            const match = value.match(/^(\d{2}:\d{2})/);
+            if (match) return match[1];
+        }
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return value;
+        return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function formatUserLabel(booking) {
+        return (
+            booking.user?.username ||
+            booking.user?.email ||
+            booking.user_name ||
+            booking.user_email ||
+            "Unknown"
+        );
+    }
+
     function formatDetails(booking) {
         if (booking.booking_type === "room" && booking.room) {
-            return `${booking.room.name || "Room"} – ${booking.room.label || `${booking.room.start_time} to ${booking.room.end_time}`}`;
+            const label = booking.room.label || `${formatTime(booking.room.start_time)} to ${formatTime(booking.room.end_time)}`;
+            return `${booking.room.name || "Room"} – ${label}`;
         }
         if (booking.booking_type === "lab" && booking.lab) {
-            return `${booking.lab.name || "Lab"} – ${booking.lab.label || `${booking.lab.start_time} to ${booking.lab.end_time}`}`;
+            const label = booking.lab.label || `${formatTime(booking.lab.start_time)} to ${formatTime(booking.lab.end_time)}`;
+            return `${booking.lab.name || "Lab"} – ${label}`;
         }
         if (booking.booking_type === "equipment" && booking.equipment) {
             return `${booking.equipment.name || "Equipment"} (Qty: ${booking.equipment.quantity})`;
@@ -141,8 +182,8 @@
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td>${booking.booking_id}</td>
-                <td>${booking.user_name || booking.user_email}</td>
-                <td>${booking.booking_date}</td>
+                <td>${formatUserLabel(booking)}</td>
+                <td>${formatDate(booking.booking_date)}</td>
                 <td>${formatDetails(booking)}</td>
                 <td>
                     <button class="btn" data-action="edit" data-id="${booking.booking_id}">Edit / Reschedule</button>
@@ -157,7 +198,7 @@
         if (!editPanel || !booking) return;
         editingId = booking.booking_id;
         panelTitle.textContent = `Edit Booking #${booking.booking_id}`;
-        dateInput.value = booking.booking_date || "";
+        dateInput.value = formatDate(booking.booking_date) || "";
 
         if (resourceSelect) {
             resourceSelect.value = "";
@@ -173,7 +214,7 @@
 
         if (slotInput && (booking.room || booking.lab)) {
             const slotId = booking.room?.timeslot_id || booking.lab?.timeslot_id;
-            loadTimeslotOptions(resourceSelect?.value, booking.booking_date, slotId);
+            loadTimeslotOptions(resourceSelect?.value, formatDate(booking.booking_date), slotId);
         }
 
         if (quantityInput && booking.equipment) {
@@ -310,7 +351,7 @@
                 if (!editingId) return;
                 try {
                     const payload = buildPayload();
-                    await bookingsAPI.updateBooking(editingId, payload);
+                    await bookingsAPI.rescheduleBooking(editingId, payload);
                     closePanel();
                     await refresh();
                 } catch (err) {

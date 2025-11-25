@@ -58,12 +58,23 @@
       </div>
     </div>
 
-    <section id="bookingsEmpty" class="bookings-empty" style="display:none;">
-      <strong>No bookings to show.</strong>
-      <p>When you reserve a room or equipment, it will appear here. Try booking from <a href="/rooms">Rooms</a> or <a href="/equipment">Equipment</a>.</p>
+    <section class="bookings-section">
+      <h3>Upcoming Bookings</h3>
+      <section id="upcomingEmpty" class="bookings-empty" style="display:none;">
+        <strong>No upcoming bookings.</strong>
+        <p>When you reserve a room or equipment, it will appear here. Try booking from <a href="/rooms">Rooms</a> or <a href="/equipment">Equipment</a>.</p>
+      </section>
+      <section id="upcomingGrid" class="bookings-grid" aria-live="polite"></section>
     </section>
 
-    <section id="bookingsGrid" class="bookings-grid" aria-live="polite"></section>
+    <section class="bookings-section">
+      <h3>Past Bookings</h3>
+      <section id="pastEmpty" class="bookings-empty" style="display:none;">
+        <strong>No past bookings to show.</strong>
+        <p>Cancelled, rescheduled, and completed bookings will appear here.</p>
+      </section>
+      <section id="pastGrid" class="bookings-grid" aria-live="polite"></section>
+    </section>
   </main>
 
   <footer class="contact">

@@ -92,12 +92,12 @@ exports.rescheduleBooking = async (req, res) => {
   }
 };
 
-exports.deleteBooking = async (req, res) => {
+exports.cancelBooking = async (req, res) => {
   try {
-    const removed = await Booking.deleteBooking(req.params.id, req.user);
-    if (!removed) return res.status(404).json({ message: 'Booking not found' });
-    if (removed === 'FORBIDDEN') return res.status(403).json({ message: 'Not allowed' });
-    return res.status(204).send();
+    const cancelled = await Booking.cancelBooking(req.params.id, req.user);
+    if (!cancelled) return res.status(404).json({ message: 'Booking not found' });
+    if (cancelled === 'FORBIDDEN') return res.status(403).json({ message: 'Not allowed' });
+    return res.json(cancelled);
   } catch (err) {
     res.status(500).json({ message: 'Failed to cancel booking' });
   }

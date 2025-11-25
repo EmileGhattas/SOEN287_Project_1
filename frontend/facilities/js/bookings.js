@@ -189,8 +189,8 @@ async function cancelBooking(id) {
     const confirmed = confirm('Cancel this booking?');
     if (!confirmed) return;
 
-    const response = await fetch(`/api/bookings/${id}`, {
-        method: 'DELETE',
+    const response = await fetch(`/api/bookings/${id}/cancel`, {
+        method: 'POST',
         headers: authHeaders(),
     });
 

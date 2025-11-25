@@ -402,13 +402,13 @@ async function rescheduleBooking(id, payload, user) {
   }
 }
 
-async function deleteBooking(id, user) {
+async function cancelBooking(id, user) {
   const existing = await findById(id);
   if (!existing) return false;
   if (!user?.is_admin && existing.user_id !== user?.id) return 'FORBIDDEN';
 
   await db.execute('UPDATE bookings SET status = ? WHERE id = ?', ['cancelled', id]);
-  return true;
+  return findById(id);
 }
 
 module.exports = {
@@ -419,6 +419,6 @@ module.exports = {
   findById,
   updateBooking,
   rescheduleBooking,
-  deleteBooking,
+  cancelBooking,
   listTimeslots,
 };

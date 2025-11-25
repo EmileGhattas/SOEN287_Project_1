@@ -78,7 +78,7 @@
             return res.json();
         },
         async deleteBooking(id) {
-            const res = await this.authFetch(`/api/bookings/${id}`, { method: "DELETE" });
+            const res = await this.authFetch(`/api/bookings/${id}/cancel`, { method: "POST" });
             if (!res.ok && res.status !== 204) {
                 const data = await res.json().catch(() => ({}));
                 throw new Error(data.message || "Failed to delete booking");

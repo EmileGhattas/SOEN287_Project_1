@@ -113,6 +113,21 @@ margin: 30px;
     color: #333;
 }
 
+.resource-thumb {
+    width: 70px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.input-error {
+    color: #c0392b;
+    font-size: 0.9rem;
+    margin-top: -8px;
+    margin-bottom: 10px;
+}
+
 
 
 

@@ -345,20 +345,49 @@ async function rescheduleBooking(id, payload, user) {
   const existing = await findById(id);
   if (!existing) throw new Error('NOT_FOUND');
   if (!user?.is_admin && existing.user_id !== user?.id) throw new Error('FORBIDDEN');
-  const currentStatus = existing.raw_status || existing.status;
-  if (currentStatus && currentStatus !== 'active') throw new Error('INVALID_STATUS');
+  const currentStatus = existing.raw_status ?? existing.status;
+  if (currentStatus !== 'active') throw new Error('INVALID_STATUS');
 
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
 
-    const resourceId = existing.resource?.id || existing.room?.id || existing.lab?.id || existing.equipment?.id;
-    const resource = await getResourceById(resourceId, connection);
-    if (!resource) throw new Error('RESOURCE_NOT_FOUND');
+    const originalResourceId = existing.resource?.id || existing.room?.id || existing.lab?.id || existing.equipment?.id;
+    const originalResource = await getResourceById(originalResourceId, connection);
+    if (!originalResource) throw new Error('RESOURCE_NOT_FOUND');
+
+    let resource = originalResource;
+    if (user?.is_admin && payload.resourceId) {
+      const candidate = await getResourceById(payload.resourceId, connection);
+      if (!candidate) throw new Error('RESOURCE_NOT_FOUND');
+      if (candidate.type !== originalResource.type) throw new Error('INVALID_RESOURCE_TYPE');
+      resource = candidate;
+    }
 
     const nextDate = payload.bookingDate || existing.booking_date;
-    const nextTimeslot = resource.type === 'equipment' ? null : payload.timeslotId || existing.room?.timeslot_id || existing.lab?.timeslot_id;
-    const nextQuantity = resource.type === 'equipment' ? Number(payload.quantity || existing.equipment?.quantity || 1) : 1;
+    const resourceChanged = resource.id !== originalResource.id;
+    let nextTimeslot = null;
+    if (resource.type !== 'equipment') {
+      const providedTimeslot =
+        payload.timeslotId === '' || payload.timeslotId === undefined || payload.timeslotId === null
+          ? undefined
+          : Number(payload.timeslotId);
+      const shouldUseProvided = providedTimeslot !== undefined;
+      if (resourceChanged && !shouldUseProvided) throw new Error('MISSING_FIELDS');
+      if (shouldUseProvided) {
+        if (!Number.isFinite(providedTimeslot)) throw new Error('MISSING_FIELDS');
+        nextTimeslot = providedTimeslot;
+      } else {
+        const existingSlot = existing.room?.timeslot_id || existing.lab?.timeslot_id;
+        if (!existingSlot) throw new Error('MISSING_FIELDS');
+        nextTimeslot = existingSlot;
+      }
+    }
+    const rawQuantity =
+      payload.quantity === '' || payload.quantity === undefined || payload.quantity === null
+        ? existing.equipment?.quantity || 1
+        : payload.quantity;
+    const nextQuantity = resource.type === 'equipment' ? Number(rawQuantity || 1) : 1;
 
     const [blackouts] = await connection.execute(
       'SELECT 1 FROM resource_blackouts WHERE resource_id = ? AND blackout_date = ? LIMIT 1',
@@ -367,6 +396,7 @@ async function rescheduleBooking(id, payload, user) {
     if (blackouts.length) throw new Error('RESOURCE_BLACKED_OUT');
 
     if (resource.type === 'equipment') {
+      if (!Number.isFinite(nextQuantity) || nextQuantity < 1) throw new Error('MISSING_FIELDS');
       await ensureQuantity(connection, resource, nextDate, nextQuantity, id);
     } else {
       if (!nextTimeslot) throw new Error('MISSING_FIELDS');

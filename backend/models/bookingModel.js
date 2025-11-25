@@ -57,14 +57,57 @@ async function getAvailability(resourceId, date, connection = db) {
   };
 }
 
+function formatDateOnly(value) {
+  if (!value) return value;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toISOString().slice(0, 10);
+}
+
+function formatTime(value) {
+  if (!value) return value;
+  if (typeof value === 'string') {
+    const match = value.match(/^(\d{2}:\d{2})/);
+    if (match) return match[1];
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toISOString().substring(11, 16);
+}
+
 async function mapBookingRow(row) {
   if (!row) return null;
+
+  const user = row.user_id
+    ? {
+        id: row.user_id,
+        username: row.user_username || row.username || null,
+        email: row.user_email || row.email || null,
+      }
+    : null;
+
+  const resource = row.resource_id
+    ? {
+        id: row.resource_id,
+        name: row.resource_name,
+        type: row.type,
+        description: row.resource_description,
+        capacity: row.resource_capacity,
+        quantity: row.resource_quantity,
+        image_path: row.image_path,
+      }
+    : null;
+
   const base = {
     booking_id: row.id,
     booking_type: row.type,
-    booking_date: row.booking_date,
-    status: row.status,
+    booking_date: formatDateOnly(row.booking_date),
+    status: normalizeBookingStatus(row.status, row.booking_date),
     user_id: row.user_id,
+    user,
+    user_name: user?.username,
+    user_email: user?.email,
+    resource,
   };
 
   if (row.type === 'room') {
@@ -73,10 +116,13 @@ async function mapBookingRow(row) {
       room: {
         id: row.resource_id,
         name: row.resource_name,
+        description: row.resource_description,
+        capacity: row.resource_capacity,
+        image_path: row.image_path,
         timeslot_id: row.timeslot_id,
         label: row.timeslot_label,
-        start_time: row.start_time,
-        end_time: row.end_time,
+        start_time: formatTime(row.start_time),
+        end_time: formatTime(row.end_time),
       },
     };
   }
@@ -86,10 +132,13 @@ async function mapBookingRow(row) {
       lab: {
         id: row.resource_id,
         name: row.resource_name,
+        description: row.resource_description,
+        capacity: row.resource_capacity,
+        image_path: row.image_path,
         timeslot_id: row.timeslot_id,
         label: row.timeslot_label,
-        start_time: row.start_time,
-        end_time: row.end_time,
+        start_time: formatTime(row.start_time),
+        end_time: formatTime(row.end_time),
       },
     };
   }
@@ -98,16 +147,36 @@ async function mapBookingRow(row) {
     equipment: {
       id: row.resource_id,
       name: row.resource_name,
+      description: row.resource_description,
+      capacity: row.resource_capacity,
+      image_path: row.image_path,
+      total_quantity: row.resource_quantity,
       quantity: row.quantity,
     },
   };
 }
 
+function normalizeBookingStatus(status, bookingDate) {
+  if (!status) return 'active';
+  if (status === 'active' && bookingDate) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const date = new Date(bookingDate);
+    if (!Number.isNaN(date.getTime()) && date < today) {
+      return 'completed';
+    }
+  }
+  return status;
+}
+
 async function listForUser(userId) {
   const [rows] = await db.execute(
-    `SELECT b.*, r.name AS resource_name, r.type, t.label AS timeslot_label, t.start_time, t.end_time
+    `SELECT b.*, r.name AS resource_name, r.type, r.description AS resource_description, r.capacity AS resource_capacity,
+            r.quantity AS resource_quantity, r.image_path, t.label AS timeslot_label, t.start_time, t.end_time,
+            u.username AS user_username, u.email AS user_email
        FROM bookings b
        JOIN resources r ON r.id = b.resource_id
+       JOIN users u ON u.id = b.user_id
        LEFT JOIN timeslots t ON t.id = b.timeslot_id
       WHERE b.user_id = ?
       ORDER BY b.created_at DESC`,
@@ -118,9 +187,12 @@ async function listForUser(userId) {
 
 async function listAll() {
   const [rows] = await db.execute(
-    `SELECT b.*, r.name AS resource_name, r.type, t.label AS timeslot_label, t.start_time, t.end_time
+    `SELECT b.*, r.name AS resource_name, r.type, r.description AS resource_description, r.capacity AS resource_capacity,
+            r.quantity AS resource_quantity, r.image_path, t.label AS timeslot_label, t.start_time, t.end_time,
+            u.username AS user_username, u.email AS user_email
        FROM bookings b
        JOIN resources r ON r.id = b.resource_id
+       JOIN users u ON u.id = b.user_id
        LEFT JOIN timeslots t ON t.id = b.timeslot_id
       ORDER BY b.created_at DESC`
   );
@@ -129,9 +201,12 @@ async function listAll() {
 
 async function findById(id, connection = db) {
   const [rows] = await connection.execute(
-    `SELECT b.*, r.name AS resource_name, r.type, t.label AS timeslot_label, t.start_time, t.end_time
+    `SELECT b.*, r.name AS resource_name, r.type, r.description AS resource_description, r.capacity AS resource_capacity,
+            r.quantity AS resource_quantity, r.image_path, t.label AS timeslot_label, t.start_time, t.end_time,
+            u.username AS user_username, u.email AS user_email
        FROM bookings b
        JOIN resources r ON r.id = b.resource_id
+       JOIN users u ON u.id = b.user_id
        LEFT JOIN timeslots t ON t.id = b.timeslot_id
       WHERE b.id = ? LIMIT 1`,
     [id]
@@ -265,12 +340,75 @@ async function updateBooking(id, payload, user) {
   }
 }
 
-async function deleteBooking(id, user) {
+async function rescheduleBooking(id, payload, user) {
+  const existing = await findById(id);
+  if (!existing) throw new Error('NOT_FOUND');
+  if (!user?.is_admin && existing.user_id !== user?.id) throw new Error('FORBIDDEN');
+  if (existing.status && existing.status !== 'active') throw new Error('INVALID_STATUS');
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const resourceId = existing.resource?.id || existing.room?.id || existing.lab?.id || existing.equipment?.id;
+    const resource = await getResourceById(resourceId, connection);
+    if (!resource) throw new Error('RESOURCE_NOT_FOUND');
+
+    const nextDate = payload.bookingDate || existing.booking_date;
+    const nextTimeslot = resource.type === 'equipment' ? null : payload.timeslotId || existing.room?.timeslot_id || existing.lab?.timeslot_id;
+    const nextQuantity = resource.type === 'equipment' ? Number(payload.quantity || existing.equipment?.quantity || 1) : 1;
+
+    const [blackouts] = await connection.execute(
+      'SELECT 1 FROM resource_blackouts WHERE resource_id = ? AND blackout_date = ? LIMIT 1',
+      [resource.id, nextDate]
+    );
+    if (blackouts.length) throw new Error('RESOURCE_BLACKED_OUT');
+
+    if (resource.type === 'equipment') {
+      await ensureQuantity(connection, resource, nextDate, nextQuantity, id);
+    } else {
+      if (!nextTimeslot) throw new Error('MISSING_FIELDS');
+      await ensureSlotAvailable(connection, resource, nextDate, nextTimeslot, id);
+    }
+
+    await connection.execute('UPDATE bookings SET status = ? WHERE id = ?', ['rescheduled', id]);
+
+    const insertPayload = {
+      user_id: existing.user_id,
+      resource_id: resource.id,
+      booking_date: nextDate,
+      timeslot_id: resource.type === 'equipment' ? null : nextTimeslot,
+      quantity: resource.type === 'equipment' ? nextQuantity : 1,
+      status: 'active',
+      purpose: payload.purpose || existing.purpose || null,
+    };
+
+    const columns = Object.keys(insertPayload);
+    const values = Object.values(insertPayload);
+    const placeholders = columns.map(() => '?').join(',');
+
+    const [result] = await connection.execute(
+      `INSERT INTO bookings (${columns.join(',')}) VALUES (${placeholders})`,
+      values
+    );
+
+    await connection.commit();
+    return findById(result.insertId, connection);
+  } catch (err) {
+    await connection.rollback();
+    throw err;
+  } finally {
+    connection.release();
+  }
+}
+
+async function cancelBooking(id, user) {
   const existing = await findById(id);
   if (!existing) return false;
   if (!user?.is_admin && existing.user_id !== user?.id) return 'FORBIDDEN';
-  await db.execute('DELETE FROM bookings WHERE id = ?', [id]);
-  return true;
+
+  await db.execute('UPDATE bookings SET status = ? WHERE id = ?', ['cancelled', id]);
+  return findById(id);
 }
 
 module.exports = {
@@ -280,6 +418,7 @@ module.exports = {
   listAll,
   findById,
   updateBooking,
-  deleteBooking,
+  rescheduleBooking,
+  cancelBooking,
   listTimeslots,
 };

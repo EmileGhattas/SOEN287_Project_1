@@ -221,6 +221,11 @@ function renderResources() {
             const imageSrc = hasImage ? resolveImagePath(rawImagePath) : null;
             const quantityDisplay = resource.current_quantity ?? resource.quantity ?? "-";
             const capacityDisplay = resource.capacity ?? "-";
+            const availableQuantity = resource.current_quantity ?? Math.max((resource.quantity ?? 0) - bookingCount, 0);
+            const usageContent =
+                type === 'equipment'
+                    ? `<div>Available: ${availableQuantity}</div>${blackoutCount !== undefined ? `<div>Blackouts: ${blackoutCount}</div>` : ''}`
+                    : `<div>Bookings: ${bookingCount}</div><div>Blackouts: ${blackoutCount}</div>`;
             row.innerHTML = `
                 <td>${resource.name}</td>
                 <td>${hasImage ? `<img class="resource-thumb" src="${imageSrc}" alt="${resource.name} image">` : "not provided"}</td>
@@ -228,8 +233,7 @@ function renderResources() {
                 <td>${type === 'equipment' ? quantityDisplay : capacityDisplay}</td>
                 <td>${resource.type || "-"}</td>
                 <td>
-                    <div>Bookings: ${bookingCount}</div>
-                    <div>Blackouts: ${blackoutCount}</div>
+                    ${usageContent}
                 </td>
                 <td>
                     <button class="btn edit" data-action="edit" data-id="${resource.id || resource.resource_id}">Edit</button>

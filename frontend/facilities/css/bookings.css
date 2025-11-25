@@ -44,8 +44,16 @@ main.page-wrap {
     justify-content: center;
     grid-template-columns: repeat(1, 300px);
     gap: 12px;
-    margin-bottom: 20px;
+    margin: 10px 0 20px 0;
     padding: 0;
+}
+
+.bookings-section {
+    margin-bottom: 32px;
+}
+
+.bookings-section h3 {
+    margin: 0 0 12px 0;
 }
 
 .booking-card {

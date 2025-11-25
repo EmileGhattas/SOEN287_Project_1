@@ -345,8 +345,8 @@ async function rescheduleBooking(id, payload, user) {
   const existing = await findById(id);
   if (!existing) throw new Error('NOT_FOUND');
   if (!user?.is_admin && existing.user_id !== user?.id) throw new Error('FORBIDDEN');
-  const currentStatus = existing.raw_status || existing.status;
-  if (currentStatus && currentStatus !== 'active') throw new Error('INVALID_STATUS');
+  const currentStatus = existing.raw_status ?? existing.status;
+  if (currentStatus !== 'active') throw new Error('INVALID_STATUS');
 
   const connection = await db.getConnection();
   try {
@@ -366,16 +366,23 @@ async function rescheduleBooking(id, payload, user) {
 
     const nextDate = payload.bookingDate || existing.booking_date;
     const resourceChanged = resource.id !== originalResource.id;
-    const providedTimeslot = payload.timeslotId === '' ? null : payload.timeslotId;
-    const hasProvidedTimeslot = providedTimeslot !== undefined && providedTimeslot !== null;
-    const nextTimeslot =
-      resource.type === 'equipment'
-        ? null
-        : hasProvidedTimeslot
-          ? Number(providedTimeslot)
-          : !resourceChanged
-            ? existing.room?.timeslot_id || existing.lab?.timeslot_id
-            : null;
+    let nextTimeslot = null;
+    if (resource.type !== 'equipment') {
+      const providedTimeslot =
+        payload.timeslotId === '' || payload.timeslotId === undefined || payload.timeslotId === null
+          ? undefined
+          : Number(payload.timeslotId);
+      const shouldUseProvided = providedTimeslot !== undefined;
+      if (resourceChanged && !shouldUseProvided) throw new Error('MISSING_FIELDS');
+      if (shouldUseProvided) {
+        if (!Number.isFinite(providedTimeslot)) throw new Error('MISSING_FIELDS');
+        nextTimeslot = providedTimeslot;
+      } else {
+        const existingSlot = existing.room?.timeslot_id || existing.lab?.timeslot_id;
+        if (!existingSlot) throw new Error('MISSING_FIELDS');
+        nextTimeslot = existingSlot;
+      }
+    }
     const rawQuantity =
       payload.quantity === '' || payload.quantity === undefined || payload.quantity === null
         ? existing.equipment?.quantity || 1

@@ -14,9 +14,20 @@ async function ensureResourceTimeslots(resourceId, type, connection = db) {
   }
 }
 
-async function listResources() {
+async function listResources(whereClause = '', params = []) {
   const [rows] = await db.execute(
-    `SELECT r.id, r.name, r.type, r.description, r.location, r.capacity, r.quantity, r.image_path,
+    `SELECT r.id,
+            r.name,
+            r.type,
+            r.description,
+            r.location,
+            CASE WHEN r.type IN ('room', 'lab') THEN r.capacity ELSE NULL END AS capacity,
+            CASE WHEN r.type = 'equipment' THEN r.quantity ELSE NULL END AS quantity,
+            CASE WHEN r.type = 'equipment'
+                 THEN GREATEST(COALESCE(r.quantity, 0) - COALESCE(ab.quantity_sum, 0), 0)
+                 ELSE NULL
+            END AS current_quantity,
+            r.image_path,
             CASE WHEN r.type = 'equipment'
                  THEN COALESCE(ab.quantity_sum, 0)
                  ELSE COALESCE(ab.booking_count, 0)
@@ -36,7 +47,9 @@ async function listResources() {
                 FROM resource_blackouts
                GROUP BY resource_id
             ) ro ON ro.resource_id = r.id
-      ORDER BY r.name`
+      ${whereClause}
+      ORDER BY r.name`,
+    params
   );
   return rows;
 }
@@ -55,7 +68,8 @@ async function createResource(payload) {
   );
   const resource = await getResourceById(result.insertId);
   await ensureResourceTimeslots(resource.id, resource.type);
-  return resource;
+  const [withAggregates] = await listResources('WHERE r.id = ?', [resource.id]);
+  return withAggregates || resource;
 }
 
 async function updateResource(id, payload) {
@@ -76,7 +90,8 @@ async function updateResource(id, payload) {
     [fields.name, fields.type, fields.description, fields.location, fields.capacity, fields.quantity, fields.image_path, id]
   );
   await ensureResourceTimeslots(id, fields.type);
-  return getResourceById(id);
+  const [withAggregates] = await listResources('WHERE r.id = ?', [id]);
+  return withAggregates || (await getResourceById(id));
 }
 
 async function deleteResource(id) {

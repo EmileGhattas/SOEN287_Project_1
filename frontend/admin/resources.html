@@ -48,20 +48,59 @@
 
     <button class="btn" id="addResourceBtn">Add Resource</button>
 
-    <table class="resource-table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Image</th>
-                <th>Location</th>
-                <th>Capacity</th>
-                <th>Type</th>
-                <th>Usage</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="resourceList"></tbody>
-    </table>
+    <section class="resource-section">
+        <h2 class="section-title">Rooms</h2>
+        <table class="resource-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Image</th>
+                    <th>Location</th>
+                    <th>Capacity</th>
+                    <th>Type</th>
+                    <th>Usage</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="roomResourceList"></tbody>
+        </table>
+    </section>
+
+    <section class="resource-section">
+        <h2 class="section-title">Labs</h2>
+        <table class="resource-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Image</th>
+                    <th>Location</th>
+                    <th>Capacity</th>
+                    <th>Type</th>
+                    <th>Usage</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="labResourceList"></tbody>
+        </table>
+    </section>
+
+    <section class="resource-section">
+        <h2 class="section-title">Equipment</h2>
+        <table class="resource-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Image</th>
+                    <th>Location</th>
+                    <th>Quantity</th>
+                    <th>Type</th>
+                    <th>Usage</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="equipmentResourceList"></tbody>
+        </table>
+    </section>
 
 </main>
 
@@ -80,8 +119,14 @@
         <label>Location</label>
         <input type="text" id="resLocation">
 
-        <label>Capacity</label>
-        <input type="number" id="resCapacity">
+        <div id="capacityField">
+            <label>Capacity</label>
+            <input type="number" id="resCapacity">
+        </div>
+        <div id="quantityField" style="display:none;">
+            <label>Quantity</label>
+            <input type="number" id="resQuantity">
+        </div>
 
         <label>Type</label>
         <select id="resType">

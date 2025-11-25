@@ -100,6 +100,15 @@ margin: 30px;
     margin-top: 20px;
 }
 
+.resource-section {
+    margin-top: 25px;
+}
+
+.section-title {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 .resource-table th,
 .resource-table td {
     padding: 12px 10px;

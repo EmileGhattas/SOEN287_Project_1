@@ -2,19 +2,24 @@ const addResourceBtn = document.getElementById("addResourceBtn");
 const resourcePanel = document.getElementById("resourcePanel");
 const closeResourcePanel = document.getElementById("closeResourcePanel");
 const saveResourceBtn = document.getElementById("saveResourceBtn");
-const resourceList = document.getElementById("resourceList");
+const roomResourceList = document.getElementById("roomResourceList");
+const labResourceList = document.getElementById("labResourceList");
+const equipmentResourceList = document.getElementById("equipmentResourceList");
 
 const panelTitle = document.getElementById("panelTitle");
 const resName = document.getElementById("resName");
 const resDescription = document.getElementById("resDescription");
 const resLocation = document.getElementById("resLocation");
 const resCapacity = document.getElementById("resCapacity");
+const resQuantity = document.getElementById("resQuantity");
+const capacityField = document.getElementById("capacityField");
+const quantityField = document.getElementById("quantityField");
 const resType = document.getElementById("resType");
 const resImage = document.getElementById("resImage");
 const resImageError = document.getElementById("resImageError");
 
 let editingResourceId = null;
-const isResourcePage = Boolean(resourceList);
+const isResourcePage = Boolean(roomResourceList || labResourceList || equipmentResourceList);
 const placeholderImage = "/assets/image-removebg-preview.png";
 
 function resolveImagePath(path) {
@@ -30,6 +35,17 @@ function validateImagePath(value) {
     if (trimmed.startsWith("/assets/")) return trimmed;
     if (/^https?:\/\//i.test(trimmed)) return trimmed;
     return null;
+}
+
+function toggleCapacityQuantityFields(type) {
+    if (!capacityField || !quantityField) return;
+    if (type === "equipment") {
+        capacityField.style.display = "none";
+        quantityField.style.display = "block";
+    } else {
+        capacityField.style.display = "block";
+        quantityField.style.display = "none";
+    }
 }
 
 function getAuthToken() {
@@ -137,6 +153,7 @@ function openPanel(resource = null) {
         resDescription.value = resource.description || "";
         resLocation.value = resource.location || "";
         resCapacity.value = resource.capacity || "";
+        resQuantity.value = resource.quantity || "";
         resType.value = resource.type || "room";
         resImage.value = resource.image_path || resource.image_url || "";
     } else {
@@ -146,9 +163,12 @@ function openPanel(resource = null) {
         resDescription.value = "";
         resLocation.value = "";
         resCapacity.value = "";
+        resQuantity.value = "";
         resType.value = "room";
         resImage.value = "";
     }
+
+    toggleCapacityQuantityFields(resType.value);
 
     if (resImageError) {
         resImageError.style.display = "none";
@@ -165,45 +185,64 @@ function closePanel() {
 }
 
 function renderResources() {
-    if (!resourceList) return;
+    if (!roomResourceList && !labResourceList && !equipmentResourceList) return;
 
     const resources = resourceAPI.cache || [];
-    resourceList.innerHTML = "";
-
-    if (!resources.length) {
-        resourceList.innerHTML = `
-            <tr><td colspan="6" style="text-align:center; padding:20px; color:#666;">
-                No resources added yet.
-            </td></tr>`;
-        return;
-    }
+    const grouped = {
+        room: [],
+        lab: [],
+        equipment: [],
+    };
 
     resources.forEach((resource) => {
-        const row = document.createElement("tr");
-        const bookingCount =
-            resource.booking_count ?? resource.usage?.bookings ?? 0;
-        const blackoutCount =
-            resource.blackout_count ?? resource.usage?.blackoutDays ?? resource.usage?.blackouts ?? 0;
-        const imageSrc = resolveImagePath(resource.image_path || resource.image_url);
-        row.innerHTML = `
-            <td>${resource.name}</td>
-            <td><img class="resource-thumb" src="${imageSrc}" alt="${resource.name} image"></td>
-            <td>${resource.location || "-"}</td>
-            <td>${resource.capacity ?? "-"}</td>
-            <td>${resource.type || "-"}</td>
-            <td>
-                <div>Bookings: ${bookingCount}</div>
-                <div>Blackouts: ${blackoutCount}</div>
-            </td>
-            <td>
-                <button class="btn edit" data-action="edit" data-id="${resource.id || resource.resource_id}">Edit</button>
-                <button class="btn delete" data-action="delete" data-id="${resource.id || resource.resource_id}">Delete</button>
-                <a class="btn" href="/admin/schedules?resourceId=${resource.id || resource.resource_id}">Availability</a>
-            </td>
-        `;
-
-        resourceList.appendChild(row);
+        if (grouped[resource.type]) {
+            grouped[resource.type].push(resource);
+        }
     });
+
+    const renderGroup = (listEl, list, type) => {
+        if (!listEl) return;
+        listEl.innerHTML = "";
+
+        if (!list.length) {
+            listEl.innerHTML = `
+                <tr><td colspan="7" style="text-align:center; padding:20px; color:#666;">
+                    No ${type}s added yet.
+                </td></tr>`;
+            return;
+        }
+
+        list.forEach((resource) => {
+            const row = document.createElement("tr");
+            const bookingCount = resource.booking_count ?? resource.usage?.bookings ?? 0;
+            const blackoutCount = resource.blackout_count ?? resource.usage?.blackoutDays ?? resource.usage?.blackouts ?? 0;
+            const imageSrc = resolveImagePath(resource.image_path || resource.image_url);
+            const quantityDisplay = resource.current_quantity ?? resource.quantity ?? "-";
+            const capacityDisplay = resource.capacity ?? "-";
+            row.innerHTML = `
+                <td>${resource.name}</td>
+                <td><img class="resource-thumb" src="${imageSrc}" alt="${resource.name} image"></td>
+                <td>${resource.location || "-"}</td>
+                <td>${type === 'equipment' ? quantityDisplay : capacityDisplay}</td>
+                <td>${resource.type || "-"}</td>
+                <td>
+                    <div>Bookings: ${bookingCount}</div>
+                    <div>Blackouts: ${blackoutCount}</div>
+                </td>
+                <td>
+                    <button class="btn edit" data-action="edit" data-id="${resource.id || resource.resource_id}">Edit</button>
+                    <button class="btn delete" data-action="delete" data-id="${resource.id || resource.resource_id}">Delete</button>
+                    <a class="btn" href="/admin/schedules?resourceId=${resource.id || resource.resource_id}">Availability</a>
+                </td>
+            `;
+
+            listEl.appendChild(row);
+        });
+    };
+
+    renderGroup(roomResourceList, grouped.room, "room");
+    renderGroup(labResourceList, grouped.lab, "lab");
+    renderGroup(equipmentResourceList, grouped.equipment, "equipment");
 }
 
 async function handleSaveResource() {
@@ -212,14 +251,32 @@ async function handleSaveResource() {
         resImageError.textContent = "";
     }
 
+    const selectedType = resType.value;
     const payload = {
         name: resName.value.trim(),
         description: resDescription.value.trim(),
         location: resLocation.value.trim(),
-        capacity: resCapacity.value ? Number(resCapacity.value) : null,
-        type: resType.value,
+        type: selectedType,
         image_path: resImage.value.trim(),
     };
+
+    if (selectedType === "equipment") {
+        const qty = resQuantity.value === "" ? null : Number(resQuantity.value);
+        if (Number.isNaN(qty)) {
+            alert("Quantity must be a valid number for equipment.");
+            return;
+        }
+        payload.quantity = qty;
+        payload.capacity = null;
+    } else {
+        const cap = resCapacity.value === "" ? null : Number(resCapacity.value);
+        if (Number.isNaN(cap)) {
+            alert("Capacity must be a valid number for rooms and labs.");
+            return;
+        }
+        payload.capacity = cap;
+        payload.quantity = null;
+    }
 
     if (!payload.name) {
         alert("Resource must have a name.");
@@ -237,21 +294,8 @@ async function handleSaveResource() {
     payload.image_path = normalizedImage;
 
     try {
-        const saved = await resourceAPI.saveResource(payload, editingResourceId);
-        if (editingResourceId) {
-            const existing = resourceAPI.cache.find((r) => (r.id || r.resource_id) === editingResourceId);
-            const merged = {
-                ...existing,
-                ...saved,
-            };
-            merged.booking_count = saved.booking_count ?? existing?.booking_count ?? 0;
-            merged.blackout_count = saved.blackout_count ?? existing?.blackout_count ?? 0;
-            resourceAPI.cache = resourceAPI.cache.map((r) => ((r.id || r.resource_id) === editingResourceId ? merged : r));
-        } else {
-            resourceAPI.cache.push({ ...saved, booking_count: saved.booking_count ?? 0, blackout_count: saved.blackout_count ?? 0 });
-        }
-
-        renderResources();
+        await resourceAPI.saveResource(payload, editingResourceId);
+        await resourceAPI.loadResources();
         closePanel();
     } catch (err) {
         alert(err.message);
@@ -295,9 +339,22 @@ if (saveResourceBtn) {
     saveResourceBtn.addEventListener("click", handleSaveResource);
 }
 
-if (resourceList) {
-    resourceList.addEventListener("click", handleResourceListClick);
+if (resType) {
+    resType.addEventListener("change", (event) => {
+        toggleCapacityQuantityFields(event.target.value);
+        if (event.target.value === "equipment") {
+            resCapacity.value = "";
+        } else {
+            resQuantity.value = "";
+        }
+    });
 }
+
+[roomResourceList, labResourceList, equipmentResourceList].forEach((listEl) => {
+    if (listEl) {
+        listEl.addEventListener("click", handleResourceListClick);
+    }
+});
 
 document.addEventListener("DOMContentLoaded", () => {
     if (isResourcePage && ensureAdmin()) {

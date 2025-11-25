@@ -10,6 +10,13 @@ const toDate = document.getElementById("toDate");
 let selectedLab = null;
 let availableSlots = [];
 let labsCatalog = [];
+const placeholderImage = "/assets/image-removebg-preview.png";
+
+function resolveImagePath(path) {
+    if (!path || typeof path !== "string") return placeholderImage;
+    const trimmed = path.trim();
+    return trimmed || placeholderImage;
+}
 
 function getAuthToken() {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
@@ -89,7 +96,18 @@ function renderLabs() {
         const card = document.createElement("div");
         card.className = "lab";
         card.dataset.id = lab.id;
-        card.innerHTML = `<h3>${lab.name}</h3>`;
+        const imageSrc = resolveImagePath(lab.image_path || lab.image_url);
+        const description = lab.description || "No description provided.";
+        const capacity = lab.capacity ?? "N/A";
+        card.innerHTML = `
+            <h3>${lab.name}</h3>
+            <div class="lab-meta">Capacity: ${capacity}</div>
+            <div class="lab-info">
+                <img class="info-image" src="${imageSrc}" alt="${lab.name} image">
+                <div><strong>Capacity:</strong> ${capacity}</div>
+                <div>${description}</div>
+            </div>
+        `;
         card.addEventListener("click", () => {
             document.querySelectorAll(".lab").forEach((l) => l.classList.remove("selected"));
             card.classList.add("selected");

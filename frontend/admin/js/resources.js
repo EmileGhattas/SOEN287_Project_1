@@ -11,9 +11,26 @@ const resLocation = document.getElementById("resLocation");
 const resCapacity = document.getElementById("resCapacity");
 const resType = document.getElementById("resType");
 const resImage = document.getElementById("resImage");
+const resImageError = document.getElementById("resImageError");
 
 let editingResourceId = null;
 const isResourcePage = Boolean(resourceList);
+const placeholderImage = "/assets/image-removebg-preview.png";
+
+function resolveImagePath(path) {
+    if (!path || typeof path !== "string") return placeholderImage;
+    const trimmed = path.trim();
+    return trimmed || placeholderImage;
+}
+
+function validateImagePath(value) {
+    if (value === undefined || value === null) return null;
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    if (trimmed.startsWith("/assets/")) return trimmed;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return null;
+}
 
 function getAuthToken() {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
@@ -121,7 +138,7 @@ function openPanel(resource = null) {
         resLocation.value = resource.location || "";
         resCapacity.value = resource.capacity || "";
         resType.value = resource.type || "room";
-        resImage.value = resource.image_url || resource.image_path || "";
+        resImage.value = resource.image_path || resource.image_url || "";
     } else {
         panelTitle.textContent = "Add Resource";
         saveResourceBtn.textContent = "Add";
@@ -131,6 +148,11 @@ function openPanel(resource = null) {
         resCapacity.value = "";
         resType.value = "room";
         resImage.value = "";
+    }
+
+    if (resImageError) {
+        resImageError.style.display = "none";
+        resImageError.textContent = "";
     }
 
     resourcePanel.style.display = "flex";
@@ -162,8 +184,10 @@ function renderResources() {
             resource.booking_count ?? resource.usage?.bookings ?? 0;
         const blackoutCount =
             resource.blackout_count ?? resource.usage?.blackoutDays ?? resource.usage?.blackouts ?? 0;
+        const imageSrc = resolveImagePath(resource.image_path || resource.image_url);
         row.innerHTML = `
             <td>${resource.name}</td>
+            <td><img class="resource-thumb" src="${imageSrc}" alt="${resource.name} image"></td>
             <td>${resource.location || "-"}</td>
             <td>${resource.capacity ?? "-"}</td>
             <td>${resource.type || "-"}</td>
@@ -183,19 +207,34 @@ function renderResources() {
 }
 
 async function handleSaveResource() {
+    if (resImageError) {
+        resImageError.style.display = "none";
+        resImageError.textContent = "";
+    }
+
     const payload = {
         name: resName.value.trim(),
         description: resDescription.value.trim(),
         location: resLocation.value.trim(),
         capacity: resCapacity.value ? Number(resCapacity.value) : null,
         type: resType.value,
-        image_url: resImage.value.trim(),
+        image_path: resImage.value.trim(),
     };
 
     if (!payload.name) {
         alert("Resource must have a name.");
         return;
     }
+
+    const normalizedImage = validateImagePath(payload.image_path);
+    if (normalizedImage === null) {
+        if (resImageError) {
+            resImageError.textContent = "Invalid image path. Use /assets/... or a full URL.";
+            resImageError.style.display = "block";
+        }
+        return;
+    }
+    payload.image_path = normalizedImage;
 
     try {
         const saved = await resourceAPI.saveResource(payload, editingResourceId);

@@ -51,7 +51,7 @@ async function createResource(payload) {
   const [result] = await db.execute(
     `INSERT INTO resources (name, type, description, location, capacity, quantity, image_path)
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [name, type, description || null, location || null, capacity || null, quantity || null, image_path || null]
+    [name, type, description || null, location || null, capacity || null, quantity || null, image_path ?? null]
   );
   const resource = await getResourceById(result.insertId);
   await ensureResourceTimeslots(resource.id, resource.type);

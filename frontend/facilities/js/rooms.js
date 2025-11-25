@@ -115,6 +115,7 @@ function renderRooms() {
         const imageSrc = resolveImagePath(room.image_path || room.image_url);
         const description = room.description || "No description provided.";
         const capacity = room.capacity ?? "N/A";
+        const location = room.location || "N/A";
         const imageMarkup = imageSrc ? `<img class="info-image" src="${imageSrc}" alt="${room.name} image">` : "";
         card.innerHTML = `
             <h3>${room.name}</h3>
@@ -122,6 +123,7 @@ function renderRooms() {
             <div class="room-info">
                 ${imageMarkup}
                 <div><strong>Capacity:</strong> ${capacity}</div>
+                <div><strong>Location:</strong> ${location}</div>
                 <div>${description}</div>
             </div>
         `;

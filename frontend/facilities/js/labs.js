@@ -96,6 +96,7 @@ function renderLabs() {
         const imageSrc = resolveImagePath(lab.image_path || lab.image_url);
         const description = lab.description || "No description provided.";
         const capacity = lab.capacity ?? "N/A";
+        const location = lab.location || "N/A";
         const imageMarkup = imageSrc ? `<img class="info-image" src="${imageSrc}" alt="${lab.name} image">` : "";
         card.innerHTML = `
             <h3>${lab.name}</h3>
@@ -103,6 +104,7 @@ function renderLabs() {
             <div class="lab-info">
                 ${imageMarkup}
                 <div><strong>Capacity:</strong> ${capacity}</div>
+                <div><strong>Location:</strong> ${location}</div>
                 <div>${description}</div>
             </div>
         `;

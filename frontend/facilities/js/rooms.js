@@ -10,12 +10,9 @@ const summary = document.getElementById("summary");
 let selectedRoom = null;
 let availableTimeslots = [];
 let roomsCatalog = [];
-const placeholderImage = "/assets/image-removebg-preview.png";
-
 function resolveImagePath(path) {
-    if (!path || typeof path !== "string") return placeholderImage;
-    const trimmed = path.trim();
-    return trimmed || placeholderImage;
+    if (!path || typeof path !== "string") return "";
+    return path.trim();
 }
 
 function getAuthToken() {
@@ -118,11 +115,12 @@ function renderRooms() {
         const imageSrc = resolveImagePath(room.image_path || room.image_url);
         const description = room.description || "No description provided.";
         const capacity = room.capacity ?? "N/A";
+        const imageMarkup = imageSrc ? `<img class="info-image" src="${imageSrc}" alt="${room.name} image">` : "";
         card.innerHTML = `
             <h3>${room.name}</h3>
             <div class="room-meta">Capacity: ${capacity}</div>
             <div class="room-info">
-                <img class="info-image" src="${imageSrc}" alt="${room.name} image">
+                ${imageMarkup}
                 <div><strong>Capacity:</strong> ${capacity}</div>
                 <div>${description}</div>
             </div>

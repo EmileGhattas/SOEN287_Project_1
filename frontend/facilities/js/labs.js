@@ -10,12 +10,9 @@ const toDate = document.getElementById("toDate");
 let selectedLab = null;
 let availableSlots = [];
 let labsCatalog = [];
-const placeholderImage = "/assets/image-removebg-preview.png";
-
 function resolveImagePath(path) {
-    if (!path || typeof path !== "string") return placeholderImage;
-    const trimmed = path.trim();
-    return trimmed || placeholderImage;
+    if (!path || typeof path !== "string") return "";
+    return path.trim();
 }
 
 function getAuthToken() {
@@ -99,11 +96,12 @@ function renderLabs() {
         const imageSrc = resolveImagePath(lab.image_path || lab.image_url);
         const description = lab.description || "No description provided.";
         const capacity = lab.capacity ?? "N/A";
+        const imageMarkup = imageSrc ? `<img class="info-image" src="${imageSrc}" alt="${lab.name} image">` : "";
         card.innerHTML = `
             <h3>${lab.name}</h3>
             <div class="lab-meta">Capacity: ${capacity}</div>
             <div class="lab-info">
-                <img class="info-image" src="${imageSrc}" alt="${lab.name} image">
+                ${imageMarkup}
                 <div><strong>Capacity:</strong> ${capacity}</div>
                 <div>${description}</div>
             </div>

@@ -11,12 +11,9 @@ let selectedEquipment = '';
 let selectedEquipmentId = null;
 let totalQuantity = 0;
 let equipmentCatalog = [];
-const placeholderImage = "/assets/image-removebg-preview.png";
-
 function resolveImagePath(path) {
-    if (!path || typeof path !== 'string') return placeholderImage;
-    const trimmed = path.trim();
-    return trimmed || placeholderImage;
+    if (!path || typeof path !== 'string') return '';
+    return path.trim();
 }
 
 function getAuthToken() {
@@ -52,11 +49,12 @@ function renderEquipment() {
         const imageSrc = resolveImagePath(item.image_path || item.image_url);
         const description = item.description || 'No description provided.';
         const total = item.quantity || item.total_quantity || 0;
+        const imageMarkup = imageSrc ? `<img class="info-image" src="${imageSrc}" alt="${item.name} image">` : '';
         card.innerHTML = `
             <div class="equipment-name">${item.name}</div>
             <div class="equipment-meta">${total} total</div>
             <div class="equipment-info">
-                <img class="info-image" src="${imageSrc}" alt="${item.name} image">
+                ${imageMarkup}
                 <div class="equipment-description">${description}</div>
                 <div class="equipment-availability">Select a date to see availability.</div>
             </div>

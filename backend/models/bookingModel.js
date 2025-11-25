@@ -103,6 +103,7 @@ async function mapBookingRow(row) {
     booking_type: row.type,
     booking_date: formatDateOnly(row.booking_date),
     status: normalizeBookingStatus(row.status, row.booking_date),
+    raw_status: row.status,
     user_id: row.user_id,
     user,
     user_name: user?.username,
@@ -344,7 +345,8 @@ async function rescheduleBooking(id, payload, user) {
   const existing = await findById(id);
   if (!existing) throw new Error('NOT_FOUND');
   if (!user?.is_admin && existing.user_id !== user?.id) throw new Error('FORBIDDEN');
-  if (existing.status && existing.status !== 'active') throw new Error('INVALID_STATUS');
+  const currentStatus = existing.raw_status || existing.status;
+  if (currentStatus && currentStatus !== 'active') throw new Error('INVALID_STATUS');
 
   const connection = await db.getConnection();
   try {

@@ -1,26 +1,5 @@
-// This script fetches booking data from the backend and renders interactive
-// charts showing the most popular resources and peak booking times.
-
-
-(function () {
-
-    const popularContainer = document.getElementById('popularResources');
-    const peakContainer = document.getElementById('peakTimes');
-
-
-    let popularChart = null;
-    let peakChart = null;
-
-
-    // AUTHENTICATION HELPER FUNCTIONS
-    // These functions handle user authentication and authorization
-
-    /**
-     * Retrieves the JWT authentication token from browser storage
-     * sessionStorage (more secure) over localStorage
-     */
-    function getAuthToken() {
-
+const AuthService = {
+    getToken() {
         const token = sessionStorage.getItem('token') || localStorage.getItem('token');
 
         if (token && !sessionStorage.getItem('token')) {
@@ -29,11 +8,9 @@
         }
 
         return token;
-    }
+    },
 
-
-    function getStoredUser() {
-
+    getUser() {
         const raw = sessionStorage.getItem('user') || localStorage.getItem('user');
 
         if (raw && !sessionStorage.getItem('user')) {
@@ -41,381 +18,364 @@
             localStorage.removeItem('user');
         }
 
-
         try {
             return raw ? JSON.parse(raw) : null;
         } catch (err) {
-            console.warn('Unable to parse user', err);
+            console.error('[AuthService] Failed to parse user:', err);
             return null;
         }
-    }
+    },
 
+    isAdmin() {
+        const user = this.getUser();
+        return user?.is_admin === true;
+    },
 
-    function ensureAdmin() {
-        try {
-            const user = getStoredUser();
+    redirectToSignIn() {
+        window.location.href = '/adminsignin';
+    },
 
-
-            if (!user?.is_admin) {
-                window.location.href = '/adminsignin';
-                return false;
-            }
-
-            return true;
-        } catch (err) {
-
-            window.location.href = '/adminsignin';
-            return false;
-        }
-    }
-
-    /**
-     * Creates HTTP headers with authentication token for API requests
-     * Backend expects "Bearer <token>" format for JWT authentication
-     */
-    function authHeaders() {
-        const token = getAuthToken();
+    getHeaders() {
+        const token = this.getToken();
         const headers = { 'Content-Type': 'application/json' };
 
-
-        if (token) headers.Authorization = `Bearer ${token}`;
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
 
         return headers;
     }
+};
 
+const ApiService = {
+    async getResourceUsage() {
+        try {
+            const response = await fetch('/api/resources/usage/summary', {
+                headers: AuthService.getHeaders()
+            });
 
-    //  CHART RENDERING FUNCTIONS
-    // These functions create visual charts using Chart.js library
+            const data = await response.json();
 
-    /**
-     * Renders a vertical bar chart showing the most booked resources
-     *  {Array} list - Array of resources with booking counts
-     *                       Example: [{name: "Room 101", type: "room", bookings: 15}, ...]
-     */
-    function renderPopularChart(list) {
-
-        if (!popularContainer) return;
-
-        popularContainer.innerHTML = '';
-
-        if (!list.length) {
-            popularContainer.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">No booking data yet.</p>';
-            return;
-        }
-
-        // Show all resources (no limit - displays all 6)
-        const allResources = list;
-
-        // Create a <canvas> element where Chart.js will draw the chart
-        const canvas = document.createElement('canvas');
-        canvas.id = 'popularChart';
-        popularContainer.appendChild(canvas);
-
-        // If a chart already exists, destroy it first to prevent memory leaks
-        if (popularChart) {
-            popularChart.destroy();
-        }
-
-        const ctx = canvas.getContext('2d');
-
-        // Create the Chart.js bar chart
-        popularChart = new Chart(ctx, {
-            type: 'bar',
-
-            // Data configuration
-            data: {
-                // X-axis labels: Extract resource names from allResources array
-                labels: allResources.map(item => item.name),
-
-                datasets: [{
-                    label: 'Number of Bookings',
-
-
-                    data: allResources.map(item => item.bookings),
-
-                    backgroundColor: [
-                        'rgba(61, 93, 96, 0.8)'  // all the same color
-                    ],
-
-
-                    borderColor: [
-                        'rgba(61, 93, 96, 1)',
-
-                    ],
-                    borderWidth: 2 // 2px border around each bar
-                }]
-            },
-
-
-            options: {
-                responsive: true,           // Chart resizes with container
-                maintainAspectRatio: true,  // Keep proportions when resizing
-
-                // Plugin configurations (Chart.js extensions)
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    title: {
-                        display: true,
-                        text: 'All Resources - Booking Count',
-                        font: {
-                            size: 16,
-                            weight: 'bold'
-                        },
-                        padding: 20
-                    },
-
-                    // Customize tooltip (popup when hovering over bars)
-                    tooltip: {
-                        callbacks: {
-                            // Add resource type to tooltip
-                            // context.dataIndex gives us which bar was hovered over yk :)
-                            afterLabel: function(context)  {
-                                const item = allResources[context.dataIndex];
-                                return `Type: ${item.type}`; // Shows "Type: room" or "Type: lab"
-                            }
-                        }
-                    }
-                },
-
-                // Configure X and Y axes
-                scales: {
-                    y: { // Y-axis shows booking count
-                        beginAtZero: true,  // Start Y-axis at 0 (not auto-scaled)
-                        ticks: {
-                            stepSize: 1,    //  (1, 2, 3, not 1.5)
-                            font: { size: 12 }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Number of Bookings',
-                            font: {
-                                size: 13,
-                                weight: 'bold'
-                            }
-                        }
-                    },
-                    x: { // X-axis shows resource names
-                        ticks: {
-                            font: { size: 12 }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Resource Name',
-                            font: {
-                                size: 13,
-                                weight: 'bold'
-                            }
-                        }
-                    }
-                }
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to load resource usage');
             }
-        });
-    }
 
-    /**
-     * Renders a horizontal bar chart showing peak booking times
-     *  {Array} list - Array of timeslots with booking counts
-     *                       Example: [{label: "09:00-10:30", bookings: 12}, ...]
-     */
-    function renderPeakTimesChart(list) {
-        // Exit if container doesn't exist
-        if (!peakContainer) return;
+            console.log('[ApiService] Resource usage loaded:', data.length, 'resources');
+            return data;
 
-        peakContainer.innerHTML = '';
-        // Show message if no data available
-        if (!list.length) {
-            peakContainer.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">No usage patterns yet.</p>';
-            return;
+        } catch (err) {
+            console.error('[ApiService] Error fetching resource usage:', err);
+            throw err;
         }
+    },
 
-        // Create canvas element for the chart
-        const canvas = document.createElement('canvas');
-        canvas.id = 'peakChart';
-        peakContainer.appendChild(canvas);
+    async getBookings() {
+        try {
+            const response = await fetch('/api/bookings', {
+                headers: AuthService.getHeaders()
+            });
 
-        if (peakChart) {
-            peakChart.destroy();
-        }
+            const data = await response.json();
 
-
-        const ctx = canvas.getContext('2d');
-
-
-        peakChart = new Chart(ctx, {
-            type: 'bar',
-
-            data: {
-                // Labels: time slot like "09:00-10:30"
-                labels: list.map(slot => slot.label),
-
-                datasets: [{
-                    label: 'Number of Bookings',
-
-                    data: list.map(slot => slot.bookings),
-
-                    backgroundColor: 'rgba(46, 97, 105, 0.7)',
-                    borderColor: 'rgba(46, 97, 105, 1)',
-                    borderWidth: 2
-                }]
-            },
-
-            options: {
-                indexAxis: 'y', // This makes the chart horizontal
-                                // 'y' means categories (time slots) are on Y axis and values (booking counts) are on X axis
-
-                responsive: true,
-                maintainAspectRatio: true,
-
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    title: {
-                        display: true,
-                        text: 'Peak Booking Times',
-                        font: {
-                            size: 16,
-                            weight: 'bold'
-                        },
-                        padding: 20
-                    }
-                },
-
-                scales: {
-                    x: { // X-axis now shows booking counts
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1,
-                            font: { size: 12 }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Number of Bookings',
-                            font: {
-                                size: 13,
-                                weight: 'bold'
-                            }
-                        }
-                    },
-                    y: { // Y-axis now shows time slots
-                        ticks: {
-                            font: { size: 12 }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Time Slot',
-                            font: {
-                                size: 13,
-                                weight: 'bold'
-                            }
-                        }
-                    }
-                }
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to load bookings');
             }
-        });
+
+            console.log('[ApiService] Bookings loaded:', data.length, 'bookings');
+            return data;
+
+        } catch (err) {
+            console.error('[ApiService] Error fetching bookings:', err);
+            throw err;
+        }
     }
+};
 
-    //  DATA FETCHING FUNCTIONS
-    // These functions fetch data from the backend API and render charts
+const DataProcessor = {
+    sortByBookings(resources) {
+        return [...resources].sort((a, b) => (b.bookings || 0) - (a.bookings || 0));
+    },
 
-    /**
-     * Fetches resource usage data from backend and renders popular resources chart
-     * Backend endpoint: GET /api/resources/usage/summary
-     * Returns [{id, name, type, bookings}, ...]
-     */
-    async function loadUsage() {
-
-        const res = await fetch('/api/resources/usage/summary', {
-            headers: authHeaders()
-        });
-
-        const data = await res.json();
-
-
-        if (!res.ok) throw new Error(data.message || 'Failed to load analytics');
-
-
-        // (b.bookings - a.bookings) sorts descending (largest first)
-        const sorted = [...data].sort((a, b) => (b.bookings || 0) - (a.bookings || 0));
-
-        // Pass sorted data to chart rendering function
-        renderPopularChart(sorted);
-    }
-
-
-    async function loadPeakTimes() {
-
-        const res = await fetch('/api/bookings', {
-            headers: authHeaders()
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) throw new Error(data.message || 'Failed to load bookings');
-
-        // Count bookings per timeslot for example: {"09:00-10:30": 12, "10:30-12:00": 8, ...}
+    countBookingsByTimeslot(bookings) {
         const counts = {};
 
+        bookings.forEach((booking) => {
+            if (booking.status === 'cancelled') return;
 
-        data.forEach((b) => {
-
-            if (b.status === 'cancelled') return;
-
-            const label = b.timeslot?.label;
-
+            const label = booking.room?.label || booking.lab?.label || booking.timeslot?.label;
             if (!label) return;
-
-
 
             counts[label] = (counts[label] || 0) + 1;
         });
 
+        console.log('[DataProcessor] Timeslot counts:', counts);
+        return counts;
+    },
 
+    convertToSortedArray(counts) {
         const entries = Object.entries(counts).map(([label, bookings]) => ({
             label,
             bookings
         }));
 
-
         entries.sort((a, b) => b.bookings - a.bookings);
-
-        renderPeakTimesChart(entries);
+        return entries;
     }
+};
 
+const ChartConfig = {
+    colors: {
+        primary: 'rgba(61, 93, 96, 0.8)',
+        primaryBorder: 'rgba(61, 93, 96, 1)',
+        secondary: 'rgba(46, 97, 105, 0.7)',
+        secondaryBorder: 'rgba(46, 97, 105, 1)'
+    },
 
+    getPopularResourcesConfig(resources) {
+        return {
+            type: 'bar',
+            data: {
+                labels: resources.map(item => item.name),
+                datasets: [{
+                    label: 'Number of Bookings',
+                    data: resources.map(item => item.bookings),
+                    backgroundColor: this.colors.primary,
+                    borderColor: this.colors.primaryBorder,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'All Resources - Booking Count',
+                        font: { size: 16, weight: 'bold' },
+                        padding: 20
+                    },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: (context) => {
+                                const item = resources[context.dataIndex];
+                                return `Type: ${item.type}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, font: { size: 12 } },
+                        title: {
+                            display: true,
+                            text: 'Number of Bookings',
+                            font: { size: 13, weight: 'bold' }
+                        }
+                    },
+                    x: {
+                        ticks: { font: { size: 12 } },
+                        title: {
+                            display: true,
+                            text: 'Resource Name',
+                            font: { size: 13, weight: 'bold' }
+                        }
+                    }
+                }
+            }
+        };
+    },
 
+    getPeakTimesConfig(timeslots) {
+        return {
+            type: 'bar',
+            data: {
+                labels: timeslots.map(slot => slot.label),
+                datasets: [{
+                    label: 'Number of Bookings',
+                    data: timeslots.map(slot => slot.bookings),
+                    backgroundColor: this.colors.secondary,
+                    borderColor: this.colors.secondaryBorder,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Peak Booking Times',
+                        font: { size: 16, weight: 'bold' },
+                        padding: 20
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, font: { size: 12 } },
+                        title: {
+                            display: true,
+                            text: 'Number of Bookings',
+                            font: { size: 13, weight: 'bold' }
+                        }
+                    },
+                    y: {
+                        ticks: { font: { size: 12 } },
+                        title: {
+                            display: true,
+                            text: 'Time Slot',
+                            font: { size: 13, weight: 'bold' }
+                        }
+                    }
+                }
+            }
+        };
+    }
+};
 
-    document.addEventListener('DOMContentLoaded', async () => {
+const ChartManager = {
+    charts: {
+        popular: null,
+        peak: null
+    },
 
-        if (!ensureAdmin()) return;
+    containers: {
+        popular: null,
+        peak: null
+    },
 
+    init() {
+        this.containers.popular = document.getElementById('popularResources');
+        this.containers.peak = document.getElementById('peakTimes');
+    },
 
-        if (popularContainer) {
-            popularContainer.innerHTML = '<p style="text-align: center; padding: 40px;">Loading charts...</p>';
+    showLoading(type) {
+        const container = this.containers[type];
+        if (container) {
+            container.innerHTML = '<p style="text-align: center; padding: 40px;">Loading charts...</p>';
         }
-        if (peakContainer) {
-            peakContainer.innerHTML = '<p style="text-align: center; padding: 40px;">Loading charts...</p>';
+    },
+
+    showError(type, message) {
+        const container = this.containers[type];
+        if (container) {
+            container.innerHTML = `<p style="text-align: center; padding: 40px; color: #c0392b;">${message}</p>`;
         }
+    },
+
+    showEmpty(type, message) {
+        const container = this.containers[type];
+        if (container) {
+            container.innerHTML = `<p style="text-align: center; padding: 40px; color: #666;">${message}</p>`;
+        }
+    },
+
+    renderPopularResources(resources) {
+        const container = this.containers.popular;
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (!resources.length) {
+            this.showEmpty('popular', 'No booking data yet.');
+            return;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.id = 'popularChart';
+        container.appendChild(canvas);
+
+        if (this.charts.popular) {
+            this.charts.popular.destroy();
+        }
+
+        const ctx = canvas.getContext('2d');
+        const config = ChartConfig.getPopularResourcesConfig(resources);
+        this.charts.popular = new Chart(ctx, config);
+
+        console.log('[ChartManager] Popular resources chart rendered');
+    },
+
+    renderPeakTimes(timeslots) {
+        const container = this.containers.peak;
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (!timeslots.length) {
+            this.showEmpty('peak', 'No usage patterns yet.');
+            return;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.id = 'peakChart';
+        container.appendChild(canvas);
+
+        if (this.charts.peak) {
+            this.charts.peak.destroy();
+        }
+
+        const ctx = canvas.getContext('2d');
+        const config = ChartConfig.getPeakTimesConfig(timeslots);
+        this.charts.peak = new Chart(ctx, config);
+
+        console.log('[ChartManager] Peak times chart rendered');
+    }
+};
+
+const AnalyticsApp = {
+    async loadPopularResources() {
+        try {
+            const data = await ApiService.getResourceUsage();
+            const sorted = DataProcessor.sortByBookings(data);
+            ChartManager.renderPopularResources(sorted);
+        } catch (err) {
+            ChartManager.showError('popular', err.message);
+            throw err;
+        }
+    },
+
+    async loadPeakTimes() {
+        try {
+            const bookings = await ApiService.getBookings();
+            const counts = DataProcessor.countBookingsByTimeslot(bookings);
+            const timeslots = DataProcessor.convertToSortedArray(counts);
+            ChartManager.renderPeakTimes(timeslots);
+        } catch (err) {
+            ChartManager.showError('peak', err.message);
+            throw err;
+        }
+    },
+
+    async init() {
+        console.log('[AnalyticsApp] Initializing...');
+
+        if (!AuthService.isAdmin()) {
+            console.warn('[AnalyticsApp] User is not admin, redirecting...');
+            AuthService.redirectToSignIn();
+            return;
+        }
+
+        ChartManager.init();
+        ChartManager.showLoading('popular');
+        ChartManager.showLoading('peak');
 
         try {
-
-            await loadUsage();
-            await loadPeakTimes();
-
+            await Promise.all([
+                this.loadPopularResources(),
+                this.loadPeakTimes()
+            ]);
+            console.log('[AnalyticsApp] All charts loaded successfully');
         } catch (err) {
-
-
-            console.error(err);
-
-            if (popularContainer) {
-                popularContainer.innerHTML = `<p style="text-align: center; padding: 40px; color: #c0392b;">${err.message}</p>`;
-            }
-            if (peakContainer) {
-                peakContainer.innerHTML = `<p style="text-align: center; padding: 40px; color: #c0392b;">${err.message}</p>`;
-            }
+            console.error('[AnalyticsApp] Error loading charts:', err);
         }
-    });
+    }
+};
 
-})();
+document.addEventListener('DOMContentLoaded', () => {
+    AnalyticsApp.init();
+});

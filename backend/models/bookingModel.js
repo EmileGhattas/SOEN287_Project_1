@@ -57,14 +57,57 @@ async function getAvailability(resourceId, date, connection = db) {
   };
 }
 
+function formatDateOnly(value) {
+  if (!value) return value;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toISOString().slice(0, 10);
+}
+
+function formatTime(value) {
+  if (!value) return value;
+  if (typeof value === 'string') {
+    const match = value.match(/^(\d{2}:\d{2})/);
+    if (match) return match[1];
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toISOString().substring(11, 16);
+}
+
 async function mapBookingRow(row) {
   if (!row) return null;
+
+  const user = row.user_id
+    ? {
+        id: row.user_id,
+        username: row.user_username || row.username || null,
+        email: row.user_email || row.email || null,
+      }
+    : null;
+
+  const resource = row.resource_id
+    ? {
+        id: row.resource_id,
+        name: row.resource_name,
+        type: row.type,
+        description: row.resource_description,
+        capacity: row.resource_capacity,
+        quantity: row.resource_quantity,
+        image_path: row.image_path,
+      }
+    : null;
+
   const base = {
     booking_id: row.id,
     booking_type: row.type,
-    booking_date: row.booking_date,
+    booking_date: formatDateOnly(row.booking_date),
     status: row.status,
     user_id: row.user_id,
+    user,
+    user_name: user?.username,
+    user_email: user?.email,
+    resource,
   };
 
   if (row.type === 'room') {
@@ -73,10 +116,13 @@ async function mapBookingRow(row) {
       room: {
         id: row.resource_id,
         name: row.resource_name,
+        description: row.resource_description,
+        capacity: row.resource_capacity,
+        image_path: row.image_path,
         timeslot_id: row.timeslot_id,
         label: row.timeslot_label,
-        start_time: row.start_time,
-        end_time: row.end_time,
+        start_time: formatTime(row.start_time),
+        end_time: formatTime(row.end_time),
       },
     };
   }
@@ -86,10 +132,13 @@ async function mapBookingRow(row) {
       lab: {
         id: row.resource_id,
         name: row.resource_name,
+        description: row.resource_description,
+        capacity: row.resource_capacity,
+        image_path: row.image_path,
         timeslot_id: row.timeslot_id,
         label: row.timeslot_label,
-        start_time: row.start_time,
-        end_time: row.end_time,
+        start_time: formatTime(row.start_time),
+        end_time: formatTime(row.end_time),
       },
     };
   }
@@ -98,6 +147,10 @@ async function mapBookingRow(row) {
     equipment: {
       id: row.resource_id,
       name: row.resource_name,
+      description: row.resource_description,
+      capacity: row.resource_capacity,
+      image_path: row.image_path,
+      total_quantity: row.resource_quantity,
       quantity: row.quantity,
     },
   };
@@ -105,9 +158,12 @@ async function mapBookingRow(row) {
 
 async function listForUser(userId) {
   const [rows] = await db.execute(
-    `SELECT b.*, r.name AS resource_name, r.type, t.label AS timeslot_label, t.start_time, t.end_time
+    `SELECT b.*, r.name AS resource_name, r.type, r.description AS resource_description, r.capacity AS resource_capacity,
+            r.quantity AS resource_quantity, r.image_path, t.label AS timeslot_label, t.start_time, t.end_time,
+            u.username AS user_username, u.email AS user_email
        FROM bookings b
        JOIN resources r ON r.id = b.resource_id
+       JOIN users u ON u.id = b.user_id
        LEFT JOIN timeslots t ON t.id = b.timeslot_id
       WHERE b.user_id = ?
       ORDER BY b.created_at DESC`,
@@ -118,9 +174,12 @@ async function listForUser(userId) {
 
 async function listAll() {
   const [rows] = await db.execute(
-    `SELECT b.*, r.name AS resource_name, r.type, t.label AS timeslot_label, t.start_time, t.end_time
+    `SELECT b.*, r.name AS resource_name, r.type, r.description AS resource_description, r.capacity AS resource_capacity,
+            r.quantity AS resource_quantity, r.image_path, t.label AS timeslot_label, t.start_time, t.end_time,
+            u.username AS user_username, u.email AS user_email
        FROM bookings b
        JOIN resources r ON r.id = b.resource_id
+       JOIN users u ON u.id = b.user_id
        LEFT JOIN timeslots t ON t.id = b.timeslot_id
       ORDER BY b.created_at DESC`
   );
@@ -129,9 +188,12 @@ async function listAll() {
 
 async function findById(id, connection = db) {
   const [rows] = await connection.execute(
-    `SELECT b.*, r.name AS resource_name, r.type, t.label AS timeslot_label, t.start_time, t.end_time
+    `SELECT b.*, r.name AS resource_name, r.type, r.description AS resource_description, r.capacity AS resource_capacity,
+            r.quantity AS resource_quantity, r.image_path, t.label AS timeslot_label, t.start_time, t.end_time,
+            u.username AS user_username, u.email AS user_email
        FROM bookings b
        JOIN resources r ON r.id = b.resource_id
+       JOIN users u ON u.id = b.user_id
        LEFT JOIN timeslots t ON t.id = b.timeslot_id
       WHERE b.id = ? LIMIT 1`,
     [id]

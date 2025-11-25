@@ -100,6 +100,15 @@ margin: 30px;
     margin-top: 20px;
 }
 
+.resource-section {
+    margin-top: 25px;
+}
+
+.section-title {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 .resource-table th,
 .resource-table td {
     padding: 12px 10px;
@@ -111,6 +120,21 @@ margin: 30px;
 .resource-table th {
     font-weight: 700;
     color: #333;
+}
+
+.resource-thumb {
+    width: 70px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.input-error {
+    color: #c0392b;
+    font-size: 0.9rem;
+    margin-top: -8px;
+    margin-bottom: 10px;
 }
 
 

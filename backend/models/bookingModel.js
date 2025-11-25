@@ -102,7 +102,7 @@ async function mapBookingRow(row) {
     booking_id: row.id,
     booking_type: row.type,
     booking_date: formatDateOnly(row.booking_date),
-    status: row.status,
+    status: normalizeBookingStatus(row.status, row.booking_date),
     user_id: row.user_id,
     user,
     user_name: user?.username,
@@ -154,6 +154,19 @@ async function mapBookingRow(row) {
       quantity: row.quantity,
     },
   };
+}
+
+function normalizeBookingStatus(status, bookingDate) {
+  if (!status) return 'active';
+  if (status === 'active' && bookingDate) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const date = new Date(bookingDate);
+    if (!Number.isNaN(date.getTime()) && date < today) {
+      return 'completed';
+    }
+  }
+  return status;
 }
 
 async function listForUser(userId) {
@@ -327,11 +340,74 @@ async function updateBooking(id, payload, user) {
   }
 }
 
+async function rescheduleBooking(id, payload, user) {
+  const existing = await findById(id);
+  if (!existing) throw new Error('NOT_FOUND');
+  if (!user?.is_admin && existing.user_id !== user?.id) throw new Error('FORBIDDEN');
+  if (existing.status && existing.status !== 'active') throw new Error('INVALID_STATUS');
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const resourceId = existing.resource?.id || existing.room?.id || existing.lab?.id || existing.equipment?.id;
+    const resource = await getResourceById(resourceId, connection);
+    if (!resource) throw new Error('RESOURCE_NOT_FOUND');
+
+    const nextDate = payload.bookingDate || existing.booking_date;
+    const nextTimeslot = resource.type === 'equipment' ? null : payload.timeslotId || existing.room?.timeslot_id || existing.lab?.timeslot_id;
+    const nextQuantity = resource.type === 'equipment' ? Number(payload.quantity || existing.equipment?.quantity || 1) : 1;
+
+    const [blackouts] = await connection.execute(
+      'SELECT 1 FROM resource_blackouts WHERE resource_id = ? AND blackout_date = ? LIMIT 1',
+      [resource.id, nextDate]
+    );
+    if (blackouts.length) throw new Error('RESOURCE_BLACKED_OUT');
+
+    if (resource.type === 'equipment') {
+      await ensureQuantity(connection, resource, nextDate, nextQuantity, id);
+    } else {
+      if (!nextTimeslot) throw new Error('MISSING_FIELDS');
+      await ensureSlotAvailable(connection, resource, nextDate, nextTimeslot, id);
+    }
+
+    await connection.execute('UPDATE bookings SET status = ? WHERE id = ?', ['rescheduled', id]);
+
+    const insertPayload = {
+      user_id: existing.user_id,
+      resource_id: resource.id,
+      booking_date: nextDate,
+      timeslot_id: resource.type === 'equipment' ? null : nextTimeslot,
+      quantity: resource.type === 'equipment' ? nextQuantity : 1,
+      status: 'active',
+      purpose: payload.purpose || existing.purpose || null,
+    };
+
+    const columns = Object.keys(insertPayload);
+    const values = Object.values(insertPayload);
+    const placeholders = columns.map(() => '?').join(',');
+
+    const [result] = await connection.execute(
+      `INSERT INTO bookings (${columns.join(',')}) VALUES (${placeholders})`,
+      values
+    );
+
+    await connection.commit();
+    return findById(result.insertId, connection);
+  } catch (err) {
+    await connection.rollback();
+    throw err;
+  } finally {
+    connection.release();
+  }
+}
+
 async function deleteBooking(id, user) {
   const existing = await findById(id);
   if (!existing) return false;
   if (!user?.is_admin && existing.user_id !== user?.id) return 'FORBIDDEN';
-  await db.execute('DELETE FROM bookings WHERE id = ?', [id]);
+
+  await db.execute('UPDATE bookings SET status = ? WHERE id = ?', ['cancelled', id]);
   return true;
 }
 
@@ -342,6 +418,7 @@ module.exports = {
   listAll,
   findById,
   updateBooking,
+  rescheduleBooking,
   deleteBooking,
   listTimeslots,
 };

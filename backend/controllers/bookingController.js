@@ -72,6 +72,26 @@ exports.updateBooking = async (req, res) => {
   }
 };
 
+exports.rescheduleBooking = async (req, res) => {
+  try {
+    const updated = await Booking.rescheduleBooking(req.params.id, req.body || {}, req.user);
+    res.json(updated);
+  } catch (err) {
+    const map = {
+      NOT_FOUND: 404,
+      FORBIDDEN: 403,
+      RESOURCE_NOT_FOUND: 404,
+      ROOM_CONFLICT: 409,
+      LAB_CONFLICT: 409,
+      EQUIPMENT_UNAVAILABLE: 409,
+      INVALID_TIMESLOT: 400,
+      INVALID_STATUS: 400,
+      RESOURCE_BLACKED_OUT: 409,
+    };
+    res.status(map[err.message] || 500).json({ message: 'Failed to reschedule booking' });
+  }
+};
+
 exports.deleteBooking = async (req, res) => {
   try {
     const removed = await Booking.deleteBooking(req.params.id, req.user);
@@ -79,7 +99,7 @@ exports.deleteBooking = async (req, res) => {
     if (removed === 'FORBIDDEN') return res.status(403).json({ message: 'Not allowed' });
     return res.status(204).send();
   } catch (err) {
-    res.status(500).json({ message: 'Failed to delete booking' });
+    res.status(500).json({ message: 'Failed to cancel booking' });
   }
 };
 

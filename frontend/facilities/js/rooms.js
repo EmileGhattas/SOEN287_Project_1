@@ -10,6 +10,10 @@ const summary = document.getElementById("summary");
 let selectedRoom = null;
 let availableTimeslots = [];
 let roomsCatalog = [];
+function resolveImagePath(path) {
+    if (!path || typeof path !== "string") return "";
+    return path.trim();
+}
 
 function getAuthToken() {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
@@ -108,10 +112,19 @@ function renderRooms() {
         const card = document.createElement("div");
         card.className = "room";
         card.dataset.id = room.id;
+        const imageSrc = resolveImagePath(room.image_path || room.image_url);
+        const description = room.description || "No description provided.";
+        const capacity = room.capacity ?? "N/A";
+        const location = room.location || "N/A";
+        const imageMarkup = imageSrc ? `<img class="info-image" src="${imageSrc}" alt="${room.name} image">` : "";
         card.innerHTML = `
             <h3>${room.name}</h3>
+            <div class="room-meta">Capacity: ${capacity}</div>
             <div class="room-info">
-                Capacity: ${room.capacity ?? "N/A"}
+                ${imageMarkup}
+                <div><strong>Capacity:</strong> ${capacity}</div>
+                <div><strong>Location:</strong> ${location}</div>
+                <div>${description}</div>
             </div>
         `;
         card.addEventListener("click", () => {

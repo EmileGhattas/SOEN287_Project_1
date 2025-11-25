@@ -11,6 +11,10 @@ let selectedEquipment = '';
 let selectedEquipmentId = null;
 let totalQuantity = 0;
 let equipmentCatalog = [];
+function resolveImagePath(path) {
+    if (!path || typeof path !== 'string') return '';
+    return path.trim();
+}
 
 function getAuthToken() {
     const token = sessionStorage.getItem('token') || localStorage.getItem('token');
@@ -42,16 +46,34 @@ function renderEquipment() {
         card.className = 'equipment';
         card.dataset.id = item.id;
         card.dataset.name = item.name;
+        const imageSrc = resolveImagePath(item.image_path || item.image_url);
+        const description = item.description || 'No description provided.';
+        const total = item.quantity || item.total_quantity || 0;
+        const available =
+            item.current_quantity ?? Math.max(total - (item.booking_count ?? 0), 0);
+        const location = item.location || 'N/A';
+        const imageMarkup = imageSrc ? `<img class="info-image" src="${imageSrc}" alt="${item.name} image">` : '';
         card.innerHTML = `
             <div class="equipment-name">${item.name}</div>
-            <div class="equipment-info">${item.quantity || item.total_quantity} total</div>
+            <div class="equipment-meta">${available} available</div>
+            <div class="equipment-info">
+                ${imageMarkup}
+                <div class="equipment-location"><strong>Location:</strong> ${location}</div>
+                <div class="equipment-quantity"><strong>Total units:</strong> ${total}</div>
+                <div class="equipment-description">${description}</div>
+                <div class="equipment-availability">Select a date to see availability.</div>
+            </div>
         `;
         card.addEventListener('click', () => {
             document.querySelectorAll('.equipment').forEach((e) => e.classList.remove('selected'));
             card.classList.add('selected');
             selectedEquipment = item.name;
             selectedEquipmentId = item.id;
-            totalQuantity = item.quantity || item.total_quantity || 0;
+            totalQuantity = total;
+            const availabilityEl = card.querySelector('.equipment-availability');
+            if (availabilityEl) {
+                availabilityEl.textContent = 'Select a date to see availability.';
+            }
             toDate.disabled = false;
         });
         equipmentList.appendChild(card);
@@ -78,7 +100,7 @@ async function refreshAvailability() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || 'Availability unavailable');
         const available = data.remainingQuantity ?? data.available_quantity ?? totalQuantity;
-        const infoEl = document.querySelector('.equipment.selected .equipment-info');
+        const infoEl = document.querySelector('.equipment.selected .equipment-availability');
         if (infoEl) {
             infoEl.textContent = `${available} available on ${dateInput.value}`;
         }

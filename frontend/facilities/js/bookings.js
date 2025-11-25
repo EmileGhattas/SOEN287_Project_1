@@ -214,6 +214,13 @@ function openRescheduleModal(booking) {
     activeBooking = booking;
     if (!booking || !rescheduleModal) return;
 
+    if (rescheduleForm) {
+        const url = `/api/bookings/${booking.booking_id}/reschedule`;
+        rescheduleForm.dataset.rescheduleUrl = url;
+        rescheduleForm.setAttribute('method', 'post');
+        rescheduleForm.setAttribute('action', url);
+    }
+
     rescheduleTitle.textContent = `Reschedule Booking #${booking.booking_id}`;
     rescheduleResource.textContent = resourceLabel(booking);
     rescheduleDate.value = booking.booking_date || '';
@@ -359,7 +366,9 @@ async function submitReschedule(event) {
         payload.timeslotId = timeslotId;
     }
 
-    const response = await fetch(`/api/bookings/${activeBooking.booking_id}/reschedule`, {
+    const rescheduleUrl = rescheduleForm?.dataset.rescheduleUrl || `/api/bookings/${activeBooking.booking_id}/reschedule`;
+
+    const response = await fetch(rescheduleUrl, {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify(payload),

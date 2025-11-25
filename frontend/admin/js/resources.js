@@ -11,9 +11,26 @@ const resLocation = document.getElementById("resLocation");
 const resCapacity = document.getElementById("resCapacity");
 const resType = document.getElementById("resType");
 const resImage = document.getElementById("resImage");
+const resImageError = document.getElementById("resImageError");
 
 let editingResourceId = null;
 const isResourcePage = Boolean(resourceList);
+const placeholderImage = "/assets/image-removebg-preview.png";
+
+function resolveImagePath(path) {
+    if (!path || typeof path !== "string") return placeholderImage;
+    const trimmed = path.trim();
+    return trimmed || placeholderImage;
+}
+
+function validateImagePath(value) {
+    if (value === undefined || value === null) return null;
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    if (trimmed.startsWith("/assets/")) return trimmed;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return null;
+}
 
 function getAuthToken() {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
@@ -121,7 +138,7 @@ function openPanel(resource = null) {
         resLocation.value = resource.location || "";
         resCapacity.value = resource.capacity || "";
         resType.value = resource.type || "room";
-        resImage.value = resource.image_url || resource.image_path || "";
+        resImage.value = resource.image_path || resource.image_url || "";
     } else {
         panelTitle.textContent = "Add Resource";
         saveResourceBtn.textContent = "Add";
@@ -131,6 +148,11 @@ function openPanel(resource = null) {
         resCapacity.value = "";
         resType.value = "room";
         resImage.value = "";
+    }
+
+    if (resImageError) {
+        resImageError.style.display = "none";
+        resImageError.textContent = "";
     }
 
     resourcePanel.style.display = "flex";
@@ -158,15 +180,20 @@ function renderResources() {
 
     resources.forEach((resource) => {
         const row = document.createElement("tr");
-        const usage = resource.usage || {};
+        const bookingCount =
+            resource.booking_count ?? resource.usage?.bookings ?? 0;
+        const blackoutCount =
+            resource.blackout_count ?? resource.usage?.blackoutDays ?? resource.usage?.blackouts ?? 0;
+        const imageSrc = resolveImagePath(resource.image_path || resource.image_url);
         row.innerHTML = `
             <td>${resource.name}</td>
+            <td><img class="resource-thumb" src="${imageSrc}" alt="${resource.name} image"></td>
             <td>${resource.location || "-"}</td>
             <td>${resource.capacity ?? "-"}</td>
             <td>${resource.type || "-"}</td>
             <td>
-                <div>Bookings: ${usage.bookings || 0}</div>
-                <div>Blackouts: ${usage.blackoutDays || usage.blackouts || 0}</div>
+                <div>Bookings: ${bookingCount}</div>
+                <div>Blackouts: ${blackoutCount}</div>
             </td>
             <td>
                 <button class="btn edit" data-action="edit" data-id="${resource.id || resource.resource_id}">Edit</button>
@@ -180,13 +207,18 @@ function renderResources() {
 }
 
 async function handleSaveResource() {
+    if (resImageError) {
+        resImageError.style.display = "none";
+        resImageError.textContent = "";
+    }
+
     const payload = {
         name: resName.value.trim(),
         description: resDescription.value.trim(),
         location: resLocation.value.trim(),
         capacity: resCapacity.value ? Number(resCapacity.value) : null,
         type: resType.value,
-        image_url: resImage.value.trim(),
+        image_path: resImage.value.trim(),
     };
 
     if (!payload.name) {
@@ -194,12 +226,29 @@ async function handleSaveResource() {
         return;
     }
 
+    const normalizedImage = validateImagePath(payload.image_path);
+    if (normalizedImage === null) {
+        if (resImageError) {
+            resImageError.textContent = "Invalid image path. Use /assets/... or a full URL.";
+            resImageError.style.display = "block";
+        }
+        return;
+    }
+    payload.image_path = normalizedImage;
+
     try {
         const saved = await resourceAPI.saveResource(payload, editingResourceId);
         if (editingResourceId) {
-            resourceAPI.cache = resourceAPI.cache.map((r) => ((r.id || r.resource_id) === editingResourceId ? saved : r));
+            const existing = resourceAPI.cache.find((r) => (r.id || r.resource_id) === editingResourceId);
+            const merged = {
+                ...existing,
+                ...saved,
+            };
+            merged.booking_count = saved.booking_count ?? existing?.booking_count ?? 0;
+            merged.blackout_count = saved.blackout_count ?? existing?.blackout_count ?? 0;
+            resourceAPI.cache = resourceAPI.cache.map((r) => ((r.id || r.resource_id) === editingResourceId ? merged : r));
         } else {
-            resourceAPI.cache.push(saved);
+            resourceAPI.cache.push({ ...saved, booking_count: saved.booking_count ?? 0, blackout_count: saved.blackout_count ?? 0 });
         }
 
         renderResources();

@@ -20,8 +20,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/resources', resourceRoutes);
 
-app.use(express.static(FRONTEND_DIR));
 app.use('/assets', express.static(ASSETS_DIR));
+app.use(express.static(FRONTEND_DIR));
 
 const pageRoutes = {
   '/': ['pages', 'landing.html'],

@@ -17,6 +17,7 @@ const rescheduleTitle = document.getElementById('rescheduleTitle');
 const closeReschedule = document.getElementById('closeReschedule');
 const timeslotField = document.getElementById('timeslotField');
 const quantityField = document.getElementById('quantityField');
+const rescheduleSubmit = rescheduleForm?.querySelector('button[type="submit"]');
 
 let bookingsCache = [];
 let activeBooking = null;
@@ -151,12 +152,17 @@ function closeRescheduleModal() {
     if (rescheduleTimeslot) rescheduleTimeslot.innerHTML = '<option value="">Select a timeslot</option>';
     if (quantityField) quantityField.style.display = 'none';
     if (timeslotField) timeslotField.style.display = 'none';
+    if (rescheduleSubmit) rescheduleSubmit.disabled = false;
 }
 
 async function loadTimeslotAvailability(resourceId, bookingDate, currentSlotId = null) {
     if (!rescheduleTimeslot) return;
-    rescheduleTimeslot.innerHTML = '<option value="">Select a timeslot</option>';
-    if (!resourceId || !bookingDate) return;
+    rescheduleTimeslot.innerHTML = '<option value="">Loading availability...</option>';
+    if (rescheduleSubmit) rescheduleSubmit.disabled = true;
+    if (!resourceId || !bookingDate) {
+        rescheduleTimeslot.innerHTML = '<option value="" disabled>Select a date to see timeslots</option>';
+        return;
+    }
 
     try {
         const res = await fetch(`/api/resources/${resourceId}/availability?date=${encodeURIComponent(bookingDate)}`);
@@ -181,10 +187,12 @@ async function loadTimeslotAvailability(resourceId, bookingDate, currentSlotId =
             );
         });
         rescheduleTimeslot.innerHTML = options.join('');
-        rescheduleTimeslot.value = '';
+        rescheduleTimeslot.value = currentSlotId ? String(currentSlotId) : '';
+        if (rescheduleSubmit) rescheduleSubmit.disabled = false;
     } catch (err) {
         console.error(err);
         rescheduleTimeslot.innerHTML = '<option value="" disabled>Availability unavailable</option>';
+        if (rescheduleSubmit) rescheduleSubmit.disabled = true;
     }
 }
 
@@ -358,12 +366,16 @@ async function submitReschedule(event) {
         }
         payload.quantity = quantity;
     } else {
+        if (rescheduleTimeslot?.disabled) {
+            alert('Please wait for availability to load.');
+            return;
+        }
         const timeslotId = rescheduleTimeslot?.value;
         if (!timeslotId) {
             alert('Please choose a timeslot.');
             return;
         }
-        payload.timeslotId = timeslotId;
+        payload.timeslotId = Number(timeslotId);
     }
 
     const rescheduleUrl = rescheduleForm?.dataset.rescheduleUrl || `/api/bookings/${activeBooking.booking_id}/reschedule`;

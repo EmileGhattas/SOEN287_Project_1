@@ -28,8 +28,9 @@ router.post('/:id/reschedule', authenticate, async (req, res) => {
       INVALID_STATUS: 400,
       RESOURCE_BLACKED_OUT: 409,
       MISSING_FIELDS: 400,
+      INVALID_RESOURCE_TYPE: 400,
     };
-    res.status(map[err.message] || 500).json({ message: 'Failed to reschedule booking' });
+    res.status(map[err.message] || 500).json({ message: err.message || 'Failed to reschedule booking' });
   }
 });
 router.put('/:id', authenticate, bookingController.updateBooking);

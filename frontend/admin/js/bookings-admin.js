@@ -270,6 +270,7 @@
     function buildPayload() {
         const payload = {
             bookingDate: dateInput?.value,
+            resourceId: resourceSelect?.value ? Number(resourceSelect.value) : null,
         };
 
         if (pageType === "room" || pageType === "lab") {
@@ -431,6 +432,14 @@
                 if (!editingId) return;
                 try {
                     const payload = buildPayload();
+                    if (!payload.bookingDate) {
+                        alert("Please select a booking date.");
+                        return;
+                    }
+                    if ((pageType === "room" || pageType === "lab") && !payload.resourceId) {
+                        alert("Please choose a resource before rescheduling.");
+                        return;
+                    }
                     if ((pageType === "room" || pageType === "lab") && slotInput?.disabled) {
                         alert("Please wait for timeslots to finish loading.");
                         return;
@@ -438,6 +447,16 @@
                     if ((pageType === "room" || pageType === "lab") && !payload.timeslotId) {
                         alert("Please select a valid timeslot for the chosen date.");
                         return;
+                    }
+                    if (pageType === "equipment") {
+                        if (!payload.resourceId) {
+                            alert("Please choose equipment to reschedule.");
+                            return;
+                        }
+                        if (!payload.quantity || Number.isNaN(payload.quantity) || payload.quantity < 1) {
+                            alert("Please enter a valid quantity (at least 1).");
+                            return;
+                        }
                     }
                     await bookingsAPI.rescheduleBooking(editingId, payload);
                     closePanel();

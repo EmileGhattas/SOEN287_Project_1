@@ -77,6 +77,36 @@
     </section>
   </main>
 
+  <section class="modal" id="rescheduleModal" aria-hidden="true">
+    <div class="panel-content">
+      <div class="panel-header">
+        <h3 id="rescheduleTitle">Reschedule Booking</h3>
+        <button id="closeReschedule" aria-label="Close reschedule form">&times;</button>
+      </div>
+      <form id="rescheduleForm" class="panel__form">
+        <div class="panel__field">
+          <label>Resource</label>
+          <div id="rescheduleResource" class="panel__value"></div>
+        </div>
+        <label class="panel__field">
+          New Date
+          <input type="date" id="rescheduleDate" required />
+        </label>
+        <label class="panel__field" id="timeslotField">
+          Timeslot
+          <select id="rescheduleTimeslot"></select>
+        </label>
+        <label class="panel__field" id="quantityField" style="display:none;">
+          Quantity
+          <input type="number" id="rescheduleQuantity" min="1" />
+        </label>
+        <div class="panel__actions">
+          <button type="submit" class="btn">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
   <footer class="contact">
     <h2>Contact Us</h2>
     <p>Reach out through any of the options below:</p>

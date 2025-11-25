@@ -293,15 +293,15 @@
                 slotInput.innerHTML = '<option value="" disabled>No slots for this date</option>';
                 return;
             }
+            const options = ['<option value="">Select a timeslot</option>'];
             slotInput.innerHTML = combined
                 .map((slot) => {
                     const disabled = slot.is_active === false || (data.booked || []).some((b) => b.id === slot.id);
                     return `<option value="${slot.id}" ${disabled && slot.id !== Number(currentSlotId) ? "disabled" : ""}>${slotLabel(slot)}${disabled && slot.id !== Number(currentSlotId) ? " (booked)" : ""}</option>`;
                 })
                 .join("");
-            if (currentSlotId) {
-                slotInput.value = String(currentSlotId);
-            }
+            slotInput.innerHTML = options.join("") + slotInput.innerHTML;
+            slotInput.value = "";
         } catch (err) {
             console.error(err);
             slotInput.innerHTML = '<option value="" disabled>Availability unavailable</option>';

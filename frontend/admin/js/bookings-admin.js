@@ -77,6 +77,17 @@
             }
             return res.json();
         },
+        async rescheduleBooking(id, payload) {
+            const res = await this.authFetch(`/api/bookings/${id}/reschedule`, {
+                method: "POST",
+                body: JSON.stringify(payload),
+            });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.message || "Failed to update booking");
+            }
+            return res.json();
+        },
         async deleteBooking(id) {
             const res = await this.authFetch(`/api/bookings/${id}/cancel`, { method: "POST" });
             if (!res.ok && res.status !== 204) {
@@ -340,7 +351,7 @@
                 if (!editingId) return;
                 try {
                     const payload = buildPayload();
-                    await bookingsAPI.updateBooking(editingId, payload);
+                    await bookingsAPI.rescheduleBooking(editingId, payload);
                     closePanel();
                     await refresh();
                 } catch (err) {

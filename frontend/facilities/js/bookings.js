@@ -94,8 +94,18 @@ function splitBookings(list) {
         const date = booking.booking_date ? new Date(`${booking.booking_date}T00:00:00`) : null;
         const entry = { ...booking, computed_status: status };
 
-        if (status === 'active' && date && !Number.isNaN(date.getTime()) && date >= today) {
+        const hasValidDate = date && !Number.isNaN(date.getTime());
+        const isUpcoming = status === 'active' && hasValidDate && date >= today;
+        const isPast =
+            status === 'cancelled' ||
+            status === 'rescheduled' ||
+            status === 'completed' ||
+            (status === 'active' && hasValidDate && date < today);
+
+        if (isUpcoming) {
             upcoming.push(entry);
+        } else if (isPast || !hasValidDate) {
+            past.push(entry);
         } else {
             past.push(entry);
         }

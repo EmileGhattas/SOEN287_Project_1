@@ -15,7 +15,29 @@ async function ensureResourceTimeslots(resourceId, type, connection = db) {
 }
 
 async function listResources() {
-  const [rows] = await db.execute('SELECT * FROM resources ORDER BY name');
+  const [rows] = await db.execute(
+    `SELECT r.id, r.name, r.type, r.description, r.location, r.capacity, r.quantity, r.image_path,
+            CASE WHEN r.type = 'equipment'
+                 THEN COALESCE(ab.quantity_sum, 0)
+                 ELSE COALESCE(ab.booking_count, 0)
+            END AS booking_count,
+            COALESCE(ro.blackout_count, 0) AS blackout_count
+       FROM resources r
+       LEFT JOIN (
+              SELECT resource_id,
+                     COUNT(id) AS booking_count,
+                     SUM(COALESCE(quantity, 0)) AS quantity_sum
+                FROM bookings
+               WHERE status = 'active'
+               GROUP BY resource_id
+            ) ab ON ab.resource_id = r.id
+       LEFT JOIN (
+              SELECT resource_id, COUNT(id) AS blackout_count
+                FROM resource_blackouts
+               GROUP BY resource_id
+            ) ro ON ro.resource_id = r.id
+      ORDER BY r.name`
+  );
   return rows;
 }
 

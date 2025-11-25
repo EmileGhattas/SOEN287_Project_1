@@ -158,15 +158,18 @@ function renderResources() {
 
     resources.forEach((resource) => {
         const row = document.createElement("tr");
-        const usage = resource.usage || {};
+        const bookingCount =
+            resource.booking_count ?? resource.usage?.bookings ?? 0;
+        const blackoutCount =
+            resource.blackout_count ?? resource.usage?.blackoutDays ?? resource.usage?.blackouts ?? 0;
         row.innerHTML = `
             <td>${resource.name}</td>
             <td>${resource.location || "-"}</td>
             <td>${resource.capacity ?? "-"}</td>
             <td>${resource.type || "-"}</td>
             <td>
-                <div>Bookings: ${usage.bookings || 0}</div>
-                <div>Blackouts: ${usage.blackoutDays || usage.blackouts || 0}</div>
+                <div>Bookings: ${bookingCount}</div>
+                <div>Blackouts: ${blackoutCount}</div>
             </td>
             <td>
                 <button class="btn edit" data-action="edit" data-id="${resource.id || resource.resource_id}">Edit</button>
@@ -197,9 +200,16 @@ async function handleSaveResource() {
     try {
         const saved = await resourceAPI.saveResource(payload, editingResourceId);
         if (editingResourceId) {
-            resourceAPI.cache = resourceAPI.cache.map((r) => ((r.id || r.resource_id) === editingResourceId ? saved : r));
+            const existing = resourceAPI.cache.find((r) => (r.id || r.resource_id) === editingResourceId);
+            const merged = {
+                ...existing,
+                ...saved,
+            };
+            merged.booking_count = saved.booking_count ?? existing?.booking_count ?? 0;
+            merged.blackout_count = saved.blackout_count ?? existing?.blackout_count ?? 0;
+            resourceAPI.cache = resourceAPI.cache.map((r) => ((r.id || r.resource_id) === editingResourceId ? merged : r));
         } else {
-            resourceAPI.cache.push(saved);
+            resourceAPI.cache.push({ ...saved, booking_count: saved.booking_count ?? 0, blackout_count: saved.blackout_count ?? 0 });
         }
 
         renderResources();

@@ -32,6 +32,7 @@ const toShortTime = (value) => (value || "").toString().slice(0, 5);
 let resourcesCache = [];
 let selectedResource = null;
 let timeslotState = [];
+let isSavingSlot = false;
 
 const defaultSlots = [
     "09:00-10:30",
@@ -179,6 +180,12 @@ async function loadResourceDetails(resourceId) {
 function toggleSections(type) {
     if (timeslotBlock) timeslotBlock.style.display = type === "equipment" ? "none" : "block";
     if (equipmentBlock) equipmentBlock.style.display = type === "equipment" ? "block" : "none";
+    if (disableToggle) {
+        const disableHolder = disableToggle.closest("label");
+        disableToggle.disabled = type === "equipment";
+        if (disableHolder) disableHolder.classList.toggle("is-disabled", type === "equipment");
+        if (type === "equipment") disableToggle.checked = false;
+    }
 }
 
 function renderBlackouts(list) {
@@ -355,26 +362,35 @@ async function loadTimeslots(resourceId) {
 }
 
 async function updateTimeslotState(slotId, updates) {
-    if (!selectedResource) return;
+    if (!selectedResource || isSavingSlot) return;
+    isSavingSlot = true;
+
+    const numericId = Number(slotId);
     const payload = {
         timeslotUpdates: [
             {
-                id: slotId,
+                id: Number.isFinite(numericId) ? numericId : undefined,
                 label: updates.label,
-                start_time: toShortTime(updates.start_time),
-                end_time: toShortTime(updates.end_time),
+                start_time: toShortTime(updates.start_time) || updates.start_time,
+                end_time: toShortTime(updates.end_time) || updates.end_time,
                 is_active: updates.is_active,
             },
         ],
     };
-    const res = await authFetch(`/api/resources/${selectedResource.id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        alert(data.message || "Failed to update timeslot");
-    } else {
+
+    try {
+        const res = await authFetch(`/api/resources/${selectedResource.id}`, {
+            method: "PUT",
+            body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            alert(data.message || "Failed to update timeslot");
+        }
+    } catch (err) {
+        alert("Unable to reach the server. Please try again.");
+    } finally {
+        isSavingSlot = false;
         await loadTimeslots(selectedResource.id);
     }
 }
@@ -387,15 +403,17 @@ function handleTimeslotClick(event) {
     if (!slot) return;
 
     if (action === "toggle-slot") {
-        slot.is_active = event.target.checked;
-        slot.is_hidden = !event.target.checked;
+        const nextState = event.target.checked;
+        slot.is_active = nextState;
+        slot.is_hidden = !nextState;
         renderTimeslots(timeslotState);
-        updateTimeslotState(slot.id, { ...slot, is_active: slot.is_active });
+        updateTimeslotState(slot.id, { ...slot, is_active: nextState });
     }
 
     if (action === "hide-slot") {
-        slot.is_hidden = !slot.is_hidden;
-        slot.is_active = !slot.is_hidden;
+        const nextHidden = !slot.is_hidden;
+        slot.is_hidden = nextHidden;
+        slot.is_active = !nextHidden;
         renderTimeslots(timeslotState);
         updateTimeslotState(slot.id, { ...slot, is_active: slot.is_active });
     }
@@ -409,16 +427,16 @@ function addCustomSlot(event) {
     if (!customStart.value || !customEnd.value) return alert("Provide start and end times.");
     const label = `${customStart.value}-${customEnd.value}`;
     const newSlot = {
-        id: `custom-${Date.now()}`,
+        id: null,
         label,
         start_time: customStart.value,
         end_time: customEnd.value,
         is_active: true,
         is_hidden: false,
     };
-    timeslotState.push(newSlot);
+    timeslotState.push({ ...newSlot, id: `temp-${Date.now()}` });
     renderTimeslots(timeslotState);
-    updateTimeslotState(newSlot.id, newSlot);
+    updateTimeslotState(null, newSlot);
 }
 
 async function hydrateEquipment(resourceId, resource) {

@@ -515,6 +515,11 @@ hr {
 
 .toggle input { display: none; }
 
+.toggle.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .toggle-slider {
     width: 42px;
     height: 22px;

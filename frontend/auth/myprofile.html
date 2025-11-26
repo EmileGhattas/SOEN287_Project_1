@@ -54,6 +54,37 @@
                 <a class="btn" href="/booking">View my bookings</a>
             </div>
         </form>
+
+        <div class="profile-divider" aria-hidden="true"></div>
+
+        <section class="profile-section">
+            <h2>Change Password</h2>
+            <p class="muted">Keep your account secure by updating your password.</p>
+            <div id="passwordMessage" class="form-message" aria-live="polite"></div>
+
+            <form id="passwordForm" class="stacked-form">
+                <label for="currentPassword">Current Password</label>
+                <input type="password" id="currentPassword" name="currentPassword" required>
+
+                <label for="newPassword">New Password</label>
+                <input type="password" id="newPassword" name="newPassword" required>
+
+                <label for="confirmPassword">Confirm New Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+
+                <div class="profile-actions">
+                    <button type="submit" class="btn">Update password</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="profile-section" id="deleteAccountSection">
+            <h2>Delete Account</h2>
+            <p class="muted">Remove your profile and all bookings. This action cannot be undone.</p>
+            <div class="profile-actions">
+                <button type="button" class="btn danger" id="deleteAccountBtn">Delete my account</button>
+            </div>
+        </section>
     </section>
 </main>
 

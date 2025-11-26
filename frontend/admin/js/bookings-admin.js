@@ -270,15 +270,11 @@
     function buildPayload() {
         const bookingDate = dateInput?.value?.trim() || null;
         const resourceId = resourceSelect?.value ? Number(resourceSelect.value) : null;
-        const payload = { bookingDate, resourceId };
-
-        if (pageType === "room" || pageType === "lab") {
-            payload.timeslotId = slotInput?.value ? Number(slotInput.value) : null;
-        } else if (pageType === "equipment") {
-            payload.quantity = Number(quantityInput?.value);
+        if (pageType === "equipment") {
+            return { bookingDate, resourceId, quantity: Number(quantityInput?.value) };
         }
 
-        return payload;
+        return { bookingDate, resourceId, timeslotId: slotInput?.value ? Number(slotInput.value) : null };
     }
 
     function slotLabel(slot) {

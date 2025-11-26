@@ -21,9 +21,13 @@ body {
   box-shadow: 0 10px 12px rgba(0, 0, 0, 0.4);
   width: 100%;
   max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .profile-card h1 { margin-top: 0; }
+.profile-card h2 { margin-bottom: 6px; }
 
 .profile-card label {
   display: block;
@@ -46,6 +50,18 @@ body {
   flex-wrap: wrap;
 }
 
+.profile-section { margin-top: 6px; }
+
+.profile-divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 14px 0;
+}
+
+.stacked-form {
+  margin-top: 6px;
+}
+
 .btn {
   background-color: #5865F2;
   color: white;
@@ -57,6 +73,7 @@ body {
 }
 
 .btn.primary { background-color: #2f7d2f; }
+.btn.danger { background-color: #8b1e1e; }
 .btn:hover { opacity: 0.9; }
 
 .muted { color: #d7e6e6; margin-top: -6px; margin-bottom: 10px; }

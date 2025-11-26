@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const authRoutes = require('./routes/authRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const resourceRoutes = require('./routes/resourceRoutes');
-const { ensureDefaultUsers } = require('./db/ensureDefaults');
+const { ensureDefaults } = require('./db/ensureDefaults');
 
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
@@ -57,7 +57,7 @@ for (const [route, relative] of Object.entries(pageRoutes)) {
 
 async function start() {
   try {
-    await ensureDefaultUsers();
+    await ensureDefaults();
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   } catch (err) {
     console.error('Failed to start server', err);

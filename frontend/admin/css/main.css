@@ -541,3 +541,63 @@ hr {
 .small {
     font-size: 0.9rem;
 }
+
+.admin-messaging {
+    padding: 30px;
+}
+
+.admin-messaging .panel-content {
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.admin-messaging .muted {
+    color: #4a6066;
+    margin-bottom: 12px;
+}
+
+.message-form label {
+    display: block;
+    font-weight: 600;
+    margin-top: 10px;
+    margin-bottom: 6px;
+}
+
+.message-form select,
+.message-form input,
+.message-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cdd6de;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.message-form textarea {
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.form-message {
+    display: none;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.form-message.error {
+    display: inline-flex;
+    background: #b7302d;
+}
+
+.form-message.success {
+    display: inline-flex;
+    background: #2f7d2f;
+}

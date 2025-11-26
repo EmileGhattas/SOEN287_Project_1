@@ -81,6 +81,21 @@
     return (relativeBase || '') + path;
   }
 
+  async function fetchUnreadNotifications() {
+    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+    if (!token) return 0;
+    try {
+      const res = await fetch(resolvePath('/api/notifications/unread'), {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return 0;
+      const data = await res.json();
+      return Number.isFinite(data?.unread) ? data.unread : 0;
+    } catch (err) {
+      return 0;
+    }
+  }
+
   function renderAdminNav(isAdmin) {
     const navList = document.querySelector('.navLinks');
     if (!navList) return;
@@ -141,6 +156,7 @@
         profileMenu.innerHTML = `
           <li><a href="/myprofile">My Profile</a></li>
           <li><a href="/booking">My Bookings</a></li>
+          <li><a href="/notifications.html" id="notificationsMenuLink">My Notifications</a></li>
           <li><a href="#" id="logout">Logout</a></li>
         `;
 
@@ -156,6 +172,13 @@
             window.location.href = '/signin';
           });
         }
+
+        fetchUnreadNotifications().then((count) => {
+          const notificationsLink = document.getElementById('notificationsMenuLink');
+          if (notificationsLink) {
+            notificationsLink.textContent = count > 0 ? `My Notifications (${count})` : 'My Notifications';
+          }
+        });
       } else {
         profileLink.textContent = 'Profile';
         profileLink.setAttribute('href', '/signin');

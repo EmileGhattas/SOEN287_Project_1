@@ -64,6 +64,17 @@ CREATE TABLE bookings (
   FOREIGN KEY (timeslot_id) REFERENCES timeslots(id) ON DELETE SET NULL
 );
 
+
+
+CREATE TABLE notifications (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  is_read BOOLEAN DEFAULT FALSE,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
 -- Seed timeslots (09:00–22:30 at 90 minute intervals)
 INSERT INTO timeslots (label, start_time, end_time) VALUES
  ('09:00-10:30', '09:00:00', '10:30:00'),

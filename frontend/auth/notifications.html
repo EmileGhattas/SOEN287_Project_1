@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Notifications</title>
+    <link rel="stylesheet" href="/shared/style.css">
+    <link rel="stylesheet" href="/auth/css/notifications.css">
+</head>
+<body>
+<header>
+    <nav class="navbar">
+        <h1 class="logo">
+            <img src="/assets/image-removebg-preview.png" alt="Website Logo">
+        </h1>
+
+        <ul class="navLinks">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li class="dropdown">
+                <a href="/booking">Bookings</a>
+                <ul class="dropdown-menu">
+                    <li><a href="/rooms">Rooms</a></li>
+                    <li><a href="/labs">Labs</a></li>
+                    <li><a href="/equipment">Equipment</a></li>
+                </ul>
+            </li>
+            <li><a href="/contact">Contact</a></li>
+            <li class="dropdown" id="profileDropdown">
+                <a href="/notifications.html" id="profileLink" class="active">Profile</a>
+                <ul class="dropdown-menu" id="profileMenu">
+                    <!-- Menu items will be added dynamically through js -->
+                </ul>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<main class="notifications-page">
+    <section class="notifications-card">
+        <h1>My Notifications</h1>
+        <p class="muted">Stay up to date with updates about your bookings and resources.</p>
+
+        <div id="notificationsMessage" class="form-message" aria-live="polite"></div>
+
+        <ul id="notificationsList" class="notifications-list" aria-live="polite"></ul>
+    </section>
+</main>
+
+<footer class="contact">
+    <h2>Contact Us</h2>
+    <p>Reach out through any of the options below:</p>
+
+    <div class="contact-info">
+        <p><strong>Phone:</strong> (438) 345 9821</p>
+        <p><strong>Email:</strong> learnspace@gmail.com</p>
+    </div>
+
+    <div class="social-links">
+        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a>
+        <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer">Twitter</a>
+    </div>
+
+    <p class="footer-note">2025 Learn Space</p>
+</footer>
+
+<script src="/shared/profile-menu.js"></script>
+<script src="/auth/js/notifications.js"></script>
+</body>
+</html>

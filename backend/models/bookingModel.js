@@ -1,5 +1,6 @@
 const db = require('../db/db');
 const { getResourceById, ensureResourceTimeslots } = require('./resourceModel');
+const notificationsService = require('../services/notificationsService');
 
 async function getTimeslotById(timeslotId, connection = db) {
   const [rows] = await connection.execute('SELECT * FROM timeslots WHERE id = ?', [timeslotId]);
@@ -73,6 +74,33 @@ function formatTime(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toISOString().substring(11, 16);
+}
+
+function describeBookingWindow(resource, bookingDate, timeslot) {
+  const date = formatDateOnly(bookingDate);
+  if (!resource || resource.type === 'equipment' || !timeslot) return date;
+  return timeslot.label ? `${date} ${timeslot.label}` : date;
+}
+
+function getResourceNameFromRecord(record) {
+  return (
+    record?.room?.name ||
+    record?.lab?.name ||
+    record?.equipment?.name ||
+    record?.resource?.name ||
+    'resource'
+  );
+}
+
+function describeBookingFromRecord(record) {
+  if (!record) return { resourceName: 'resource', window: '' };
+  const label = record.room?.label || record.lab?.label || null;
+  const resourceName = getResourceNameFromRecord(record);
+  const resourceType = record.room ? 'room' : record.lab ? 'lab' : record.equipment ? 'equipment' : null;
+  return {
+    resourceName,
+    window: describeBookingWindow({ name: resourceName, type: resourceType }, record.booking_date, label ? { label } : null),
+  };
 }
 
 async function mapBookingRow(row) {
@@ -267,10 +295,12 @@ async function createBooking(payload, user) {
     );
     if (blackouts.length) throw new Error('RESOURCE_BLACKED_OUT');
 
+    let selectedSlot = null;
     if (resource.type === 'equipment') {
       await ensureQuantity(connection, resource, bookingDate, quantity || 1);
     } else {
       if (!timeslotId) throw new Error('MISSING_FIELDS');
+      selectedSlot = await getTimeslotById(timeslotId, connection);
       await ensureSlotAvailable(connection, resource, bookingDate, timeslotId);
     }
 
@@ -293,8 +323,17 @@ async function createBooking(payload, user) {
       values
     );
 
+    const created = await findById(result.insertId, connection);
+
+    await notificationsService.addNotification(
+      user.id,
+      'Booking Confirmed',
+      `Your booking for ${resource.name} on ${describeBookingWindow(resource, bookingDate, selectedSlot)} is confirmed.`,
+      connection
+    );
+
     await connection.commit();
-    return findById(result.insertId, connection);
+    return created;
   } catch (err) {
     await connection.rollback();
     throw err;
@@ -391,6 +430,7 @@ async function rescheduleBooking(id, payload, user) {
 
     let timeslotId = null;
     let quantity = 1;
+    let selectedSlot = null;
 
     if (isEquipment) {
       if (typeof payload.quantity !== 'number' || payload.quantity < 1) {
@@ -441,6 +481,8 @@ async function rescheduleBooking(id, payload, user) {
       if (conflict.length) {
         throw new Error(resource.type === 'room' ? 'ROOM_CONFLICT' : 'LAB_CONFLICT');
       }
+
+      selectedSlot = await getTimeslotById(timeslotId, connection);
     }
 
     await connection.execute('UPDATE bookings SET status = ? WHERE id = ?', ['rescheduled', id]);
@@ -464,6 +506,17 @@ async function rescheduleBooking(id, payload, user) {
       values
     );
 
+    const rescheduledWindow = describeBookingWindow(resource, bookingDate, selectedSlot);
+    const isAdminActingForUser = user.is_admin && existing.user_id !== user.id;
+    await notificationsService.addNotification(
+      existing.user_id,
+      isAdminActingForUser ? 'Booking Rescheduled by Admin' : 'Booking Rescheduled',
+      isAdminActingForUser
+        ? `An admin rescheduled your booking for ${resource.name} to ${rescheduledWindow}.`
+        : `Your booking for ${resource.name} has been rescheduled to ${rescheduledWindow}.`,
+      connection
+    );
+
     await connection.commit();
 
     return findById(result.insertId, connection);
@@ -482,6 +535,15 @@ async function cancelBooking(id, user) {
   if (!user?.is_admin && existing.user_id !== user?.id) return 'FORBIDDEN';
 
   await db.execute('UPDATE bookings SET status = ? WHERE id = ?', ['cancelled', id]);
+  const { resourceName, window } = describeBookingFromRecord(existing);
+  const isAdminAction = user?.is_admin && existing.user_id !== user?.id;
+  await notificationsService.addNotification(
+    existing.user_id,
+    isAdminAction ? 'Booking Cancelled by Admin' : 'Booking Cancelled',
+    isAdminAction
+      ? `An admin cancelled your booking for ${resourceName} on ${window}.`
+      : `Your booking for ${resourceName} on ${window} has been cancelled.`,
+  );
   return findById(id);
 }
 

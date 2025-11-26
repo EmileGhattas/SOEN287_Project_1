@@ -50,7 +50,7 @@
 
     <h2 class="dashboard"> Dashboard </h2>
 
-    <section class="grid"> 
+    <section class="grid">
         <a href="/admin/resources" class="card">
             <span class="icon">
                <img src="/assets/resources.png" alt="Resources icon">
@@ -83,11 +83,36 @@
 
     </section>
 
+    <section class="admin-messaging">
+        <div class="panel-content">
+            <h3>Send User Notification</h3>
+            <p class="muted">Send a direct notification to any user without leaving the dashboard.</p>
 
-    
+            <form id="adminNotificationForm" class="message-form">
+                <label for="adminNotificationUser">Select user</label>
+                <select id="adminNotificationUser" required>
+                    <option value="" disabled selected>Loading users...</option>
+                </select>
+
+                <label for="adminNotificationTitle">Title</label>
+                <input type="text" id="adminNotificationTitle" required placeholder="Notification title">
+
+                <label for="adminNotificationBody">Message body</label>
+                <textarea id="adminNotificationBody" rows="4" required placeholder="Enter your message"></textarea>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn">Send notification</button>
+                    <span id="adminNotificationFeedback" class="form-message" aria-live="polite"></span>
+                </div>
+            </form>
+        </div>
+    </section>
 
 
-    
+
+
+
+
 </main>
 
 
@@ -115,6 +140,7 @@
 </footer>
 
 <script src="/shared/profile-menu.js"></script>
+<script src="/admin/js/notifications-tool.js"></script>
 
 </body>
 

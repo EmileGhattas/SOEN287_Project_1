@@ -1,5 +1,6 @@
 const Resource = require('../models/resourceModel');
 const Booking = require('../models/bookingModel');
+const notificationsService = require('../services/notificationsService');
 
 function normalizeCapacityQuantity(payload = {}) {
   const type = payload.type;
@@ -109,6 +110,10 @@ async function addBlackout(req, res) {
     const { blackout_date, reason } = req.body;
     if (!blackout_date) return res.status(400).json({ message: 'Blackout date required' });
     const blackouts = await Resource.addBlackout(req.params.id, blackout_date, reason);
+    const resource = await Resource.getResourceById(req.params.id);
+    if (resource) {
+      await notificationsService.notifyBlackoutForResource(resource, blackout_date, reason);
+    }
     res.status(201).json(blackouts);
   } catch (err) {
     res.status(500).json({ message: 'Failed to add blackout' });

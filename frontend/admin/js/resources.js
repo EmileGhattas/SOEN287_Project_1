@@ -215,7 +215,6 @@ function renderResources() {
         list.forEach((resource) => {
             const row = document.createElement("tr");
             const bookingCount = resource.booking_count ?? resource.usage?.bookings ?? 0;
-            const blackoutCount = resource.blackout_count ?? resource.usage?.blackoutDays ?? resource.usage?.blackouts ?? 0;
             const rawImagePath = resource.image_path || resource.image_url || "";
             const hasImage = rawImagePath.trim().length > 0;
             const imageSrc = hasImage ? resolveImagePath(rawImagePath) : null;
@@ -224,8 +223,8 @@ function renderResources() {
             const availableQuantity = resource.current_quantity ?? Math.max((resource.quantity ?? 0) - bookingCount, 0);
             const usageContent =
                 type === 'equipment'
-                    ? `<div>Available: ${availableQuantity}</div>${blackoutCount !== undefined ? `<div>Blackouts: ${blackoutCount}</div>` : ''}`
-                    : `<div>Bookings: ${bookingCount}</div><div>Blackouts: ${blackoutCount}</div>`;
+                    ? `<div>Available: ${availableQuantity}</div>`
+                    : `<div>Bookings: ${bookingCount}</div>`;
             row.innerHTML = `
                 <td>${resource.name}</td>
                 <td>${hasImage ? `<img class="resource-thumb" src="${imageSrc}" alt="${resource.name} image">` : "not provided"}</td>

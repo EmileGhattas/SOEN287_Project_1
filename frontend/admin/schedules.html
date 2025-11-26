@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/shared/style.css">
     <link rel="stylesheet" href="/admin/css/main.css">
     <script defer src="/admin/js/resources.js"></script>
-    <title>Manage Resources</title>
+    <title>Manage Schedules</title>
 </head>
-
 <body>
 <header>
     <nav class="navbar">
@@ -18,11 +16,8 @@
 
         <ul class="navLinks">
             <li><a href="/">Home</a></li>
-
             <li><a href="/about">About</a></li>
-
             <li class="dropdown">
-
                 <a href="/booking">Bookings</a>
                 <ul class="dropdown-menu">
                     <li><a href="/rooms">Rooms</a></li>
@@ -30,11 +25,8 @@
                     <li><a href="/equipment">Equipment</a></li>
                 </ul>
             </li>
-
             <li><a href="/contact">Contact</a></li>
             <li id="adminNavItem"><a href="/admin" class="active">Admin</a></li>
-
-
             <li class="dropdown" id="profileDropdown">
                 <a href="/signin" id="profileLink">Profile</a>
                 <ul class="dropdown-menu" id="profileMenu"></ul>
@@ -43,87 +35,155 @@
     </nav>
 </header>
 
+<main class="page manage-schedules">
+    <section class="page-header">
+        <div>
+            <p class="eyebrow">Admin Tools</p>
+            <h1 class="title">Manage Schedules</h1>
+            <p class="subtitle">Configure availability, blackouts, and capacities without touching backend settings.</p>
+        </div>
+        <div class="resource-picker">
+            <div class="field">
+                <label for="resourceType">Resource Type</label>
+                <select id="resourceType">
+                    <option value="room">Room</option>
+                    <option value="lab">Lab</option>
+                    <option value="equipment">Equipment</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="resourceSelect">Select Resource</label>
+                <select id="resourceSelect">
+                    <option value="">Choose a resource</option>
+                </select>
+            </div>
+            <button class="btn" id="refreshResource">Refresh</button>
+        </div>
+    </section>
 
-<main class="page">
+    <section class="resource-summary" id="resourceSummary">
+        <div class="summary-main">
+            <h2 id="summaryName">Select a resource to view details</h2>
+            <p id="summaryDescription" class="muted"></p>
+            <div class="meta-grid">
+                <div>
+                    <p class="meta-label">Type</p>
+                    <p class="meta-value" id="summaryType">-</p>
+                </div>
+                <div>
+                    <p class="meta-label">Location</p>
+                    <p class="meta-value" id="summaryLocation">-</p>
+                </div>
+                <div>
+                    <p class="meta-label">Capacity / Qty</p>
+                    <p class="meta-value" id="summaryCapacity">-</p>
+                </div>
+            </div>
+        </div>
+        <div class="summary-actions">
+            <label class="toggle">
+                <input type="checkbox" id="disableToggle">
+                <span class="toggle-slider"></span>
+                <span class="toggle-label">Temporarily Disable Resource (Indefinitely)</span>
+            </label>
+            <p class="muted small">Use this when a resource needs to be unavailable without setting blackout dates.</p>
+        </div>
+    </section>
 
-    <h1 class="title">Set Availability</h1>
+    <section class="card-grid">
+        <div class="card-block">
+            <div class="card-header">
+                <div>
+                    <p class="eyebrow">Availability</p>
+                    <h3>Blackouts</h3>
+                    <p class="muted">Create date ranges that cannot be booked.</p>
+                </div>
+            </div>
+            <form class="blackout-form" id="blackoutForm">
+                <div class="field">
+                    <label for="blackoutStart">Start Date</label>
+                    <input type="date" id="blackoutStart" required>
+                </div>
+                <div class="field">
+                    <label for="blackoutEnd">End Date</label>
+                    <input type="date" id="blackoutEnd" required>
+                </div>
+                <div class="field">
+                    <label for="blackoutReason">Reason (optional)</label>
+                    <input type="text" id="blackoutReason" placeholder="Maintenance, holiday, etc.">
+                </div>
+                <button class="btn" type="submit">Add Blackout</button>
+            </form>
+            <div class="list" id="blackoutList"></div>
+        </div>
 
-   
-    <label for="resourceSelect"><strong>Select Resource:</strong></label>
-    <select id="resourceSelect">
-        <option value="">Choose a resource</option>
-    </select>
+        <div class="card-block" id="timeslotBlock">
+            <div class="card-header">
+                <div>
+                    <p class="eyebrow">Rooms &amp; Labs</p>
+                    <h3>Timeslot Availability</h3>
+                    <p class="muted">Toggle individual timeslots or add custom ones.</p>
+                </div>
+                <div class="field inline">
+                    <label for="timeslotDate">Reference Date</label>
+                    <input type="date" id="timeslotDate">
+                </div>
+            </div>
+            <div class="timeslot-grid" id="timeslotGrid"></div>
+            <div class="timeslot-actions">
+                <h4>Add Custom Timeslot</h4>
+                <div class="timeslot-form">
+                    <div class="field">
+                        <label for="customStart">Start</label>
+                        <input type="time" id="customStart" value="09:00">
+                    </div>
+                    <div class="field">
+                        <label for="customEnd">End</label>
+                        <input type="time" id="customEnd" value="10:30">
+                    </div>
+                    <button class="btn" id="addTimeslot">Add Custom Timeslot</button>
+                </div>
+            </div>
+        </div>
 
-    <div id="resourceMeta" class="schedule-section"></div>
-
-    <hr>
-
-    
-    <h2>Working Hours</h2>
-    <div class="schedule-section">
-        <label>Open Time:</label>
-        <input type="time" id="openTime">
-
-        <label>Close Time:</label>
-        <input type="time" id="closeTime">
-
-        <button class="btn" id="saveHoursBtn">Save Hours</button>
-    </div>
-
-    <hr>
-
-    <h2>Exceptions </h2>
-    <div class="schedule-section">
-
-
-        <label>Date:</label>
-        <input type="date" id="exceptionDate">
-
-        <label>Open:</label>
-        <input type="time" id="exceptionOpen">
-
-        <label>Close:</label>
-        <input type="time" id="exceptionClose">
-
-        <button class="btn" id="addExceptionBtn">Add Exception</button>
-    </div>
-
-    <ul id="exceptionList"></ul>
-
-    <hr>
-
-    
-    <h2>Blackout Dates</h2>
-    <div class="schedule-section">
-        <label>Date:</label>
-        <input type="date" id="blackoutDate">
-
-        <button class="btn" id="addBlackoutBtn">Add Blackout</button>
-    </div>
-
-    <ul id="blackoutList"></ul>
-
+        <div class="card-block" id="equipmentBlock">
+            <div class="card-header">
+                <div>
+                    <p class="eyebrow">Equipment</p>
+                    <h3>Daily Capacity</h3>
+                    <p class="muted">Set how many items can be booked per day.</p>
+                </div>
+            </div>
+            <form class="equipment-form" id="equipmentForm">
+                <div class="field">
+                    <label for="equipmentQuantity">Quantity Available</label>
+                    <input type="number" id="equipmentQuantity" min="0" step="1">
+                </div>
+                <div class="field-inline">
+                    <div class="field">
+                        <label for="equipStart">Daily Availability Start</label>
+                        <input type="time" id="equipStart" value="09:00">
+                    </div>
+                    <div class="field">
+                        <label for="equipEnd">Daily Availability End</label>
+                        <input type="time" id="equipEnd" value="22:30">
+                    </div>
+                </div>
+                <button class="btn" type="submit">Save Equipment Availability</button>
+            </form>
+        </div>
+    </section>
 </main>
-
-<script defer src="/admin/js/schedules.js"></script>
-
-
-
 
 <footer class="contact">
     <h2>Contact Support</h2>
-
-
     <p>If you are experiencing issues, contact IT or system administrators.</p>
-
     <div class="contact-info">
         <p><strong>Admin Support:</strong> admin@learnspace.com</p>
     </div>
-
     <p class="footer-note">2025 Learn Space Admin Panel</p>
 </footer>
-
+<script src="/admin/js/schedules.js" defer></script>
 <script src="/shared/profile-menu.js"></script>
-
 </body>
 </html>

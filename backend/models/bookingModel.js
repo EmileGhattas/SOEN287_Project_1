@@ -345,66 +345,114 @@ async function rescheduleBooking(id, payload, user) {
   if (!user?.id) throw new Error('USER_NOT_FOUND');
 
   const connection = await db.getConnection();
+
   try {
     await connection.beginTransaction();
 
-    const existing = await findById(id, connection);
-    if (!existing) throw new Error('NOT_FOUND');
+    const [existingRows] = await connection.execute(
+      `SELECT b.*, r.type AS resource_type, r.quantity AS resource_quantity
+         FROM bookings b
+         JOIN resources r ON r.id = b.resource_id
+        WHERE b.id = ?
+        LIMIT 1`,
+      [id]
+    );
+
+    if (!existingRows.length) throw new Error('NOT_FOUND');
+
+    const existing = existingRows[0];
+
+    if (existing.status !== 'active') throw new Error('BOOKING_NOT_ACTIVE');
     if (!user.is_admin && existing.user_id !== user.id) throw new Error('FORBIDDEN');
 
-    const currentStatus = existing.raw_status || existing.status;
-    if (currentStatus !== 'active') throw new Error('INVALID_STATUS');
+    const targetResourceId = user.is_admin && payload.resourceId ? payload.resourceId : existing.resource_id;
 
-    const bookingDate = payload?.bookingDate;
-    if (!bookingDate) throw new Error('MISSING_FIELDS');
+    const resource = await getResourceById(targetResourceId, connection);
+    if (!resource) throw new Error('RESOURCE_NOT_FOUND');
 
-    const originalResourceId =
-      existing.resource?.id || existing.room?.id || existing.lab?.id || existing.equipment?.id;
-    const originalResource = await getResourceById(originalResourceId, connection);
-    if (!originalResource) throw new Error('RESOURCE_NOT_FOUND');
+    if (user.is_admin && resource.id !== existing.resource_id && resource.type !== existing.resource_type) {
+      throw new Error('RESOURCE_TYPE_MISMATCH');
+    }
 
-    let targetResourceId = originalResource.id;
-    if (user.is_admin && payload.resourceId) {
-      targetResourceId = Number(payload.resourceId);
-    } else if (!user.is_admin && payload.resourceId && Number(payload.resourceId) !== Number(originalResource.id)) {
+    if (!user.is_admin && resource.id !== existing.resource_id) {
       throw new Error('FORBIDDEN');
     }
 
-    const targetResource = await getResourceById(targetResourceId, connection);
-    if (!targetResource) throw new Error('RESOURCE_NOT_FOUND');
-    if (targetResource.type !== originalResource.type) throw new Error('INVALID_RESOURCE_TYPE');
+    const isEquipment = resource.type === 'equipment';
+
+    const bookingDate = payload.bookingDate;
+    if (!bookingDate) throw new Error('MISSING_FIELDS');
 
     const [blackouts] = await connection.execute(
       'SELECT 1 FROM resource_blackouts WHERE resource_id = ? AND blackout_date = ? LIMIT 1',
-      [targetResource.id, bookingDate]
+      [resource.id, bookingDate]
     );
     if (blackouts.length) throw new Error('RESOURCE_BLACKED_OUT');
 
     let timeslotId = null;
     let quantity = 1;
 
-    if (targetResource.type === 'equipment') {
-      const parsedQuantity = Number(payload.quantity);
-      if (!Number.isInteger(parsedQuantity) || parsedQuantity < 1) throw new Error('MISSING_FIELDS');
-      quantity = parsedQuantity;
-      await ensureQuantity(connection, targetResource, bookingDate, quantity, id);
+    if (isEquipment) {
+      if (typeof payload.quantity !== 'number' || payload.quantity < 1) {
+        throw new Error('MISSING_FIELDS');
+      }
+
+      quantity = Math.floor(payload.quantity);
+
+      const [usageRows] = await connection.execute(
+        `SELECT COALESCE(SUM(quantity),0) AS used
+           FROM bookings
+          WHERE resource_id = ? AND booking_date = ? AND status = 'active' AND id <> ?`,
+        [resource.id, bookingDate, id]
+      );
+
+      const used = usageRows[0]?.used || 0;
+
+      if (quantity + used > (resource.quantity || 0)) {
+        throw new Error('EQUIPMENT_UNAVAILABLE');
+      }
     } else {
-      const parsedTimeslot = Number(payload.timeslotId);
-      if (!Number.isFinite(parsedTimeslot) || parsedTimeslot <= 0) throw new Error('MISSING_FIELDS');
-      timeslotId = parsedTimeslot;
-      await ensureSlotAvailable(connection, targetResource, bookingDate, timeslotId, id);
+      if (!payload.timeslotId || payload.timeslotId <= 0) {
+        throw new Error('MISSING_FIELDS');
+      }
+
+      timeslotId = payload.timeslotId;
+
+      await ensureResourceTimeslots(resource.id, resource.type, connection);
+
+      const [allowed] = await connection.execute(
+        `SELECT 1 FROM resource_timeslots WHERE resource_id = ? AND timeslot_id = ? AND is_active = 1 LIMIT 1`,
+        [resource.id, timeslotId]
+      );
+
+      if (!allowed.length) throw new Error('INVALID_TIMESLOT');
+
+      const [conflict] = await connection.execute(
+        `SELECT 1 FROM bookings
+            WHERE resource_id = ?
+              AND booking_date = ?
+              AND timeslot_id = ?
+              AND status = 'active'
+              AND id <> ?
+            LIMIT 1`,
+        [resource.id, bookingDate, timeslotId, id]
+      );
+
+      if (conflict.length) {
+        throw new Error(resource.type === 'room' ? 'ROOM_CONFLICT' : 'LAB_CONFLICT');
+      }
     }
 
     await connection.execute('UPDATE bookings SET status = ? WHERE id = ?', ['rescheduled', id]);
 
     const insertPayload = {
       user_id: existing.user_id,
-      resource_id: targetResource.id,
+      resource_id: resource.id,
       booking_date: bookingDate,
-      timeslot_id: targetResource.type === 'equipment' ? null : timeslotId,
-      quantity: targetResource.type === 'equipment' ? quantity : 1,
+      timeslot_id: isEquipment ? null : timeslotId,
+      quantity: isEquipment ? quantity : 1,
       status: 'active',
-      purpose: payload?.purpose || existing.purpose || null,
+      purpose: payload.purpose || null,
     };
 
     const columns = Object.keys(insertPayload);
@@ -417,14 +465,16 @@ async function rescheduleBooking(id, payload, user) {
     );
 
     await connection.commit();
+
     return findById(result.insertId, connection);
-  } catch (err) {
+  } catch (error) {
     await connection.rollback();
-    throw err;
+    throw error;
   } finally {
     connection.release();
   }
 }
+
 
 async function cancelBooking(id, user) {
   const existing = await findById(id);

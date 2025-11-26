@@ -31,4 +31,29 @@ async function ensureDefaultUsers() {
   }
 }
 
-module.exports = { ensureDefaultUsers };
+async function ensureBookingStatusEnum() {
+  const [rows] = await db.execute(
+    `SELECT COLUMN_TYPE
+       FROM information_schema.columns
+      WHERE table_schema = DATABASE()
+        AND table_name = 'bookings'
+        AND column_name = 'status'
+      LIMIT 1`
+  );
+
+  if (!rows.length) return;
+
+  const columnType = rows[0].COLUMN_TYPE || '';
+  if (!columnType.includes("'rescheduled'")) {
+    await db.execute(
+      "ALTER TABLE bookings MODIFY status ENUM('active','cancelled','rescheduled','completed') DEFAULT 'active'"
+    );
+  }
+}
+
+async function ensureDefaults() {
+  await ensureBookingStatusEnum();
+  await ensureDefaultUsers();
+}
+
+module.exports = { ensureDefaultUsers, ensureDefaults, ensureBookingStatusEnum };

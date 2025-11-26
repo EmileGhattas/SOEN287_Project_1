@@ -309,3 +309,235 @@ hr {
     border-radius: 10px;
     
 }
+
+/* Manage Schedules redesign */
+.manage-schedules .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.manage-schedules .eyebrow {
+    color: #2E6169;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+}
+
+.manage-schedules .subtitle {
+    color: #5f6b6f;
+    max-width: 640px;
+}
+
+.resource-picker {
+    background: #f5f9fa;
+    border: 1px solid #d5e5e8;
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.resource-summary {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #d5e5e8;
+    border-radius: 12px;
+    background: #fff;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+.resource-summary .muted {
+    color: #6c757d;
+}
+
+.summary-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+}
+
+.meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.meta-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.meta-value {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 18px;
+    margin-top: 20px;
+}
+
+.card-block {
+    background: #fff;
+    border: 1px solid #d5e5e8;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field-inline {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.field input,
+.field select {
+    min-width: 180px;
+}
+
+.blackout-form,
+.timeslot-form,
+.equipment-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    align-items: end;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.list-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid #e6eaea;
+    border-radius: 8px;
+    background: #f9fbfc;
+}
+
+.timeslot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.timeslot-card {
+    padding: 12px;
+    border: 1px solid #d5e5e8;
+    border-radius: 10px;
+    background: #fdfefe;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+}
+
+.timeslot-card.is-disabled {
+    opacity: 0.6;
+    background: #f3f4f5;
+}
+
+.timeslot-label {
+    display: flex;
+    flex-direction: column;
+}
+
+.timeslot-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.timeslot-actions {
+    border-top: 1px solid #e6eaea;
+    padding-top: 12px;
+}
+
+.toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.toggle input { display: none; }
+
+.toggle-slider {
+    width: 42px;
+    height: 22px;
+    background: #c7d4d6;
+    border-radius: 22px;
+    position: relative;
+    transition: background 0.2s ease;
+}
+
+.toggle-slider::after {
+    content: "";
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: transform 0.2s ease;
+}
+
+.toggle input:checked + .toggle-slider {
+    background: #2E6169;
+}
+
+.toggle input:checked + .toggle-slider::after {
+    transform: translateX(20px);
+}
+
+.toggle-label {
+    font-weight: 600;
+}
+
+.toggle.small .toggle-label {
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.small {
+    font-size: 0.9rem;
+}

@@ -32,7 +32,14 @@ async function listResources(whereClause = '', params = []) {
                  THEN COALESCE(ab.quantity_sum, 0)
                  ELSE COALESCE(ab.booking_count, 0)
             END AS booking_count,
-            COALESCE(ro.blackout_count, 0) AS blackout_count
+            COALESCE(ro.blackout_count, 0) AS blackout_count,
+            CASE WHEN r.type IN ('room', 'lab')
+                 THEN CASE WHEN EXISTS (
+                        SELECT 1 FROM resource_timeslots rt
+                         WHERE rt.resource_id = r.id AND rt.is_active = 1
+                       ) THEN 0 ELSE 1 END
+                 ELSE 0
+            END AS is_disabled
        FROM resources r
        LEFT JOIN (
               SELECT resource_id,
@@ -52,6 +59,55 @@ async function listResources(whereClause = '', params = []) {
     params
   );
   return rows;
+}
+
+async function upsertResourceTimeslot(resourceId, update, connection = db) {
+  let timeslotId = update.id || update.timeslot_id;
+
+  if (!timeslotId && update.label && update.start_time && update.end_time) {
+    const label = update.label;
+    const startTime = `${update.start_time}:00`;
+    const endTime = `${update.end_time}:00`;
+    const [existing] = await connection.execute('SELECT id FROM timeslots WHERE label = ?', [label]);
+    if (existing[0]?.id) {
+      timeslotId = existing[0].id;
+    } else {
+      const [inserted] = await connection.execute(
+        'INSERT INTO timeslots (label, start_time, end_time) VALUES (?, ?, ?)',
+        [label, startTime, endTime]
+      );
+      timeslotId = inserted.insertId;
+    }
+  }
+
+  if (!timeslotId) return null;
+
+  const isActive = update.is_active === false ? 0 : 1;
+  await connection.execute(
+    `INSERT INTO resource_timeslots (resource_id, timeslot_id, is_active)
+     VALUES (?, ?, ?)
+     ON DUPLICATE KEY UPDATE is_active = VALUES(is_active)`,
+    [resourceId, timeslotId, isActive]
+  );
+
+  return timeslotId;
+}
+
+async function applyTimeslotUpdates(resourceId, updates, resourceType, connection = db) {
+  if (!Array.isArray(updates) || !updates.length) return;
+  await ensureResourceTimeslots(resourceId, resourceType, connection);
+  for (const update of updates) {
+    // eslint-disable-next-line no-await-in-loop
+    await upsertResourceTimeslot(resourceId, update, connection);
+  }
+}
+
+async function toggleAllTimeslots(resourceId, isActive, resourceType, connection = db) {
+  await ensureResourceTimeslots(resourceId, resourceType, connection);
+  await connection.execute(
+    'UPDATE resource_timeslots SET is_active = ? WHERE resource_id = ?',
+    [isActive ? 1 : 0, resourceId]
+  );
 }
 
 async function getResourceById(id, connection = db) {
@@ -90,6 +146,14 @@ async function updateResource(id, payload) {
     [fields.name, fields.type, fields.description, fields.location, fields.capacity, fields.quantity, fields.image_path, id]
   );
   await ensureResourceTimeslots(id, fields.type);
+
+  if (payload.disable_all_timeslots !== undefined && (fields.type === 'room' || fields.type === 'lab')) {
+    await toggleAllTimeslots(id, !payload.disable_all_timeslots, fields.type);
+  }
+
+  if (Array.isArray(payload.timeslotUpdates) && payload.timeslotUpdates.length && (fields.type === 'room' || fields.type === 'lab')) {
+    await applyTimeslotUpdates(id, payload.timeslotUpdates, fields.type);
+  }
   const [withAggregates] = await listResources('WHERE r.id = ?', [id]);
   return withAggregates || (await getResourceById(id));
 }

@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const authRoutes = require('./routes/authRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const resourceRoutes = require('./routes/resourceRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 const { ensureDefaults } = require('./db/ensureDefaults');
 
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/resources', resourceRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.use('/assets', express.static(ASSETS_DIR));
 app.use(express.static(FRONTEND_DIR));
@@ -46,6 +48,7 @@ const pageRoutes = {
   '/admin/bookings/equipment': ['admin', 'bookings-equipment.html'],
   '/admin/schedules': ['admin', 'schedules.html'],
   '/admin/analytics': ['admin', 'analytics.html'],
+  '/notifications.html': ['auth', 'notifications.html'],
 };
 
 for (const [route, relative] of Object.entries(pageRoutes)) {

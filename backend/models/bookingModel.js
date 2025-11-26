@@ -38,9 +38,12 @@ async function getAvailability(resourceId, date, connection = db) {
 
   await ensureResourceTimeslots(resourceId, resource.type, connection);
 
-  const [allowed] = await connection.execute(
-    `SELECT t.* FROM resource_timeslots rt JOIN timeslots t ON t.id = rt.timeslot_id
-      WHERE rt.resource_id = ? AND rt.is_active = 1 ORDER BY t.start_time`,
+  const [slots] = await connection.execute(
+    `SELECT t.*, rt.is_active
+       FROM resource_timeslots rt
+       JOIN timeslots t ON t.id = rt.timeslot_id
+      WHERE rt.resource_id = ?
+      ORDER BY t.start_time`,
     [resourceId]
   );
   const [booked] = await connection.execute(
@@ -51,8 +54,12 @@ async function getAvailability(resourceId, date, connection = db) {
 
   return {
     resource,
-    available: allowed.filter((slot) => !bookedIds.has(slot.id)),
-    booked: allowed.filter((slot) => bookedIds.has(slot.id)),
+    all: slots.map((slot) => ({
+      ...slot,
+      is_active: slot.is_active === 1,
+    })),
+    available: slots.filter((slot) => slot.is_active === 1 && !bookedIds.has(slot.id)),
+    booked: slots.filter((slot) => slot.is_active === 1 && bookedIds.has(slot.id)),
     remainingQuantity: null,
   };
 }

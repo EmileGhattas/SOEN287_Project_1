@@ -27,6 +27,8 @@ const equipmentQuantity = document.getElementById("equipmentQuantity");
 const equipStart = document.getElementById("equipStart");
 const equipEnd = document.getElementById("equipEnd");
 
+const toShortTime = (value) => (value || "").toString().slice(0, 5);
+
 let resourcesCache = [];
 let selectedResource = null;
 let timeslotState = [];
@@ -109,6 +111,9 @@ function setSummary(resource) {
     summaryCapacity.textContent = resource.type === "equipment"
         ? resource.quantity ?? "-"
         : resource.capacity ?? "-";
+    if (disableToggle && (resource.type === "room" || resource.type === "lab")) {
+        disableToggle.checked = Boolean(resource.is_disabled);
+    }
 }
 
 async function loadResources() {
@@ -133,6 +138,15 @@ function renderResourceOptions() {
         opt.textContent = resource.name;
         resourceSelect.appendChild(opt);
     });
+}
+
+function handleResourceTypeChange() {
+    renderResourceOptions();
+    resourceSelect.value = "";
+    setSummary(null);
+    renderBlackouts([]);
+    renderTimeslots([]);
+    toggleSections(resourceTypeSelect.value);
 }
 
 function preloadSelection() {
@@ -262,14 +276,19 @@ function normalizeTimeslots(raw) {
     if (Array.isArray(raw)) {
         raw.forEach((slot) => {
             if (!slot?.label) return;
-            const exists = merged.some((s) => s.label === slot.label);
-            if (!exists) merged.push({
-                id: slot.id,
+            const exists = merged.find((s) => s.label === slot.label);
+            const enriched = {
+                id: slot.id || slot.timeslot_id,
                 label: slot.label,
                 start_time: slot.start_time || slot.label.split("-")[0],
                 end_time: slot.end_time || slot.label.split("-")[1],
                 is_active: slot.is_active !== false,
-            });
+            };
+            if (!exists) {
+                merged.push(enriched);
+            } else {
+                Object.assign(exists, enriched);
+            }
         });
     }
     return merged.map((slot, index) => ({
@@ -321,9 +340,13 @@ async function loadTimeslots(resourceId) {
         const res = await authFetch(`/api/resources/${resourceId}/availability?date=${encodeURIComponent(dateParam)}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Unable to load availability");
-        const combined = [...(data.available || []), ...(data.booked || [])];
+        const combined = data.all || [...(data.available || []), ...(data.booked || [])];
         timeslotState = normalizeTimeslots(combined);
         renderTimeslots(timeslotState);
+        if (disableToggle) {
+            const anyActive = timeslotState.some((slot) => slot.is_active !== false);
+            disableToggle.checked = !anyActive;
+        }
     } catch (err) {
         console.error(err);
         timeslotState = normalizeTimeslots();
@@ -333,7 +356,17 @@ async function loadTimeslots(resourceId) {
 
 async function updateTimeslotState(slotId, updates) {
     if (!selectedResource) return;
-    const payload = { timeslotUpdates: [{ id: slotId, ...updates }] };
+    const payload = {
+        timeslotUpdates: [
+            {
+                id: slotId,
+                label: updates.label,
+                start_time: toShortTime(updates.start_time),
+                end_time: toShortTime(updates.end_time),
+                is_active: updates.is_active,
+            },
+        ],
+    };
     const res = await authFetch(`/api/resources/${selectedResource.id}`, {
         method: "PUT",
         body: JSON.stringify(payload),
@@ -341,6 +374,8 @@ async function updateTimeslotState(slotId, updates) {
     if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         alert(data.message || "Failed to update timeslot");
+    } else {
+        await loadTimeslots(selectedResource.id);
     }
 }
 
@@ -355,14 +390,14 @@ function handleTimeslotClick(event) {
         slot.is_active = event.target.checked;
         slot.is_hidden = !event.target.checked;
         renderTimeslots(timeslotState);
-        updateTimeslotState(slot.id, { is_active: slot.is_active });
+        updateTimeslotState(slot.id, { ...slot, is_active: slot.is_active });
     }
 
     if (action === "hide-slot") {
         slot.is_hidden = !slot.is_hidden;
         slot.is_active = !slot.is_hidden;
         renderTimeslots(timeslotState);
-        updateTimeslotState(slot.id, { is_active: slot.is_active });
+        updateTimeslotState(slot.id, { ...slot, is_active: slot.is_active });
     }
 }
 
@@ -415,12 +450,15 @@ async function toggleDisable(event) {
     if (!selectedResource) return;
     const res = await authFetch(`/api/resources/${selectedResource.id}`, {
         method: "PUT",
-        body: JSON.stringify({ is_disabled: event.target.checked }),
+        body: JSON.stringify({ disable_all_timeslots: event.target.checked }),
     });
     if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         alert(data.message || "Unable to update resource state");
+        event.target.checked = !event.target.checked;
+        return;
     }
+    await loadTimeslots(selectedResource.id);
 }
 
 function handleResourceChange() {
@@ -442,7 +480,7 @@ function init() {
     loadResources();
 }
 
-resourceTypeSelect?.addEventListener("change", renderResourceOptions);
+resourceTypeSelect?.addEventListener("change", handleResourceTypeChange);
 resourceSelect?.addEventListener("change", handleResourceChange);
 refreshResourceBtn?.addEventListener("click", loadResources);
 blackoutForm?.addEventListener("submit", addBlackoutRange);

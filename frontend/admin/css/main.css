@@ -328,6 +328,14 @@ hr {
     margin-bottom: 6px;
 }
 
+.manage-schedules .field input,
+.manage-schedules .field select,
+.manage-schedules .field textarea {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
 .manage-schedules .subtitle {
     color: #5f6b6f;
     max-width: 640px;
@@ -433,6 +441,14 @@ hr {
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 12px;
     align-items: end;
+}
+
+.blackout-form .span-2 {
+    grid-column: span 2;
+}
+
+.blackout-form .field input {
+    min-width: 0;
 }
 
 .list {

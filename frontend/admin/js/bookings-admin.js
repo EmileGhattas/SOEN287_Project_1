@@ -268,35 +268,16 @@
     }
 
     function buildPayload() {
-        const payload = {
-            bookingDate: dateInput?.value,
-            resourceId: resourceSelect?.value ? Number(resourceSelect.value) : null,
-        };
+        const bookingDate = dateInput?.value?.trim() || null;
+        const resourceId = resourceSelect?.value ? Number(resourceSelect.value) : null;
+        const payload = { bookingDate, resourceId };
 
         if (pageType === "room" || pageType === "lab") {
-            const chosenSlot = slotInput?.value;
-            const originalSlot = editingBooking?.room?.timeslot_id || editingBooking?.lab?.timeslot_id || null;
-            const originalDate = formatDate(editingBooking?.booking_date);
-            const originalResourceId =
-                (editingBooking?.room && editingBooking.room.id) ||
-                (editingBooking?.lab && editingBooking.lab.id) ||
-                null;
-            const dateUnchanged = payload.bookingDate && originalDate === payload.bookingDate;
-            const resourceUnchanged =
-                originalResourceId && resourceSelect?.value
-                    ? String(originalResourceId) === String(resourceSelect.value)
-                    : false;
-
-            if (chosenSlot) {
-                payload.timeslotId = Number(chosenSlot);
-            } else if (dateUnchanged && resourceUnchanged && originalSlot) {
-                payload.timeslotId = Number(originalSlot);
-            } else {
-                payload.timeslotId = null;
-            }
+            payload.timeslotId = slotInput?.value ? Number(slotInput.value) : null;
         } else if (pageType === "equipment") {
-            payload.quantity = Number(quantityInput?.value || 1);
+            payload.quantity = Number(quantityInput?.value);
         }
+
         return payload;
     }
 
@@ -436,24 +417,22 @@
                         alert("Please select a booking date.");
                         return;
                     }
-                    if ((pageType === "room" || pageType === "lab") && !payload.resourceId) {
+                    if (!payload.resourceId || Number.isNaN(payload.resourceId) || payload.resourceId <= 0) {
                         alert("Please choose a resource before rescheduling.");
                         return;
                     }
-                    if ((pageType === "room" || pageType === "lab") && slotInput?.disabled) {
-                        alert("Please wait for timeslots to finish loading.");
-                        return;
-                    }
-                    if ((pageType === "room" || pageType === "lab") && !payload.timeslotId) {
-                        alert("Please select a valid timeslot for the chosen date.");
-                        return;
-                    }
-                    if (pageType === "equipment") {
-                        if (!payload.resourceId) {
-                            alert("Please choose equipment to reschedule.");
+                    if (pageType === "room" || pageType === "lab") {
+                        if (slotInput?.disabled) {
+                            alert("Please wait for timeslots to finish loading.");
                             return;
                         }
-                        if (!payload.quantity || Number.isNaN(payload.quantity) || payload.quantity < 1) {
+                        if (!payload.timeslotId || Number.isNaN(payload.timeslotId) || payload.timeslotId <= 0) {
+                            alert("Please select a valid timeslot for the chosen date.");
+                            return;
+                        }
+                    }
+                    if (pageType === "equipment") {
+                        if (!Number.isInteger(payload.quantity) || payload.quantity < 1) {
                             alert("Please enter a valid quantity (at least 1).");
                             return;
                         }
